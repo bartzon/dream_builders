@@ -94,7 +94,14 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
     if (!isMyTurn) return
     hideCardTooltip()
     const card = uiState.hand[cardIndex]
-    setGameLog(prev => [`Playing ${card?.name}...`, ...prev.slice(0, 4)])
+    
+    // Add specific messages for cards with delayed effects
+    if (card?.effect === 'delayed_inventory_boost') {
+      setGameLog(prev => [`Playing ${card?.name} - Will add inventory for 2 turns!`, ...prev.slice(0, 4)])
+    } else {
+      setGameLog(prev => [`Playing ${card?.name}...`, ...prev.slice(0, 4)])
+    }
+    
     moves.playCard?.(cardIndex)
   }, [moves, uiState.hand, isMyTurn, hideCardTooltip])
 
@@ -169,6 +176,7 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
         turn={uiState.turn}
         deckSize={uiState.deck.length}
         revenue={uiState.revenue}
+        effectContext={effectContext}
       />
 
       {/* Main Game Area */}

@@ -109,6 +109,11 @@ export function DebugPanel({ gameState, playerID }: DebugPanelProps) {
       // Pending effects
       midnightOilDiscardPending: effectContext.midnightOilDiscardPending,
       recurringCapitalNextTurn: effectContext.recurringCapitalNextTurn,
+      delayedInventoryBoostTurns: effectContext.delayedInventoryBoostTurns,
+      fastPivotProductDestroyPending: effectContext.fastPivotProductDestroyPending,
+      
+      // Product-specific boosts
+      productRevenueBoosts: effectContext.productRevenueBoosts,
       
       // Quick Learner tracking
       lastActionEffect: effectContext.lastActionEffect,

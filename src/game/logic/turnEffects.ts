@@ -74,6 +74,10 @@ export function processPassiveEffects(G: GameState, playerID: string) {
       const randomProduct = activeProducts[randomIndex];
       if (randomProduct.inventory !== undefined) {
         randomProduct.inventory += 1;
+        // Add to game log
+        if (G.gameLog) {
+          G.gameLog.push(`Fulfillment App Integration: Added +1 inventory to ${randomProduct.name}`);
+        }
       }
     }
     // Decrement the counter
