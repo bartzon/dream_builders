@@ -569,6 +569,10 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
     } else if (pendingChoice.type === 'destroy_product') {
       const productToDestroy = pendingChoice.cards?.[choiceIndex];
       setGameLog(prev => [`Destroying ${productToDestroy?.name || 'product'}...`, ...prev.slice(0, 4)])
+    } else if (pendingChoice.type === 'choose_card') {
+      const chosenCard = pendingChoice.cards?.[choiceIndex];
+      const effectName = pendingChoice.effect?.replace(/_/g, ' ') || 'inventory effect';
+      setGameLog(prev => [`Applying ${effectName} to ${chosenCard?.name || 'product'}...`, ...prev.slice(0, 4)])
     }
     
     moves.makeChoice?.(choiceIndex)
@@ -912,6 +916,15 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
                   - Click a product to destroy it
                 </span>
               )}
+              {pendingChoice?.type === 'choose_card' && (
+                <span style={{ 
+                  color: '#10b981', 
+                  marginLeft: '10px',
+                  fontSize: FONT_SIZES.body 
+                }}>
+                  - Click a product to boost its inventory
+                </span>
+              )}
             </h4>
             <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
               {products.length === 0 ? (
@@ -929,21 +942,32 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
                   const isDestroyMode = pendingChoice?.type === 'destroy_product';
                   const canDestroy = isDestroyMode && pendingChoice?.cards?.some(c => c.id === product.id);
                   
+                  const isChooseMode = pendingChoice?.type === 'choose_card';
+                  const canChoose = isChooseMode && pendingChoice?.cards?.some(c => c.id === product.id);
+                  
+                  const isClickable = canDestroy || canChoose;
+                  
                   return (
                     <div 
                       key={i} 
                       style={{
                         ...CARD_STYLES,
-                        background: isDestroyMode && canDestroy ? '#dc2626' : '#065f46',
-                        border: isDestroyMode && canDestroy ? '2px solid #ef4444' : '1px solid #059669',
-                        cursor: canDestroy ? 'pointer' : 'default',
+                        background: 
+                          (isDestroyMode && canDestroy) ? '#dc2626' : 
+                          (isChooseMode && canChoose) ? '#059669' :
+                          '#065f46',
+                        border: 
+                          (isDestroyMode && canDestroy) ? '2px solid #ef4444' : 
+                          (isChooseMode && canChoose) ? '2px solid #10b981' :
+                          '1px solid #059669',
+                        cursor: isClickable ? 'pointer' : 'default',
                         position: 'relative'
                       }}
                       onMouseEnter={(e) => showTooltip(product, e)}
                       onMouseLeave={hideTooltip}
                       onMouseMove={(e) => showTooltip(product, e)}
                       onClick={() => {
-                        if (canDestroy && pendingChoice?.cards) {
+                        if (isClickable && pendingChoice?.cards) {
                           const choiceIndex = pendingChoice.cards.findIndex(c => c.id === product.id);
                           if (choiceIndex >= 0) {
                             handleMakeChoice(choiceIndex);
@@ -971,6 +995,23 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
                           fontWeight: 'bold'
                         }}>
                           DESTROY
+                        </div>
+                      )}
+                      
+                      {isChooseMode && canChoose && (
+                        <div style={{
+                          position: 'absolute',
+                          bottom: '5px',
+                          left: '50%',
+                          transform: 'translateX(-50%)',
+                          background: '#10b981',
+                          color: '#fff',
+                          padding: '2px 6px',
+                          borderRadius: '3px',
+                          fontSize: '12px',
+                          fontWeight: 'bold'
+                        }}>
+                          BOOST
                         </div>
                       )}
                     </div>

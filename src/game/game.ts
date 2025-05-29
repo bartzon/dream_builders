@@ -8,7 +8,7 @@ import { INVALID_MOVE } from 'boardgame.io/core';
 import { GAME_CONFIG } from './constants';
 
 // Logic Imports from their respective files
-import { cardEffects, resolveFastPivotEffect } from './logic/cardEffects';
+import { cardEffects, resolveFastPivotEffect, sellProduct } from './logic/cardEffects';
 import { heroAbilityEffects } from './logic/heroAbilities';
 import {
   processPassiveEffects,
@@ -337,6 +337,69 @@ export const DreamBuildersGame: Game<GameState> = {
         player.pendingChoice = undefined;
         if (G.gameLog) {
           G.gameLog.push(`Player ${playerID} used Fast Pivot to destroy ${choice.cards[choiceIndex].name}, draw 2 cards, and discount next Product.`);
+        }
+      } else if (choice.type === 'choose_card') {
+        if (!choice.cards || choiceIndex < 0 || choiceIndex >= choice.cards.length) return INVALID_MOVE;
+        const chosenCard = choice.cards[choiceIndex];
+        const boardProduct = player.board.Products.find(p => p.id === chosenCard.id);
+        
+        if (!boardProduct) return INVALID_MOVE;
+        
+        // Handle different inventory-related effects
+        switch (choice.effect) {
+          case 'add_inventory_to_product':
+            if (boardProduct.inventory !== undefined) {
+              boardProduct.inventory += 2;
+            }
+            break;
+            
+          case 'add_inventory_if_empty':
+            if (boardProduct.inventory === 0) {
+              boardProduct.inventory = 3;
+            }
+            break;
+            
+          case 'multi_product_inventory_boost':
+            // For now, handle single selection. UI would need to handle multi-selection
+            if (boardProduct.inventory !== undefined) {
+              boardProduct.inventory += 1;
+            }
+            break;
+            
+          case 'inventory_and_sale_boost':
+            if (boardProduct.inventory !== undefined) {
+              boardProduct.inventory += 1;
+              // Immediately sell 1 if possible
+              if (boardProduct.inventory > 0) {
+                sellProduct(G, playerID, boardProduct, 1);
+              }
+            }
+            break;
+            
+          case 'inventory_boost_plus_revenue':
+            if (boardProduct.inventory !== undefined) {
+              boardProduct.inventory += 2;
+              // Mark this product for revenue boost
+              if (!G.effectContext?.[playerID]) break;
+              const ctx = G.effectContext[playerID];
+              if (!ctx.productRevenueBoosts) {
+                ctx.productRevenueBoosts = {};
+              }
+              ctx.productRevenueBoosts[boardProduct.id] = 1000;
+            }
+            break;
+            
+          case 'draw_and_inventory':
+          case 'simple_inventory_boost':
+            if (boardProduct.inventory !== undefined) {
+              boardProduct.inventory += 1;
+            }
+            break;
+        }
+        
+        player.pendingChoice = undefined;
+        if (G.gameLog) {
+          G.gameLog.push(`Player ${playerID} chose ${chosenCard.name} for ${choice.effect}.`);
         }
       }
       // Add more choice types here as needed

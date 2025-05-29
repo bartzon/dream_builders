@@ -154,6 +154,13 @@ export function sellProduct(G: GameState, playerID: string, product: Card, quant
       totalRevenue += 10000 * quantity;
     }
     
+    // Product-specific revenue boost (from Supplier Collab)
+    if (ctx.productRevenueBoosts && ctx.productRevenueBoosts[product.id]) {
+      totalRevenue += ctx.productRevenueBoosts[product.id];
+      // Use up the boost
+      delete ctx.productRevenueBoosts[product.id];
+    }
+    
     // Scaling Algorithm effect (Developer)
     const scalingAlgo = player.board.Tools.find(t => t.effect === 'scaling_algorithm');
     if (scalingAlgo) {
@@ -712,6 +719,202 @@ export const cardEffects: Record<string, (G: GameState, playerID: string, card: 
   },
 
   shoestring_budget: passiveEffect, // Handled in getCardDiscount
+
+  // === INVENTORY SUPPORT EFFECTS ===
+  
+  // Bulk Order Deal - Choose a Product. Add +2 inventory.
+  'add_inventory_to_product': (G, playerID) => {
+    const player = G.players[playerID];
+    const products = player.board.Products.filter(p => p.isActive !== false);
+    
+    if (products.length === 0) return;
+    
+    if (products.length === 1) {
+      // Only one product, add inventory directly
+      const product = products[0];
+      if (product.inventory !== undefined) {
+        product.inventory += 2;
+      }
+    } else {
+      // Multiple products, create a choice
+      player.pendingChoice = {
+        type: 'choose_card',
+        effect: 'add_inventory_to_product',
+        cards: products.map(p => ({ ...p })),
+      };
+    }
+  },
+  
+  // Reorder Notification - Choose a Product with 0 inventory. Add +3 inventory.
+  'add_inventory_if_empty': (G, playerID) => {
+    const player = G.players[playerID];
+    const emptyProducts = player.board.Products.filter(p => 
+      p.isActive !== false && p.inventory === 0
+    );
+    
+    if (emptyProducts.length === 0) return;
+    
+    if (emptyProducts.length === 1) {
+      // Only one empty product, add inventory directly
+      const product = emptyProducts[0];
+      product.inventory = 3;
+    } else {
+      // Multiple empty products, create a choice
+      player.pendingChoice = {
+        type: 'choose_card',
+        effect: 'add_inventory_if_empty',
+        cards: emptyProducts.map(p => ({ ...p })),
+      };
+    }
+  },
+  
+  // Dropship Restock - All Products with less than 2 inventory gain +1.
+  'add_inventory_to_low_stock': (G, playerID) => {
+    const player = G.players[playerID];
+    player.board.Products.forEach(product => {
+      if (product.inventory !== undefined && product.inventory < 2 && product.isActive !== false) {
+        product.inventory += 1;
+      }
+    });
+  },
+  
+  // Warehouse Expansion - Choose up to 3 Products. Add +1 inventory to each.
+  'multi_product_inventory_boost': (G, playerID) => {
+    const player = G.players[playerID];
+    const products = player.board.Products.filter(p => p.isActive !== false);
+    
+    if (products.length === 0) return;
+    
+    if (products.length <= 3) {
+      // 3 or fewer products, boost them all
+      products.forEach(product => {
+        if (product.inventory !== undefined) {
+          product.inventory += 1;
+        }
+      });
+    } else {
+      // More than 3 products, create a multi-choice
+      player.pendingChoice = {
+        type: 'choose_card',
+        effect: 'multi_product_inventory_boost',
+        cards: products.map(p => ({ ...p })),
+        // Note: The UI would need to handle multi-selection for this
+      };
+    }
+  },
+  
+  // Viral Unboxing Video - Choose a Product. Add +1 inventory and +1 sale this turn.
+  'inventory_and_sale_boost': (G, playerID) => {
+    const player = G.players[playerID];
+    const products = player.board.Products.filter(p => 
+      p.isActive !== false && p.inventory !== undefined
+    );
+    
+    if (products.length === 0) return;
+    
+    if (products.length === 1) {
+      // Only one product
+      const product = products[0];
+      if (product.inventory !== undefined) {
+        product.inventory += 1;
+        // Immediately sell 1 if possible
+        if (product.inventory > 0) {
+          sellProduct(G, playerID, product, 1);
+        }
+      }
+    } else {
+      // Multiple products, create a choice
+      player.pendingChoice = {
+        type: 'choose_card',
+        effect: 'inventory_and_sale_boost',
+        cards: products.map(p => ({ ...p })),
+      };
+    }
+  },
+  
+  // Supplier Collab - Choose a Product. Add +2 inventory. Its next sale earns +1000.
+  'inventory_boost_plus_revenue': (G, playerID) => {
+    const player = G.players[playerID];
+    const products = player.board.Products.filter(p => p.isActive !== false);
+    
+    if (products.length === 0) return;
+    
+    const ctx = ensureEffectContext(G, playerID);
+    
+    if (products.length === 1) {
+      // Only one product
+      const product = products[0];
+      if (product.inventory !== undefined) {
+        product.inventory += 2;
+        // Mark this product for revenue boost
+        if (!ctx.productRevenueBoosts) {
+          ctx.productRevenueBoosts = {};
+        }
+        ctx.productRevenueBoosts[product.id] = 1000;
+      }
+    } else {
+      // Multiple products, create a choice
+      player.pendingChoice = {
+        type: 'choose_card',
+        effect: 'inventory_boost_plus_revenue',
+        cards: products.map(p => ({ ...p })),
+      };
+    }
+  },
+  
+  // Fulfillment App Integration - At the start of your next 2 turns, add +1 inventory to a random Product.
+  'delayed_inventory_boost': (G, playerID) => {
+    const ctx = ensureEffectContext(G, playerID);
+    ctx.delayedInventoryBoostTurns = 2;
+  },
+  
+  // Inventory Forecast Tool - Draw 1. Then choose a Product to gain +1 inventory.
+  'draw_and_inventory': (G, playerID) => {
+    drawCards(G, playerID, 1);
+    
+    const player = G.players[playerID];
+    const products = player.board.Products.filter(p => p.isActive !== false);
+    
+    if (products.length === 0) return;
+    
+    if (products.length === 1) {
+      // Only one product
+      const product = products[0];
+      if (product.inventory !== undefined) {
+        product.inventory += 1;
+      }
+    } else {
+      // Multiple products, create a choice
+      player.pendingChoice = {
+        type: 'choose_card',
+        effect: 'draw_and_inventory',
+        cards: products.map(p => ({ ...p })),
+      };
+    }
+  },
+  
+  // Last-Minute Restock - Choose any Product. Add +1 inventory.
+  'simple_inventory_boost': (G, playerID) => {
+    const player = G.players[playerID];
+    const products = player.board.Products.filter(p => p.isActive !== false);
+    
+    if (products.length === 0) return;
+    
+    if (products.length === 1) {
+      // Only one product
+      const product = products[0];
+      if (product.inventory !== undefined) {
+        product.inventory += 1;
+      }
+    } else {
+      // Multiple products, create a choice
+      player.pendingChoice = {
+        type: 'choose_card',
+        effect: 'simple_inventory_boost',
+        cards: products.map(p => ({ ...p })),
+      };
+    }
+  },
 };
 
 export function resolveFastPivotEffect(G: GameState, playerID: string, productToDestroyId: string) {

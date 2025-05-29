@@ -10,6 +10,7 @@ export interface EffectContext {
   doubleRevenueThisTurn?: boolean;
   nextActionRevenue?: number;
   nextProductDiscount?: number;
+  productRevenueBoosts?: Record<string, number>; // product ID -> revenue bonus
   
   // Cost modifiers
   nextCardDiscount?: number;
@@ -59,6 +60,9 @@ export interface EffectContext {
   
   // Shoestring Budget tracking
   firstCardDiscountUsed?: boolean;
+  
+  // Inventory Support tracking
+  delayedInventoryBoostTurns?: number;
 }
 
 // Initialize effect context for each player
@@ -97,6 +101,7 @@ export function initEffectContext(): EffectContext {
     lastActionEffect: undefined,
     lastActionCard: undefined,
     firstCardDiscountUsed: false,
+    delayedInventoryBoostTurns: 0,
   };
 }
 
@@ -145,5 +150,6 @@ export function clearTempEffects(G: GameState, playerID: string) {
     ctx.lastActionEffect = undefined;
     ctx.lastActionCard = undefined;
     ctx.firstCardDiscountUsed = false;
+    ctx.delayedInventoryBoostTurns = 0;
   }
 } 

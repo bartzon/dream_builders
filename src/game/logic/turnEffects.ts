@@ -63,6 +63,23 @@ export function processPassiveEffects(G: GameState, playerID: string) {
     G.effectContext[playerID].productCostReduction = 1;
   }
   
+  // === INVENTORY SUPPORT EFFECTS ===
+  
+  // Fulfillment App Integration - delayed inventory boost
+  if (G.effectContext?.[playerID]?.delayedInventoryBoostTurns && G.effectContext[playerID].delayedInventoryBoostTurns > 0) {
+    const activeProducts = player.board.Products.filter(p => p.isActive !== false && p.inventory !== undefined);
+    if (activeProducts.length > 0) {
+      // Choose a random product
+      const randomIndex = Math.floor(Math.random() * activeProducts.length);
+      const randomProduct = activeProducts[randomIndex];
+      if (randomProduct.inventory !== undefined) {
+        randomProduct.inventory += 1;
+      }
+    }
+    // Decrement the counter
+    G.effectContext[playerID].delayedInventoryBoostTurns--;
+  }
+  
   // Automation Architect Effects
   // Basic Script - gain 1 capital each turn
   const basicScript = player.board.Tools.find(t => t.effect === 'basic_script');
