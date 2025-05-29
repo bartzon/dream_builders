@@ -1,6 +1,7 @@
 import React from 'react'
 import { FONT_SIZES, CARD_STYLES } from '../../../constants/ui'
 import { CostDisplay } from '../CostDisplay'
+import { BonusIndicator, type BonusInfo } from './BonusIndicator'
 import type { ClientCard } from '../../../types/game'
 
 interface HandCardProps {
@@ -31,6 +32,15 @@ export const HandCard = React.memo(({
   onMouseMove
 }: HandCardProps) => {
   const canInteract = isDiscardMode || canPlay
+  
+  // Check for cost discounts to display
+  const bonuses: BonusInfo[] = []
+  if (costInfo.discount > 0) {
+    bonuses.push({
+      type: 'cost',
+      value: costInfo.discount
+    })
+  }
 
   // Wrap disabled cards in a div to handle tooltip events
   if (!canInteract) {
@@ -49,9 +59,11 @@ export const HandCard = React.memo(({
             background: '#666',
             color: 'white',
             border: 'none',
-            cursor: 'not-allowed'
+            cursor: 'not-allowed',
+            position: 'relative'
           }}
         >
+          <BonusIndicator bonuses={bonuses} position="top-right" />
           <div style={{ fontWeight: 'bold', fontSize: FONT_SIZES.medium }}>{card.name || 'Card'}</div>
           <div style={{ fontSize: FONT_SIZES.body, display: 'flex', alignItems: 'center', gap: '4px' }}>
             Cost: 
@@ -85,6 +97,7 @@ export const HandCard = React.memo(({
         position: 'relative'
       }}
     >
+      <BonusIndicator bonuses={bonuses} position="top-right" />
       <div style={{ fontWeight: 'bold', fontSize: FONT_SIZES.medium }}>{card.name || 'Card'}</div>
       <div style={{ fontSize: FONT_SIZES.body, display: 'flex', alignItems: 'center', gap: '4px' }}>
         Cost: 

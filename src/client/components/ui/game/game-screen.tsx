@@ -203,6 +203,7 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
           {/* Tools & Employees */}
           <ToolsAndEmployees
             cards={toolsAndEmployees}
+            effectContext={effectContext}
             onShowTooltip={showCardTooltip}
             onHideTooltip={hideCardTooltip}
           />
@@ -211,6 +212,7 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
           <ProductsSection
             products={uiState.products}
             pendingChoice={uiState.pendingChoice}
+            effectContext={effectContext}
             onMakeChoice={handleMakeChoice}
             onShowTooltip={showCardTooltip}
             onHideTooltip={hideCardTooltip}

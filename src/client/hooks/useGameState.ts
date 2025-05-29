@@ -34,6 +34,8 @@ export function useGameState(
     lastActionEffect: effectContextRaw.lastActionEffect as string | undefined,
     lastActionCard: effectContextRaw.lastActionCard as ClientCard | undefined,
     firstCardDiscountUsed: effectContextRaw.firstCardDiscountUsed as boolean | undefined,
+    productRevenueBoosts: effectContextRaw.productRevenueBoosts as Record<string, number> | undefined,
+    delayedInventoryBoostTurns: effectContextRaw.delayedInventoryBoostTurns as number | undefined,
   }
   
   // Extract pending choice

@@ -1,15 +1,18 @@
 import React from 'react'
 import { FONT_SIZES, CARD_STYLES } from '../../../constants/ui'
-import type { ClientCard } from '../../../types/game'
+import { BonusIndicator, type BonusInfo } from './BonusIndicator'
+import type { ClientCard, EffectContextUI } from '../../../types/game'
 
 interface ToolsAndEmployeesProps {
   cards: ClientCard[]
+  effectContext: EffectContextUI
   onShowTooltip: (card: ClientCard, e: React.MouseEvent) => void
   onHideTooltip: () => void
 }
 
 export const ToolsAndEmployees = React.memo(({
   cards,
+  effectContext,
   onShowTooltip,
   onHideTooltip
 }: ToolsAndEmployeesProps) => {
@@ -26,6 +29,7 @@ export const ToolsAndEmployees = React.memo(({
             <ToolEmployeeCard
               key={`${card.id || 'tool-employee'}-${i}`}
               card={card}
+              effectContext={effectContext}
               onMouseEnter={(e) => onShowTooltip(card, e)}
               onMouseLeave={onHideTooltip}
               onMouseMove={(e) => onShowTooltip(card, e)}
@@ -40,57 +44,84 @@ export const ToolsAndEmployees = React.memo(({
 // Card component for tools and employees
 const ToolEmployeeCard = ({ 
   card, 
+  effectContext, 
   onMouseEnter, 
   onMouseLeave, 
   onMouseMove 
 }: {
   card: ClientCard
+  effectContext: EffectContextUI
   onMouseEnter: (e: React.MouseEvent) => void
   onMouseLeave: () => void
   onMouseMove: (e: React.MouseEvent) => void
-}) => (
-  <div 
-    style={{
-      ...CARD_STYLES,
-      background: card.type === 'Employee' ? '#2563eb' : '#7c3aed',
-      border: card.type === 'Employee' ? '1px solid #3b82f6' : '1px solid #8b5cf6'
-    }}
-    onMouseEnter={onMouseEnter}
-    onMouseLeave={onMouseLeave}
-    onMouseMove={onMouseMove}
-  >
-    <div style={{ 
-      fontWeight: 'bold', 
-      marginBottom: '5px', 
-      color: 'white', 
-      fontSize: FONT_SIZES.medium 
-    }}>
-      {card.name}
-    </div>
-    <div style={{ 
-      fontSize: FONT_SIZES.body, 
-      marginBottom: '3px', 
-      color: '#e2e8f0' 
-    }}>
-      Cost: {card.cost}
-    </div>
-    <div style={{ 
-      fontSize: FONT_SIZES.small, 
-      color: '#a78bfa' 
-    }}>
-      {card.type}
-    </div>
-    {card.isActive !== undefined && (
+}) => {
+  // Check for delayed effects to display
+  const bonuses: BonusInfo[] = []
+  
+  // Check if this is Fulfillment App Integration with active delayed inventory
+  if (card.effect === 'delayed_inventory_boost' && effectContext.delayedInventoryBoostTurns) {
+    bonuses.push({
+      type: 'delayed',
+      value: effectContext.delayedInventoryBoostTurns,
+      label: `${effectContext.delayedInventoryBoostTurns} turns`
+    })
+  }
+  
+  // Check for recurring effects in card text
+  if (card.text?.includes('Recurring:')) {
+    bonuses.push({
+      type: 'delayed',
+      value: '♻️',
+      label: 'Recurring'
+    })
+  }
+
+  return (
+    <div 
+      style={{
+        ...CARD_STYLES,
+        background: card.type === 'Employee' ? '#2563eb' : '#7c3aed',
+        border: card.type === 'Employee' ? '1px solid #3b82f6' : '1px solid #8b5cf6',
+        position: 'relative'
+      }}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+      onMouseMove={onMouseMove}
+    >
+      <BonusIndicator bonuses={bonuses} position="top-right" />
       <div style={{ 
-        fontSize: FONT_SIZES.medium, 
-        color: card.isActive ? '#10b981' : '#6b7280',
-        fontWeight: 'bold'
+        fontWeight: 'bold', 
+        marginBottom: '5px', 
+        color: 'white', 
+        fontSize: FONT_SIZES.medium 
       }}>
-        {card.isActive ? 'Active' : 'Inactive'}
+        {card.name}
       </div>
-    )}
-  </div>
-)
+      <div style={{ 
+        fontSize: FONT_SIZES.body, 
+        marginBottom: '3px', 
+        color: '#e2e8f0' 
+      }}>
+        Cost: {card.cost}
+      </div>
+      <div style={{ 
+        fontSize: FONT_SIZES.small, 
+        color: '#a78bfa' 
+      }}>
+        {card.type}
+      </div>
+      {card.isActive !== undefined && (
+        <div style={{ 
+          fontSize: FONT_SIZES.medium, 
+          color: card.isActive ? '#10b981' : '#6b7280',
+          fontWeight: 'bold'
+        }}>
+          {card.isActive ? 'Active' : 'Inactive'}
+        </div>
+      )}
+    </div>
+  )
+}
 
 // Empty state component
 const EmptyState = ({ message }: { message: string }) => (

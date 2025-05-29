@@ -1,10 +1,12 @@
 import React from 'react'
 import { FONT_SIZES, CARD_STYLES } from '../../../constants/ui'
-import type { ClientCard, PendingChoice } from '../../../types/game'
+import { BonusIndicator, type BonusInfo } from './BonusIndicator'
+import type { ClientCard, PendingChoice, EffectContextUI } from '../../../types/game'
 
 interface ProductsSectionProps {
   products: ClientCard[]
   pendingChoice?: PendingChoice
+  effectContext: EffectContextUI
   onMakeChoice: (index: number) => void
   onShowTooltip: (card: ClientCard, e: React.MouseEvent) => void
   onHideTooltip: () => void
@@ -13,6 +15,7 @@ interface ProductsSectionProps {
 export const ProductsSection = React.memo(({
   products,
   pendingChoice,
+  effectContext,
   onMakeChoice,
   onShowTooltip,
   onHideTooltip
@@ -33,6 +36,15 @@ export const ProductsSection = React.memo(({
           onMakeChoice(choiceIndex)
         }
       }
+    }
+    
+    // Check for bonuses on this product
+    const bonuses: BonusInfo[] = []
+    if (product.id && effectContext.productRevenueBoosts?.[product.id]) {
+      bonuses.push({
+        type: 'revenue',
+        value: effectContext.productRevenueBoosts[product.id]
+      })
     }
     
     return (
@@ -56,6 +68,8 @@ export const ProductsSection = React.memo(({
         onMouseMove={(e) => onShowTooltip(product, e)}
         onClick={handleClick}
       >
+        <BonusIndicator bonuses={bonuses} position="top-right" />
+        
         <div style={{ fontWeight: 'bold', marginBottom: '5px', fontSize: FONT_SIZES.medium }}>
           {product.name}
         </div>
