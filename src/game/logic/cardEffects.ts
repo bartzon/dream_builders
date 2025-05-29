@@ -1,6 +1,6 @@
 import type { GameState } from '../state';
 import type { Card } from '../types';
-import { drawCard } from '../logic';
+import { drawCard } from './utils';
 import { initEffectContext } from './effectContext';
 
 // Helper function to sell a product
@@ -20,7 +20,7 @@ export function sellProduct(G: GameState, playerID: string, product: Card, quant
     }
     
     // Limited Time Offer effect
-    if (ctx.nextProductBonus > 0) {
+    if (ctx.nextProductBonus && ctx.nextProductBonus > 0) {
       totalRevenue += ctx.nextProductBonus;
       ctx.nextProductBonus = 0;
     }

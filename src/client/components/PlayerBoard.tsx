@@ -1,4 +1,3 @@
-import React from 'react';
 import type { PlayerState } from '../../game/state';
 import { Card } from './Card';
 import { SellButton } from './SellButton';

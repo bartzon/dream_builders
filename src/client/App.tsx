@@ -1,5 +1,4 @@
 import '../index.css';
-import React from 'react';
 import { Client } from 'boardgame.io/react';
 import { DreamBuildersGame } from '../game/game';
 import type { GameState } from '../game/state';

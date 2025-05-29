@@ -1,10 +1,5 @@
 import type { Game } from 'boardgame.io';
 import type { GameState, PlayerState } from './state';
-import { 
-  drawCard, 
-  checkGameEnd,
-  initializePlayer 
-} from './logic';
 import { allHeroes, type Hero } from './data/heroes';
 import type { Card } from './types';
 import { 
@@ -15,10 +10,13 @@ import {
   processOverheadCosts,
   processAutomaticSales,
   processRecurringRevenue,
-  clearTempEffects,
   getCardDiscount,
   handleCardPlayEffects,
-  initEffectContext
+  initEffectContext,
+  clearTempEffects,
+  drawCard,
+  initializePlayer,
+  checkGameEnd
 } from './logic/index';
 import { INVALID_MOVE } from 'boardgame.io/core';
 import { GAME_CONFIG } from './constants';
@@ -78,9 +76,10 @@ export const DreamBuildersGame: Game<GameState> = {
       const heroName = hero.id.charAt(0).toUpperCase() + hero.id.slice(1) as PlayerState['hero'];
       players[playerID] = initializePlayer(heroName, fullDeck);
       
-      console.log(`Setup - Player ${playerID} (${heroName}): Starting capital = ${players[playerID].capital}`);
+      // Set initial capital to turn 1 value
+      players[playerID].capital = 1;
     }
-    
+
     return {
       players,
       currentPlayer: '0',
@@ -103,13 +102,12 @@ export const DreamBuildersGame: Game<GameState> = {
       if (!G.effectContext) G.effectContext = {};
       if (!G.effectContext[playerID]) G.effectContext[playerID] = initEffectContext();
       
-      // 1. Set Capital based on turn number (max 10)
-      const oldCapital = player.capital;
-      const baseCapital = Math.min(GAME_CONFIG.MAX_CAPITAL, G.turn);
+      // 1. Capital gain phase
+      const baseCapital = Math.min(G.turn, GAME_CONFIG.MAX_CAPITAL);
+      
+      // Apply any capital modifications from effect context
       const newCapital = G.effectContext[playerID].doubleCapitalGain ? Math.min(GAME_CONFIG.MAX_CAPITAL, baseCapital * 2) : baseCapital;
       player.capital = newCapital;
-      
-      console.log(`Turn ${G.turn} - Player ${playerID}: Capital ${oldCapital} → ${player.capital} (turn-based)`);
       
       // 2. Process overhead costs (must pay or disable products)
       processOverheadCosts(G, playerID);

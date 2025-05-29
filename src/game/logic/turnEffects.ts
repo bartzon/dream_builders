@@ -1,6 +1,6 @@
 import type { GameState } from '../state';
 import type { Card } from '../types';
-import { drawCard } from '../logic';
+import { drawCard } from './utils';
 import { sellProduct } from './cardEffects';
 
 // Process passive effects at start of turn

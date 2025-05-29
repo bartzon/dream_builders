@@ -1,4 +1,3 @@
-import React from 'react';
 import type { Card as CardType } from '../../game/types';
 import { CARD_TYPE_COLORS, CARD_TYPE_BORDER_COLORS } from '../../game/constants';
 

@@ -13,4 +13,5 @@ export {
   processRecurringRevenue,
   getCardDiscount,
   handleCardPlayEffects
-} from './turnEffects'; 
+} from './turnEffects';
+export { drawCard, spendCapital, initializePlayer, checkGameEnd } from './utils'; 

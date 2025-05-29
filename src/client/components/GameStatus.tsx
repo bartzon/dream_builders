@@ -1,4 +1,3 @@
-import React from 'react';
 import type { GameState } from '../../game/state';
 import { formatCurrency } from '../utils/format';
 import { GAME_CONFIG } from '../../game/constants';

@@ -1,6 +1,4 @@
-import React from 'react';
 import type { Card } from '../../game/types';
-import { motion } from 'framer-motion';
 
 interface SellButtonProps {
   product: Card;
@@ -13,13 +11,11 @@ export function SellButton({ product, onSell, disabled = false }: SellButtonProp
   const isDisabled = disabled || !canSell;
   
   return (
-    <motion.button
-      whileHover={!isDisabled ? { scale: 1.05 } : {}}
-      whileTap={!isDisabled ? { scale: 0.95 } : {}}
+    <button
       onClick={() => !isDisabled && onSell(product.id)}
       disabled={isDisabled}
       className={`
-        px-3 py-1 rounded text-xs font-semibold transition-colors
+        px-3 py-1 rounded text-xs font-semibold
         ${isDisabled 
           ? 'bg-gray-400 text-gray-600 cursor-not-allowed' 
           : 'bg-green-500 text-white hover:bg-green-600 shadow-sm'
@@ -27,6 +23,6 @@ export function SellButton({ product, onSell, disabled = false }: SellButtonProp
       `}
     >
       Sell 1 (${((product.revenuePerSale || 0) / 1000).toFixed(0)}k)
-    </motion.button>
+    </button>
   );
 } 
