@@ -5,7 +5,6 @@ import { sharedProductPool } from './data/shared-products';
 import type { Card } from './types';
 import { 
   cardEffects,
-  sellProduct,
   heroAbilityEffects,
   processPassiveEffects,
   processOverheadCosts,
@@ -105,22 +104,25 @@ export const DreamBuildersGame: Game<GameState> = {
       if (!G.effectContext) G.effectContext = {};
       if (!G.effectContext[playerID]) G.effectContext[playerID] = initEffectContext();
       
-      // 1. Capital gain phase
+      // 1. Automatic sales phase - SELL ALL PRODUCTS AUTOMATICALLY
+      processAutomaticSales(G, playerID);
+      
+      // 2. Capital gain phase
       const baseCapital = Math.min(G.turn, GAME_CONFIG.MAX_CAPITAL);
       
       // Apply any capital modifications from effect context
       const newCapital = G.effectContext[playerID].doubleCapitalGain ? Math.min(GAME_CONFIG.MAX_CAPITAL, baseCapital * 2) : baseCapital;
       player.capital = newCapital;
       
-      // 2. Process overhead costs (must pay or disable products)
+      // 3. Process overhead costs (must pay or disable products)
       processOverheadCosts(G, playerID);
       
-      // 3. Draw card(s)
+      // 4. Draw card(s)
       for (let i = 0; i < GAME_CONFIG.CARDS_DRAWN_PER_TURN; i++) {
         drawCard(player);
       }
       
-      // 4. Process passive effects (additional capital, card draw, inventory increases)
+      // 5. Process passive effects (additional capital, card draw, inventory increases)
       processPassiveEffects(G, playerID);
       
       // Reset hero ability usage
@@ -129,9 +131,6 @@ export const DreamBuildersGame: Game<GameState> = {
     
     onEnd: ({ G, ctx }) => {
       const playerID = ctx.currentPlayer;
-      
-      // Process automatic sales
-      processAutomaticSales(G, playerID);
       
       // Process recurring revenue (legacy)
       processRecurringRevenue(G, playerID);
@@ -214,57 +213,6 @@ export const DreamBuildersGame: Game<GameState> = {
       // Use up an extra card play if applicable
       if (hasExtraPlays && G.effectContext?.[playerID]) {
         G.effectContext[playerID].extraCardPlays = (G.effectContext[playerID].extraCardPlays || 0) - 1;
-      }
-    },
-    
-    sellProduct: ({ G, ctx, playerID }, productIndex: number) => {
-      if (playerID !== ctx.currentPlayer) return INVALID_MOVE;
-      
-      const player = G.players[playerID];
-      
-      // Validate the product index
-      if (productIndex < 0 || productIndex >= player.board.Products.length) {
-        console.log('Invalid product index:', productIndex, 'Available products:', player.board.Products.length);
-        return INVALID_MOVE;
-      }
-      
-      const product = player.board.Products[productIndex];
-      
-      // Debug logging
-      console.log('Selling product at index', productIndex, ':', {
-        id: product.id,
-        name: product.name,
-        inventory: product.inventory,
-        isActive: product.isActive
-      });
-      
-      // Check if product can be sold
-      if (!product.inventory || product.inventory <= 0) {
-        console.log('Product has no inventory:', product.inventory);
-        return INVALID_MOVE;
-      }
-      
-      if (product.isActive === false) {
-        console.log('Product is inactive:', product.isActive);
-        return INVALID_MOVE;
-      }
-      
-      console.log('Product validation passed, selling:', product.name);
-      
-      // Sell the product
-      sellProduct(G, playerID, product, 1);
-      
-      // Track items sold this turn
-      if (G.effectContext?.[playerID]) {
-        G.effectContext[playerID].itemsSoldThisTurn = 
-          (G.effectContext[playerID].itemsSoldThisTurn || 0) + 1;
-      }
-      
-      // Apply Disruptive Pivot effect if active
-      if (G.effectContext?.[playerID]?.doubleRevenueThisTurn) {
-        const lastRevenue = product.revenuePerSale || 0;
-        player.revenue += lastRevenue;
-        G.teamRevenue += lastRevenue;
       }
     },
     

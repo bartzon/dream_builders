@@ -172,13 +172,30 @@ export function processOverheadCosts(G: GameState, playerID: string) {
   });
 }
 
-// Process automatic sales at end of turn
+// Process automatic sales at start of turn - NEW MECHANIC
 export function processAutomaticSales(G: GameState, playerID: string) {
   const player = G.players[playerID];
+  let productsSold = 0;
   
-  // === LEGACY EFFECTS ===
+  // === NEW AUTOMATIC SELLING MECHANIC ===
+  // Sell 1 item from each Product with inventory > 0
+  player.board.Products.forEach(product => {
+    if (product.inventory && product.inventory > 0 && product.isActive !== false) {
+      sellProduct(G, playerID, product, 1);
+      productsSold++;
+    }
+  });
   
-  // Pop-up Shop effect - sell 1 item each turn
+  // Track that products were sold this turn if any were sold
+  if (productsSold > 0 && G.effectContext?.[playerID]) {
+    G.effectContext[playerID].soldProductThisTurn = true;
+    G.effectContext[playerID].itemsSoldThisTurn = 
+      (G.effectContext[playerID].itemsSoldThisTurn || 0) + productsSold;
+  }
+  
+  // === LEGACY CARD EFFECTS (additional automatic sales) ===
+  
+  // Pop-up Shop effect - sell 1 additional item
   const popupShop = player.board.Products.find(p => p.effect === 'popup_shop');
   if (popupShop && popupShop.inventory && popupShop.inventory > 0 && popupShop.isActive) {
     sellProduct(G, playerID, popupShop, 1);
@@ -193,7 +210,7 @@ export function processAutomaticSales(G: GameState, playerID: string) {
     }
   }
   
-  // AI Salesbot effect - automatically sell 1 item
+  // AI Salesbot effect - automatically sell 1 additional item
   const aiSalesbot = player.board.Employees.find(e => e.effect === 'ai_salesbot');
   if (aiSalesbot) {
     const product = player.board.Products.find(p => p.inventory && p.inventory > 0 && p.isActive);
@@ -211,9 +228,7 @@ export function processAutomaticSales(G: GameState, playerID: string) {
     }
   }
   
-  // === NEW AUTOMATION EFFECTS ===
-  
-  // Automated Pipeline - sell 1 item from each Product
+  // Automated Pipeline effect - sell 1 additional item from each Product
   const automatedPipeline = player.board.Tools.find(t => t.effect === 'automated_pipeline');
   if (automatedPipeline) {
     player.board.Products.forEach(product => {

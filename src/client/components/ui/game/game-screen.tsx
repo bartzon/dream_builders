@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 
 // Font size constants (increased by 25% from previous)
 const FONT_SIZES = {
@@ -311,6 +311,8 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
     y: number
   }>({ visible: false, x: 0, y: 0 })
 
+  const [lastTeamRevenue, setLastTeamRevenue] = useState(0)
+
   // Extract basic game state
   const gameState = G as Record<string, unknown>
   const players = gameState.players as Record<string, unknown>
@@ -320,6 +322,11 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
   const board = currentPlayer.board as Record<string, Card[]>
   const products = Array.isArray(board?.Products) ? board.Products : []
   const tools = Array.isArray(board?.Tools) ? board.Tools : []
+
+  // Check if automatic sales happened this turn
+  const effectContext = (gameState.effectContext as Record<string, Record<string, unknown>>)?.[playerID]
+  const itemsSoldThisTurn = effectContext?.itemsSoldThisTurn as number || 0
+  const soldProductThisTurn = effectContext?.soldProductThisTurn as boolean || false
 
   // Hero power costs from game constants
   const HERO_ABILITY_COSTS: Record<string, number> = {
@@ -365,18 +372,22 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
   const playerRevenue = Number(currentPlayer.revenue || 0)
   const goalProgress = Math.min((teamRevenue / REVENUE_GOAL) * 100, 100)
 
-  // Play cha-ching sound
-  const playChaChing = () => {
-    try {
-      const audio = new Audio('/sounds/cha_ching_sound.mp3')
-      audio.volume = 0.7
-      audio.play().catch(() => {
-        // Ignore audio errors in case file doesn't exist
-      })
-    } catch {
-      // Ignore audio errors
+  // Automatic cha-ching sound when team revenue increases (products sold automatically)
+  useEffect(() => {
+    if (teamRevenue > lastTeamRevenue && lastTeamRevenue > 0) {
+      // Revenue increased, play cha-ching sound
+      try {
+        const audio = new Audio('/sounds/cha_ching_sound.mp3')
+        audio.volume = 0.7
+        audio.play().catch(() => {
+          // Ignore audio errors in case file doesn't exist
+        })
+      } catch {
+        // Ignore audio errors
+      }
     }
-  }
+    setLastTeamRevenue(teamRevenue)
+  }, [teamRevenue, lastTeamRevenue])
 
   // Handle tooltip
   const showTooltip = (card: Card, event: React.MouseEvent) => {
@@ -410,14 +421,6 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
     if (!isMyTurn) return
     moves.playCard?.(cardIndex)
     setGameLog(prev => [`Played card ${cardIndex}`, ...prev.slice(0, 4)])
-  }
-
-  // Handle sell product
-  const handleSellProduct = (productIndex: number) => {
-    if (!isMyTurn) return
-    playChaChing()
-    moves.sellProduct?.(productIndex)
-    setGameLog(prev => [`Sold product ${productIndex}`, ...prev.slice(0, 4)])
   }
 
   // Handle end turn
@@ -591,6 +594,19 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
 
           <div>
             <h4 style={{ fontSize: FONT_SIZES.large }}>Game Log:</h4>
+            
+            {/* Automatic Sales Feedback */}
+            {soldProductThisTurn && isMyTurn && (
+              <div style={{ 
+                fontSize: FONT_SIZES.body, 
+                marginBottom: '5px',
+                color: '#10b981',
+                fontWeight: 'bold'
+              }}>
+                🛒 Sold {itemsSoldThisTurn} product{itemsSoldThisTurn !== 1 ? 's' : ''} automatically
+              </div>
+            )}
+            
             {gameLog.map((log, i) => (
               <div key={i} style={{ fontSize: FONT_SIZES.body, marginBottom: '5px' }}>{log}</div>
             ))}
@@ -681,28 +697,6 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
                     <div style={{ fontSize: FONT_SIZES.body, marginBottom: '3px' }}>Cost: {product.cost || 0}</div>
                     {product.inventory !== undefined && (
                       <div style={{ fontSize: FONT_SIZES.body, marginBottom: '8px' }}>Stock: {product.inventory}</div>
-                    )}
-                    
-                    {/* Sell Button */}
-                    {isMyTurn && product.inventory !== undefined && product.inventory > 0 && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          handleSellProduct(i)
-                        }}
-                        style={{
-                          background: '#16a34a',
-                          color: 'white',
-                          border: 'none',
-                          borderRadius: '3px',
-                          padding: '6px 10px',
-                          fontSize: FONT_SIZES.medium,
-                          cursor: 'pointer',
-                          width: '100%'
-                        }}
-                      >
-                        Sell (${(product.revenuePerSale || 10000) / 1000}k)
-                      </button>
                     )}
                   </div>
                 ))
