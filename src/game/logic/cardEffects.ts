@@ -53,7 +53,7 @@ function createProductChoice(player: PlayerState, effect: string, filter?: (p: C
   
   if (products.length === 1) {
     // Auto-resolve if only one choice
-    handleSingleProductChoice(player, products[0], effect);
+    handleSingleProductChoice(products[0], effect);
   } else {
     // Create pending choice for multiple options
     player.pendingChoice = {
@@ -64,7 +64,7 @@ function createProductChoice(player: PlayerState, effect: string, filter?: (p: C
   }
 }
 
-function handleSingleProductChoice(player: PlayerState, product: Card, effect: string): void {
+function handleSingleProductChoice(product: Card, effect: string): void {
   switch (effect) {
     case 'add_inventory_to_product':
       addInventoryToSpecificProduct(product, 2);

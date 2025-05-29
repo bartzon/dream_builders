@@ -7,12 +7,10 @@ import { HeroPowerTooltip } from './HeroPowerTooltip'
 import { GameHeader } from './GameHeader'
 import { HeroControls } from './HeroControls'
 import { PlayerHand } from './PlayerHand'
-import { ProductsSection } from './ProductsSection'
-import { ToolsAndEmployees } from './ToolsAndEmployees'
 import { useGameState } from '../../../hooks/useGameState'
 import { useTooltip } from '../../../hooks/useTooltip'
 import { useCardDiscount } from '../../../hooks/useCardDiscount'
-import { HERO_ABILITY_COSTS, HERO_POWER_INFO } from '../../../constants/ui'
+import { FONT_SIZES, CARD_STYLES, HERO_ABILITY_COSTS, HERO_POWER_INFO } from '../../../constants/ui'
 import type { GameState } from '../../../../game/state'
 
 interface GameScreenProps {
@@ -198,20 +196,167 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
           flexDirection: 'column'
         }}>
           {/* Tools & Employees */}
-          <ToolsAndEmployees
-            cards={toolsAndEmployees}
-            onShowTooltip={showCardTooltip}
-            onHideTooltip={hideCardTooltip}
-          />
+          <div style={{ marginBottom: '20px' }}>
+            <h4 style={{ fontSize: FONT_SIZES.subheading }}>Your Tools & Employees ({toolsAndEmployees.length})</h4>
+            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+              {toolsAndEmployees.length === 0 ? (
+                <div style={{ 
+                  padding: '20px', 
+                  border: '2px dashed #666', 
+                  borderRadius: '5px',
+                  color: '#999',
+                  fontSize: FONT_SIZES.body
+                }}>
+                  No tools or employees
+                </div>
+              ) : (
+                toolsAndEmployees.map((card, i) => (
+                  <div 
+                    key={`${card.id || 'tool-employee'}-${i}`}
+                    style={{
+                      ...CARD_STYLES,
+                      background: card.type === 'Employee' ? '#2563eb' : '#7c3aed',
+                      border: card.type === 'Employee' ? '1px solid #3b82f6' : '1px solid #8b5cf6'
+                    }}
+                    onMouseEnter={(e) => showCardTooltip(card, e)}
+                    onMouseLeave={hideCardTooltip}
+                    onMouseMove={(e) => showCardTooltip(card, e)}
+                  >
+                    <div style={{ fontWeight: 'bold', marginBottom: '5px', color: 'white', fontSize: FONT_SIZES.medium }}>{card.name}</div>
+                    <div style={{ fontSize: FONT_SIZES.body, marginBottom: '3px', color: '#e2e8f0' }}>Cost: {card.cost}</div>
+                    <div style={{ fontSize: FONT_SIZES.small, color: '#a78bfa' }}>{card.type}</div>
+                    {card.isActive !== undefined && (
+                      <div style={{ 
+                        fontSize: FONT_SIZES.medium, 
+                        color: card.isActive ? '#10b981' : '#6b7280',
+                        fontWeight: 'bold'
+                      }}>
+                        {card.isActive ? 'Active' : 'Inactive'}
+                      </div>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
           
           {/* Products */}
-          <ProductsSection
-            products={uiState.products}
-            pendingChoice={uiState.pendingChoice}
-            onMakeChoice={handleMakeChoice}
-            onShowTooltip={showCardTooltip}
-            onHideTooltip={hideCardTooltip}
-          />
+          <div style={{ marginBottom: '20px' }}>
+            <h4 style={{ fontSize: FONT_SIZES.subheading }}>
+              Your Products ({uiState.products.length})
+              {uiState.pendingChoice?.type === 'destroy_product' && (
+                <span style={{ 
+                  color: '#ef4444', 
+                  marginLeft: '10px',
+                  fontSize: FONT_SIZES.body 
+                }}>
+                  - Click a product to destroy it
+                </span>
+              )}
+              {uiState.pendingChoice?.type === 'choose_card' && (
+                <span style={{ 
+                  color: '#10b981', 
+                  marginLeft: '10px',
+                  fontSize: FONT_SIZES.body 
+                }}>
+                  - Click a product to boost its inventory
+                </span>
+              )}
+            </h4>
+            <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+              {uiState.products.length === 0 ? (
+                <div style={{ 
+                  padding: '20px', 
+                  border: '2px dashed #666', 
+                  borderRadius: '5px',
+                  color: '#999',
+                  fontSize: FONT_SIZES.body
+                }}>
+                  No products
+                </div>
+              ) : (
+                uiState.products.map((product, i) => {
+                  const isDestroyMode = uiState.pendingChoice?.type === 'destroy_product'
+                  const canDestroy = isDestroyMode && uiState.pendingChoice?.cards?.some(c => c.id === product.id)
+                  
+                  const isChooseMode = uiState.pendingChoice?.type === 'choose_card'
+                  const canChoose = isChooseMode && uiState.pendingChoice?.cards?.some(c => c.id === product.id)
+                  
+                  const isClickable = canDestroy || canChoose
+                  
+                  return (
+                    <div 
+                      key={i} 
+                      style={{
+                        ...CARD_STYLES,
+                        background: 
+                          (isDestroyMode && canDestroy) ? '#dc2626' : 
+                          (isChooseMode && canChoose) ? '#059669' :
+                          '#065f46',
+                        border: 
+                          (isDestroyMode && canDestroy) ? '2px solid #ef4444' : 
+                          (isChooseMode && canChoose) ? '2px solid #10b981' :
+                          '1px solid #059669',
+                        cursor: isClickable ? 'pointer' : 'default',
+                        position: 'relative'
+                      }}
+                      onMouseEnter={(e) => showCardTooltip(product, e)}
+                      onMouseLeave={hideCardTooltip}
+                      onMouseMove={(e) => showCardTooltip(product, e)}
+                      onClick={() => {
+                        if (isClickable && uiState.pendingChoice?.cards) {
+                          const choiceIndex = uiState.pendingChoice.cards.findIndex(c => c.id === product.id)
+                          if (choiceIndex >= 0) {
+                            handleMakeChoice(choiceIndex)
+                          }
+                        }
+                      }}
+                    >
+                      <div style={{ fontWeight: 'bold', marginBottom: '5px', fontSize: FONT_SIZES.medium }}>{product.name}</div>
+                      <div style={{ fontSize: FONT_SIZES.body, marginBottom: '3px' }}>Cost: {product.cost}</div>
+                      {product.inventory !== undefined && (
+                        <div style={{ fontSize: FONT_SIZES.body, marginBottom: '8px' }}>Stock: {product.inventory}</div>
+                      )}
+                      
+                      {isDestroyMode && canDestroy && (
+                        <div style={{
+                          position: 'absolute',
+                          bottom: '5px',
+                          left: '50%',
+                          transform: 'translateX(-50%)',
+                          background: '#fbbf24',
+                          color: '#000',
+                          padding: '2px 6px',
+                          borderRadius: '3px',
+                          fontSize: '12px',
+                          fontWeight: 'bold'
+                        }}>
+                          DESTROY
+                        </div>
+                      )}
+                      
+                      {isChooseMode && canChoose && (
+                        <div style={{
+                          position: 'absolute',
+                          bottom: '5px',
+                          left: '50%',
+                          transform: 'translateX(-50%)',
+                          background: '#10b981',
+                          color: '#fff',
+                          padding: '2px 6px',
+                          borderRadius: '3px',
+                          fontSize: '12px',
+                          fontWeight: 'bold'
+                        }}>
+                          BOOST
+                        </div>
+                      )}
+                    </div>
+                  )
+                })
+              )}
+            </div>
+          </div>
 
           {/* Hand */}
           <PlayerHand
