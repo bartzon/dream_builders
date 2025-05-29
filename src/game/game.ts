@@ -11,6 +11,7 @@ import {
   processAutomaticSales,
   processRecurringRevenue,
   getCardDiscount,
+  getCardCostInfo,
   handleCardPlayEffects,
   initEffectContext,
   clearTempEffects,

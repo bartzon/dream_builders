@@ -111,9 +111,6 @@ function addAppealToProduct(product: Card, amount: number) {
 // No-op function for passive effects handled elsewhere
 const passiveEffect = () => {};
 
-// No-op function for sale effects that only use revenuePerSale property
-const revenueOnlyEffect = () => {};
-
 // Helper function to sell a product
 export function sellProduct(G: GameState, playerID: string, product: Card, quantity: number = 1): number {
   if (!product.inventory || product.inventory < quantity) return 0;

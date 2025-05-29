@@ -1,6 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { CostDisplay } from '../CostDisplay'
+import type { GameState } from '../../../../game/state'
 
 // Font size constants (increased by 25% from previous)
 const FONT_SIZES = {
@@ -314,7 +316,7 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
   const [lastPlayerRevenue, setLastPlayerRevenue] = useState(0)
 
   // Extract basic game state
-  const gameState = G as Record<string, unknown>
+  const gameState = G as GameState
   const players = gameState.players as Record<string, unknown>
   const currentPlayer = players[playerID] as Record<string, unknown>
   
@@ -322,6 +324,7 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
   const board = currentPlayer.board as Record<string, Card[]>
   const products = Array.isArray(board?.Products) ? board.Products : []
   const tools = Array.isArray(board?.Tools) ? board.Tools : []
+  const employees = Array.isArray(board?.Employees) ? board.Employees : []
 
   // Check if automatic sales happened this turn
   const effectContext = (gameState.effectContext as Record<string, Record<string, unknown>>)?.[playerID]
@@ -398,6 +401,70 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
     }
     setLastPlayerRevenue(playerRevenue)
   }, [playerRevenue, lastPlayerRevenue])
+
+  // Helper function to calculate discount for a card
+  const getCardDiscount = (card: Card) => {
+    let discount = 0;
+    
+    // Check for next card discount
+    if (effectContext?.nextCardDiscount) {
+      discount += effectContext.nextCardDiscount as number || 0;
+    }
+    
+    // Brand Ambassador effect - Actions cost 1 less
+    if (card.type === 'Action') {
+      const brandAmbassador = employees.find(e => e.effect === 'brand_ambassador');
+      if (brandAmbassador) discount += 1;
+      
+      const customerSupport = employees.find(e => e.effect === 'customer_support_team');
+      if (customerSupport) discount += 1;
+    }
+    
+    // Solo Hustler - Product cost reduction
+    if (card.type === 'Product') {
+      const productReduction = effectContext?.productCostReduction as number || 0;
+      discount += productReduction;
+      
+      // DIY Assembly effect - Products cost 1 less
+      const diyAssembly = tools.find(t => t.effect === 'diy_assembly');
+      if (diyAssembly) discount += 1;
+    }
+    
+    // Community Leader - Meme Magic cost reduction
+    if (card.effect === 'meme_magic') {
+      const cardsPlayed = effectContext?.cardsPlayedThisTurn as number || 0;
+      if (cardsPlayed >= 2) {
+        discount = card.cost; // Make it cost 0
+      }
+    }
+    
+    // Brand Builder - Quality Materials effect (increases cost)
+    if (card.type === 'Product') {
+      const qualityMaterials = tools.find(t => t.effect === 'quality_materials');
+      if (qualityMaterials) {
+        discount -= 1; // Actually increases cost
+      }
+    }
+    
+    // Solo Hustler - Shoestring Budget effect (first card each turn costs 1 less)
+    const shoestringBudget = tools.find(t => t.effect === 'shoestring_budget');
+    if (shoestringBudget && effectContext && !effectContext.firstCardDiscountUsed) {
+      discount += 1;
+    }
+    
+    // Can't reduce below 0 or be negative discount
+    return Math.min(Math.max(0, discount), card.cost);
+  };
+
+  // Helper function to get cost info for display
+  const getCostInfo = (card: Card) => {
+    const discount = getCardDiscount(card);
+    return {
+      originalCost: card.cost,
+      discount,
+      finalCost: Math.max(0, card.cost - discount)
+    };
+  };
 
   // Handle tooltip
   const showTooltip = (card: Card, event: React.MouseEvent) => {
@@ -478,6 +545,116 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
     hideTooltip() // Hide any tooltips when making a choice
     moves.makeChoice?.(choiceIndex)
     setGameLog(prev => [`Discarded card`, ...prev.slice(0, 4)])
+  }
+
+  // Update the hand card rendering to use real cost info
+  const renderHandCard = (card: Card, i: number) => {
+    const costInfo = getCostInfo(card);
+    const canAffordCard = costInfo.finalCost <= Number(currentPlayer.capital || 0);
+    
+    // Check Quick Learner special restriction
+    const isQuickLearner = card.effect === 'quick_learner'
+    const lastActionEffect = effectContext?.lastActionEffect
+    const lastActionCard = effectContext?.lastActionCard as Card | undefined
+    const hasPlayedAction = lastActionEffect && lastActionCard && lastActionCard.type === 'Action'
+    
+    const canPlay = isMyTurn && canAffordCard && (!isQuickLearner || hasPlayedAction)
+    const isDiscardMode = pendingChoice?.type === 'discard'
+    
+    // Handle discard mode vs normal play mode
+    const handleCardClick = () => {
+      if (isDiscardMode) {
+        handleMakeChoice(i)
+      } else if (canPlay) {
+        handlePlayCard(i)
+      }
+    }
+    
+    const canInteract = isDiscardMode || canPlay
+    
+    // Wrap disabled cards in a div to handle tooltip events
+    if (!canInteract) {
+      return (
+        <div
+          key={i}
+          onMouseEnter={(e) => showTooltip(card, e)}
+          onMouseLeave={hideTooltip}
+          onMouseMove={(e) => showTooltip(card, e)}
+          style={{ display: 'inline-block' }}
+        >
+          <button
+            disabled={true}
+            style={{
+              ...CARD_STYLES,
+              background: '#666',
+              color: 'white',
+              border: 'none',
+              cursor: 'not-allowed'
+            }}
+          >
+            <div style={{ fontWeight: 'bold', fontSize: FONT_SIZES.medium }}>{card.name || 'Card'}</div>
+            <div style={{ fontSize: FONT_SIZES.body, display: 'flex', alignItems: 'center', gap: '4px' }}>
+              Cost: 
+              <CostDisplay 
+                originalCost={costInfo.originalCost}
+                discount={costInfo.discount}
+                size="small"
+                className="text-white"
+              />
+            </div>
+            <div style={{ fontSize: FONT_SIZES.small }}>{card.type || 'Unknown'}</div>
+          </button>
+        </div>
+      )
+    }
+    
+    // For interactive cards (playable or discardable)
+    return (
+      <button
+        key={i}
+        onClick={handleCardClick}
+        onMouseEnter={(e) => showTooltip(card, e)}
+        onMouseLeave={hideTooltip}
+        onMouseMove={(e) => showTooltip(card, e)}
+        style={{
+          ...CARD_STYLES,
+          background: isDiscardMode ? '#dc2626' : '#1d4ed8',
+          color: 'white',
+          border: isDiscardMode ? '2px solid #ef4444' : 'none',
+          cursor: 'pointer',
+          position: 'relative'
+        }}
+      >
+        <div style={{ fontWeight: 'bold', fontSize: FONT_SIZES.medium }}>{card.name || 'Card'}</div>
+        <div style={{ fontSize: FONT_SIZES.body, display: 'flex', alignItems: 'center', gap: '4px' }}>
+          Cost: 
+          <CostDisplay 
+            originalCost={costInfo.originalCost}
+            discount={costInfo.discount}
+            size="small"
+            className="text-white"
+          />
+        </div>
+        <div style={{ fontSize: FONT_SIZES.small }}>{card.type || 'Unknown'}</div>
+        
+        {isDiscardMode && (
+          <div style={{
+            position: 'absolute',
+            bottom: '5px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            background: '#fbbf24',
+            color: '#000',
+            padding: '2px 6px',
+            borderRadius: '3px',
+            fontSize: '12px',
+            fontWeight: 'bold'
+          }}>
+            DISCARD
+          </div>
+        )}
+      </button>
+    )
   }
 
   return (
@@ -768,97 +945,7 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
                   No cards
                 </div>
               ) : (
-                hand.map((card, i) => {
-                  const canAffordCard = Number(card.cost || 0) <= Number(currentPlayer.capital || 0)
-                  
-                  // Check Quick Learner special restriction
-                  const isQuickLearner = card.effect === 'quick_learner'
-                  const lastActionEffect = effectContext?.lastActionEffect
-                  const lastActionCard = effectContext?.lastActionCard as Card | undefined
-                  const hasPlayedAction = lastActionEffect && lastActionCard && lastActionCard.type === 'Action'
-                  
-                  const canPlay = isMyTurn && canAffordCard && (!isQuickLearner || hasPlayedAction)
-                  const isDiscardMode = pendingChoice?.type === 'discard'
-                  
-                  // Handle discard mode vs normal play mode
-                  const handleCardClick = () => {
-                    if (isDiscardMode) {
-                      handleMakeChoice(i)
-                    } else if (canPlay) {
-                      handlePlayCard(i)
-                    }
-                  }
-                  
-                  const canInteract = isDiscardMode || canPlay
-                  
-                  // Wrap disabled cards in a div to handle tooltip events
-                  if (!canInteract) {
-                    return (
-                      <div
-                        key={i}
-                        onMouseEnter={(e) => showTooltip(card, e)}
-                        onMouseLeave={hideTooltip}
-                        onMouseMove={(e) => showTooltip(card, e)}
-                        style={{ display: 'inline-block' }}
-                      >
-                        <button
-                          disabled={true}
-                          style={{
-                            ...CARD_STYLES,
-                            background: '#666',
-                            color: 'white',
-                            border: 'none',
-                            cursor: 'not-allowed'
-                          }}
-                        >
-                          <div style={{ fontWeight: 'bold', fontSize: FONT_SIZES.medium }}>{card.name || 'Card'}</div>
-                          <div style={{ fontSize: FONT_SIZES.body }}>Cost: {card.cost || 0}</div>
-                          <div style={{ fontSize: FONT_SIZES.small }}>{card.type || 'Unknown'}</div>
-                        </button>
-                      </div>
-                    )
-                  }
-                  
-                  // For interactive cards (playable or discardable)
-                  return (
-                    <button
-                      key={i}
-                      onClick={handleCardClick}
-                      onMouseEnter={(e) => showTooltip(card, e)}
-                      onMouseLeave={hideTooltip}
-                      onMouseMove={(e) => showTooltip(card, e)}
-                      style={{
-                        ...CARD_STYLES,
-                        background: isDiscardMode ? '#dc2626' : '#1d4ed8',
-                        color: 'white',
-                        border: isDiscardMode ? '2px solid #ef4444' : 'none',
-                        cursor: 'pointer',
-                        position: 'relative'
-                      }}
-                    >
-                      <div style={{ fontWeight: 'bold', fontSize: FONT_SIZES.medium }}>{card.name || 'Card'}</div>
-                      <div style={{ fontSize: FONT_SIZES.body }}>Cost: {card.cost || 0}</div>
-                      <div style={{ fontSize: FONT_SIZES.small }}>{card.type || 'Unknown'}</div>
-                      
-                      {isDiscardMode && (
-                        <div style={{
-                          position: 'absolute',
-                          bottom: '5px',
-                          left: '50%',
-                          transform: 'translateX(-50%)',
-                          background: '#fbbf24',
-                          color: '#000',
-                          padding: '2px 6px',
-                          borderRadius: '3px',
-                          fontSize: '12px',
-                          fontWeight: 'bold'
-                        }}>
-                          DISCARD
-                        </div>
-                      )}
-                    </button>
-                  )
-                })
+                hand.map((card, i) => renderHandCard(card, i))
               )}
             </div>
           </div>

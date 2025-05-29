@@ -303,6 +303,72 @@ export function getCardDiscount(G: GameState, playerID: string, card: Card): num
   return Math.min(discount, card.cost); // Can't reduce below 0
 }
 
+// Get cost information for UI display (doesn't modify game state)
+export function getCardCostInfo(G: GameState, playerID: string, card: Card): { originalCost: number, discount: number, finalCost: number } {
+  const player = G.players[playerID];
+  let discount = 0;
+  
+  // Check for next card discount (don't modify the game state)
+  if (G.effectContext?.[playerID]?.nextCardDiscount) {
+    discount += G.effectContext[playerID].nextCardDiscount || 0;
+  }
+  
+  // === LEGACY EFFECTS ===
+  
+  // Brand Ambassador effect - Actions cost 1 less
+  if (card.type === 'Action') {
+    const brandAmbassador = player.board.Employees.find(e => e.effect === 'brand_ambassador');
+    if (brandAmbassador) discount += 1;
+    
+    const customerSupport = player.board.Employees.find(e => e.effect === 'customer_support_team');
+    if (customerSupport) discount += 1;
+  }
+  
+  // === NEW HERO EFFECTS ===
+  
+  // Solo Hustler - Product cost reduction
+  if (card.type === 'Product') {
+    const productReduction = G.effectContext?.[playerID]?.productCostReduction || 0;
+    discount += productReduction;
+    
+    // DIY Assembly effect - Products cost 1 less
+    const diyAssembly = player.board.Tools.find(t => t.effect === 'diy_assembly');
+    if (diyAssembly) discount += 1;
+  }
+  
+  // Community Leader - Meme Magic cost reduction
+  if (card.effect === 'meme_magic') {
+    const cardsPlayed = G.effectContext?.[playerID]?.cardsPlayedThisTurn || 0;
+    if (cardsPlayed >= 2) {
+      discount = card.cost; // Make it cost 0
+    }
+  }
+  
+  // Brand Builder - Quality Materials effect (increases cost but handled in card effects)
+  if (card.type === 'Product') {
+    const qualityMaterials = player.board.Tools.find(t => t.effect === 'quality_materials');
+    if (qualityMaterials) {
+      discount -= 1; // Actually increases cost
+    }
+  }
+  
+  // Solo Hustler - Shoestring Budget effect (first card each turn costs 1 less)
+  // Note: We check the discount without modifying the firstCardDiscountUsed flag
+  const shoestringBudget = player.board.Tools.find(t => t.effect === 'shoestring_budget');
+  if (shoestringBudget && G.effectContext?.[playerID] && !G.effectContext[playerID].firstCardDiscountUsed) {
+    discount += 1;
+  }
+  
+  const effectiveDiscount = Math.min(Math.max(0, discount), card.cost); // Can't reduce below 0 or be negative
+  const finalCost = Math.max(0, card.cost - effectiveDiscount);
+  
+  return {
+    originalCost: card.cost,
+    discount: effectiveDiscount,
+    finalCost
+  };
+}
+
 // Handle card play effects
 export function handleCardPlayEffects(G: GameState, playerID: string, card: Card) {
   const player = G.players[playerID];
