@@ -68,10 +68,21 @@ export const DreamBuildersGame: Game<GameState> = {
   setup: ({ ctx }) => {
     const players: Record<string, PlayerState> = {};
     
+    // Get selected hero from localStorage
+    const selectedHeroId = typeof window !== 'undefined' ? localStorage.getItem('selectedHero') : null;
+    
     // Initialize each player with a hero
     for (let i = 0; i < ctx.numPlayers; i++) {
       const playerID = i.toString();
-      const hero = allHeroes[i % allHeroes.length];
+      let hero;
+      
+      if (ctx.numPlayers === 1 && selectedHeroId) {
+        // Use selected hero for single player
+        hero = allHeroes.find(h => h.id === selectedHeroId) || allHeroes[0];
+      } else {
+        // Default behavior for multiplayer
+        hero = allHeroes[i % allHeroes.length];
+      }
       
       // Create a 30-card deck from the hero's 10-card starter deck
       const fullDeck = createFullDeck(hero.starterDeck);
