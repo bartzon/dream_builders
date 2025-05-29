@@ -24,8 +24,6 @@ export interface HeroClass {
   id: string;
   name: string;
   color: 'Red' | 'Blue' | 'Green' | 'Black' | 'White';
-  abilityName: string;
-  abilityDescription: string;
   starterDeck: Card[];
 }
 

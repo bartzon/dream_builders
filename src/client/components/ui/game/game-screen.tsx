@@ -12,7 +12,7 @@ import { ToolsAndEmployees } from './ToolsAndEmployees'
 import { useGameState } from '../../../hooks/useGameState'
 import { useTooltip } from '../../../hooks/useTooltip'
 import { useCardDiscount } from '../../../hooks/useCardDiscount'
-import { HERO_ABILITY_COSTS, HERO_POWER_INFO } from '../../../constants/ui'
+import { allHeroes } from '../../../../game/data/heroes'
 import type { GameState } from '../../../../game/state'
 
 interface GameScreenProps {
@@ -41,14 +41,17 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
   } = useTooltip()
   const { getCostInfo } = useCardDiscount(effectContext, uiState.tools, uiState.employees)
 
-  // Extract derived state
-  const canUseHeroPower = isMyTurn && !uiState.heroAbilityUsed && 
-    uiState.capital >= (HERO_ABILITY_COSTS[uiState.hero] || 2)
-  
-  const heroPowerInfo = HERO_POWER_INFO[uiState.hero] || { 
+  // Get hero data from the single source of truth
+  const currentHero = allHeroes.find(h => h.id === uiState.hero)
+  const heroPowerCost = currentHero?.heroPower.cost || 2
+  const heroPowerInfo = currentHero?.heroPower || { 
     name: 'Hero Power', 
     description: 'Use your hero\'s special ability' 
   }
+
+  // Extract derived state
+  const canUseHeroPower = isMyTurn && !uiState.heroAbilityUsed && 
+    uiState.capital >= heroPowerCost
 
   // Automatic cha-ching sound when revenue increases
   useEffect(() => {
@@ -156,7 +159,7 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
         {...heroPowerTooltip} 
         heroPowerName={heroPowerInfo.name}
         heroPowerDescription={heroPowerInfo.description}
-        cost={HERO_ABILITY_COSTS[uiState.hero] || 2}
+        cost={heroPowerCost}
       />
 
       {/* Header */}
@@ -174,7 +177,7 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
         {/* Left - Hero and Controls */}
         <HeroControls
           heroName={uiState.hero}
-          heroCost={HERO_ABILITY_COSTS[uiState.hero] || 2}
+          heroCost={heroPowerCost}
           isHeroPowerUsed={uiState.heroAbilityUsed}
           canUseHeroPower={canUseHeroPower}
           isMyTurn={isMyTurn}

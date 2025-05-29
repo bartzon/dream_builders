@@ -72,40 +72,6 @@ export const COLORS = {
   white: '#fff'
 } as const 
 
-// Hero ability costs
-export const HERO_ABILITY_COSTS: Record<string, number> = {
-  marketer: 2,
-  developer: 1,
-  operator: 2,
-  visionary: 1,
-  Marketer: 2,
-  Developer: 1,
-  Operator: 2,
-  Visionary: 1,
-  solo_hustler: 1,
-  brand_builder: 2,
-  automation_architect: 2,
-  community_leader: 1,
-  serial_founder: 2,
-} as const
-
-// Hero power descriptions
-export const HERO_POWER_INFO: Record<string, { name: string, description: string }> = {
-  marketer: { name: 'Marketing Blitz', description: 'Gain 2 capital, draw 1 card, all Products +$10k this turn' },
-  developer: { name: 'Code Sprint', description: 'Next card costs 2 less, draw 1 card' },
-  operator: { name: 'Operational Excellence', description: 'Gain 1 capital, all cards +$20k revenue this turn' },
-  visionary: { name: 'Visionary Insight', description: 'Draw 3 cards, discard 1, gain $50k' },
-  Marketer: { name: 'Marketing Blitz', description: 'Gain 2 capital, draw 1 card, all Products +$10k this turn' },
-  Developer: { name: 'Code Sprint', description: 'Next card costs 2 less, draw 1 card' },
-  Operator: { name: 'Operational Excellence', description: 'Gain 1 capital, all cards +$20k revenue this turn' },
-  Visionary: { name: 'Visionary Insight', description: 'Draw 3 cards, discard 1, gain $50k' },
-  solo_hustler: { name: 'Grind', description: 'Draw 1 card. If it\'s a Product, reduce its cost by 1 this turn' },
-  brand_builder: { name: 'Engage', description: 'Give a Product +1 Appeal this turn' },
-  automation_architect: { name: 'Deploy Script', description: 'Gain 1 recurring Capital next turn' },
-  community_leader: { name: 'Go Viral', description: 'If you played 2+ cards this turn, add a copy of a Product in play to your inventory' },
-  serial_founder: { name: 'Double Down', description: 'Choose one: draw a card OR refresh 1 used Product' },
-} as const
-
 // Game constants
 export const REVENUE_GOAL = 1_000_000
 
