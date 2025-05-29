@@ -418,6 +418,7 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
   // Handle play card
   const handlePlayCard = (cardIndex: number) => {
     if (!isMyTurn) return
+    hideTooltip() // Hide tooltip when card is played
     moves.playCard?.(cardIndex)
     setGameLog(prev => [`Played card ${cardIndex}`, ...prev.slice(0, 4)])
   }
@@ -425,6 +426,8 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
   // Handle end turn
   const handleEndTurn = () => {
     if (isMyTurn && events?.endTurn) {
+      hideTooltip() // Hide any tooltips when ending turn
+      hideHeroPowerTooltip()
       events.endTurn()
       setGameLog(prev => [`Turn ended`, ...prev.slice(0, 4)])
     }
@@ -433,6 +436,7 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
   // Handle hero power
   const handleUseHeroPower = () => {
     if (isMyTurn && !currentPlayer.heroAbilityUsed && Number(currentPlayer.capital || 0) >= heroCost) {
+      hideHeroPowerTooltip() // Hide tooltip when hero power is used
       moves.useHeroAbility?.()
       setGameLog(prev => [`Used hero power`, ...prev.slice(0, 4)])
     }
