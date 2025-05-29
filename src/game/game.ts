@@ -2,6 +2,7 @@ import type { Game } from 'boardgame.io';
 import type { GameState, PlayerState } from './state';
 import { allHeroes, type Hero } from './data/heroes';
 import { sharedProductPool } from './data/shared-products';
+import { inventorySupportCards } from './data/inventory-support-cards';
 import type { Card } from './types';
 import { INVALID_MOVE } from 'boardgame.io/core';
 import { GAME_CONFIG } from './constants';
@@ -35,16 +36,31 @@ function selectRandomCards<T>(cards: T[], count: number): T[] {
   return shuffled.slice(0, Math.min(count, shuffled.length));
 }
 
-// New drafting function that creates a 30-card deck
+// New drafting function that creates a 40-card deck
 function createDraftedDeck(heroStarterDeck: Card[]): Card[] {
-  // Get 15 random cards from hero's unique deck (now all non-Product cards)
-  const heroCards = selectRandomCards(heroStarterDeck, 15);
+  // GUARANTEED CARDS (20 total - 50% of deck):
+  // 1. All 10 unique hero cards (no duplicates)
+  const heroCards = [...heroStarterDeck];
   
-  // Get 15 random cards from shared product pool
-  const productCards = selectRandomCards(sharedProductPool, 15);
+  // 2. 10 additional hero cards (allows for duplicates of key cards)
+  const additionalHeroCards = selectRandomCards(heroStarterDeck, 10);
   
-  // Combine and shuffle
-  const combinedDeck = [...heroCards, ...productCards];
+  // INVENTORY SUPPORT (7 cards - 17.5% of deck):
+  // 3. 7 random inventory support cards
+  const inventoryCards = selectRandomCards(inventorySupportCards, 7);
+  
+  // PRODUCTS (13 cards - 32.5% of deck):
+  // 4. 13 random products from shared pool
+  const productCards = selectRandomCards(sharedProductPool, 13);
+  
+  // Combine all cards and shuffle
+  const combinedDeck = [
+    ...heroCards,           // 10 cards - hero identity (guaranteed uniques)
+    ...additionalHeroCards, // 10 cards - hero synergy reinforcement
+    ...inventoryCards,      // 7 cards - inventory management
+    ...productCards         // 13 cards - revenue generation
+  ];
+  
   return shuffleArray(combinedDeck);
 }
 
@@ -70,7 +86,7 @@ export const DreamBuildersGame: Game<GameState> = {
         hero = allHeroes[i % allHeroes.length];
       }
       
-      // Create a 30-card deck from the hero's 10-card starter deck
+      // Create a 40-card deck from the hero's 10-card starter deck
       const fullDeck = createDraftedDeck(hero.starterDeck);
       
       // Use the hero ID directly (no capitalization needed)
