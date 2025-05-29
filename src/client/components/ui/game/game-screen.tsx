@@ -326,10 +326,13 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
   const currentPlayer = players[playerID] as Record<string, unknown>
   
   const hand = Array.isArray(currentPlayer.hand) ? currentPlayer.hand as Card[] : []
+  const deck = Array.isArray(currentPlayer.deck) ? currentPlayer.deck as Card[] : []
   const board = currentPlayer.board as Record<string, Card[]>
   const products = Array.isArray(board?.Products) ? board.Products : []
   const tools = Array.isArray(board?.Tools) ? board.Tools : []
   const employees = Array.isArray(board?.Employees) ? board.Employees : []
+  // Combine tools and employees into one array for display
+  const toolsAndEmployees = [...tools, ...employees]
 
   // Check if automatic sales happened this turn
   const effectContext = (gameState.effectContext as Record<string, Record<string, unknown>>)?.[playerID]
@@ -346,6 +349,7 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
 
   // Check for delayed effects
   const midnightOilPending = effectContext?.midnightOilDiscardPending as boolean || false
+  const fastPivotPending = effectContext?.fastPivotProductDestroyPending as boolean || false
 
   // Hero power costs from game constants
   const HERO_ABILITY_COSTS: Record<string, number> = {
@@ -544,12 +548,30 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
     }
   }, [midnightOilPending, isMyTurn, moves]);
 
+  // Handle delayed fast pivot destroy choice
+  useEffect(() => {
+    if (fastPivotPending && isMyTurn) {
+      // Trigger the destroy choice immediately
+      moves.triggerFastPivotDestroyChoice?.();
+      setGameLog(prev => [`Choose a Product to destroy...`, ...prev.slice(0, 4)]);
+    }
+  }, [fastPivotPending, isMyTurn, moves]);
+
   // Handle make choice
   const handleMakeChoice = (choiceIndex: number) => {
     if (!isMyTurn || !pendingChoice) return
     hideTooltip() // Hide any tooltips when making a choice
+    
+    // More detailed logging
+    if (pendingChoice.type === 'discard') {
+      const cardToDiscard = hand[choiceIndex];
+      setGameLog(prev => [`Discarding ${cardToDiscard?.name || 'card'}...`, ...prev.slice(0, 4)])
+    } else if (pendingChoice.type === 'destroy_product') {
+      const productToDestroy = pendingChoice.cards?.[choiceIndex];
+      setGameLog(prev => [`Destroying ${productToDestroy?.name || 'product'}...`, ...prev.slice(0, 4)])
+    }
+    
     moves.makeChoice?.(choiceIndex)
-    setGameLog(prev => [`Discarded card`, ...prev.slice(0, 4)])
   }
 
   // Update the hand card rendering to use real cost info
@@ -581,7 +603,7 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
     if (!canInteract) {
       return (
         <div
-          key={i}
+          key={`${card.id || 'card'}-${i}`}
           onMouseEnter={(e) => showTooltip(card, e)}
           onMouseLeave={hideTooltip}
           onMouseMove={(e) => showTooltip(card, e)}
@@ -616,7 +638,7 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
     // For interactive cards (playable or discardable)
     return (
       <button
-        key={i}
+        key={`${card.id || 'card'}-${i}`}
         onClick={handleCardClick}
         onMouseEnter={(e) => showTooltip(card, e)}
         onMouseLeave={hideTooltip}
@@ -702,7 +724,8 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
             <p style={{ margin: 0, fontSize: FONT_SIZES.body }}>
               Hero: {heroName} | 
               Capital: {Number(currentPlayer.capital || 0)} | 
-              Turn: {String(gameState.turn || 1)}
+              Turn: {String(gameState.turn || 1)} | 
+              Deck: {deck.length}
             </p>
           </div>
           
@@ -833,9 +856,9 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
         }}>
           {/* Tools */}
           <div style={{ marginBottom: '20px' }}>
-            <h4 style={{ fontSize: FONT_SIZES.subheading }}>Your Tools ({tools.length})</h4>
+            <h4 style={{ fontSize: FONT_SIZES.subheading }}>Your Tools & Employees ({toolsAndEmployees.length})</h4>
             <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-              {tools.length === 0 ? (
+              {toolsAndEmployees.length === 0 ? (
                 <div style={{ 
                   padding: '20px', 
                   border: '2px dashed #666', 
@@ -843,30 +866,31 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
                   color: '#999',
                   fontSize: FONT_SIZES.body
                 }}>
-                  No tools
+                  No tools or employees
                 </div>
               ) : (
-                tools.map((tool, i) => (
+                toolsAndEmployees.map((card, i) => (
                   <div 
-                    key={i} 
+                    key={`${card.id || 'tool-employee'}-${i}`}
                     style={{
                       ...CARD_STYLES,
-                      background: '#7c3aed',
-                      border: '1px solid #8b5cf6'
+                      background: card.type === 'Employee' ? '#2563eb' : '#7c3aed',
+                      border: card.type === 'Employee' ? '1px solid #3b82f6' : '1px solid #8b5cf6'
                     }}
-                    onMouseEnter={(e) => showTooltip(tool, e)}
+                    onMouseEnter={(e) => showTooltip(card, e)}
                     onMouseLeave={hideTooltip}
-                    onMouseMove={(e) => showTooltip(tool, e)}
+                    onMouseMove={(e) => showTooltip(card, e)}
                   >
-                    <div style={{ fontWeight: 'bold', marginBottom: '5px', color: 'white', fontSize: FONT_SIZES.medium }}>{tool.name || 'Tool'}</div>
-                    <div style={{ fontSize: FONT_SIZES.body, marginBottom: '3px', color: '#e2e8f0' }}>Cost: {tool.cost || 0}</div>
-                    {tool.isActive !== undefined && (
+                    <div style={{ fontWeight: 'bold', marginBottom: '5px', color: 'white', fontSize: FONT_SIZES.medium }}>{card.name || card.type || 'Card'}</div>
+                    <div style={{ fontSize: FONT_SIZES.body, marginBottom: '3px', color: '#e2e8f0' }}>Cost: {card.cost || 0}</div>
+                    <div style={{ fontSize: FONT_SIZES.small, color: '#a78bfa' }}>{card.type}</div>
+                    {card.isActive !== undefined && (
                       <div style={{ 
                         fontSize: FONT_SIZES.medium, 
-                        color: tool.isActive ? '#10b981' : '#6b7280',
+                        color: card.isActive ? '#10b981' : '#6b7280',
                         fontWeight: 'bold'
                       }}>
-                        {tool.isActive ? 'Active' : 'Inactive'}
+                        {card.isActive ? 'Active' : 'Inactive'}
                       </div>
                     )}
                   </div>
@@ -877,7 +901,18 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
           
           {/* Products */}
           <div style={{ marginBottom: '20px' }}>
-            <h4 style={{ fontSize: FONT_SIZES.subheading }}>Your Products ({products.length})</h4>
+            <h4 style={{ fontSize: FONT_SIZES.subheading }}>
+              Your Products ({products.length})
+              {pendingChoice?.type === 'destroy_product' && (
+                <span style={{ 
+                  color: '#ef4444', 
+                  marginLeft: '10px',
+                  fontSize: FONT_SIZES.body 
+                }}>
+                  - Click a product to destroy it
+                </span>
+              )}
+            </h4>
             <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
               {products.length === 0 ? (
                 <div style={{ 
@@ -890,25 +925,57 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
                   No products
                 </div>
               ) : (
-                products.map((product, i) => (
-                  <div 
-                    key={i} 
-                    style={{
-                      ...CARD_STYLES,
-                      background: '#065f46',
-                      border: '1px solid #059669'
-                    }}
-                    onMouseEnter={(e) => showTooltip(product, e)}
-                    onMouseLeave={hideTooltip}
-                    onMouseMove={(e) => showTooltip(product, e)}
-                  >
-                    <div style={{ fontWeight: 'bold', marginBottom: '5px', fontSize: FONT_SIZES.medium }}>{product.name || 'Product'}</div>
-                    <div style={{ fontSize: FONT_SIZES.body, marginBottom: '3px' }}>Cost: {product.cost || 0}</div>
-                    {product.inventory !== undefined && (
-                      <div style={{ fontSize: FONT_SIZES.body, marginBottom: '8px' }}>Stock: {product.inventory}</div>
-                    )}
-                  </div>
-                ))
+                products.map((product, i) => {
+                  const isDestroyMode = pendingChoice?.type === 'destroy_product';
+                  const canDestroy = isDestroyMode && pendingChoice?.cards?.some(c => c.id === product.id);
+                  
+                  return (
+                    <div 
+                      key={i} 
+                      style={{
+                        ...CARD_STYLES,
+                        background: isDestroyMode && canDestroy ? '#dc2626' : '#065f46',
+                        border: isDestroyMode && canDestroy ? '2px solid #ef4444' : '1px solid #059669',
+                        cursor: canDestroy ? 'pointer' : 'default',
+                        position: 'relative'
+                      }}
+                      onMouseEnter={(e) => showTooltip(product, e)}
+                      onMouseLeave={hideTooltip}
+                      onMouseMove={(e) => showTooltip(product, e)}
+                      onClick={() => {
+                        if (canDestroy && pendingChoice?.cards) {
+                          const choiceIndex = pendingChoice.cards.findIndex(c => c.id === product.id);
+                          if (choiceIndex >= 0) {
+                            handleMakeChoice(choiceIndex);
+                          }
+                        }
+                      }}
+                    >
+                      <div style={{ fontWeight: 'bold', marginBottom: '5px', fontSize: FONT_SIZES.medium }}>{product.name || 'Product'}</div>
+                      <div style={{ fontSize: FONT_SIZES.body, marginBottom: '3px' }}>Cost: {product.cost || 0}</div>
+                      {product.inventory !== undefined && (
+                        <div style={{ fontSize: FONT_SIZES.body, marginBottom: '8px' }}>Stock: {product.inventory}</div>
+                      )}
+                      
+                      {isDestroyMode && canDestroy && (
+                        <div style={{
+                          position: 'absolute',
+                          bottom: '5px',
+                          left: '50%',
+                          transform: 'translateX(-50%)',
+                          background: '#fbbf24',
+                          color: '#000',
+                          padding: '2px 6px',
+                          borderRadius: '3px',
+                          fontSize: '12px',
+                          fontWeight: 'bold'
+                        }}>
+                          DESTROY
+                        </div>
+                      )}
+                    </div>
+                  );
+                })
               )}
             </div>
           </div>

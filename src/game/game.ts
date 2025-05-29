@@ -7,7 +7,7 @@ import { INVALID_MOVE } from 'boardgame.io/core';
 import { GAME_CONFIG } from './constants';
 
 // Logic Imports from their respective files
-import { cardEffects, resolveFastPivotEffect, drawCards, applyTemporaryBonus } from './logic/cardEffects';
+import { cardEffects, resolveFastPivotEffect } from './logic/cardEffects';
 import { heroAbilityEffects } from './logic/heroAbilities';
 import {
   processPassiveEffects,
@@ -15,8 +15,6 @@ import {
   processAutomaticSales,
   processRecurringRevenue,
   getCardDiscount,
-  getCardCostInfo,
-  // handleCardPlayEffects, // Assuming this might be part of a general game flow or specific effect logic
 } from './logic/turnEffects';
 import { initEffectContext, clearTempEffects } from './logic/effectContext';
 import { drawCard, initializePlayer, checkGameEnd, handleCardPlayEffects } from './logic/index'; // Assuming index.ts exports these
@@ -89,6 +87,7 @@ export const DreamBuildersGame: Game<GameState> = {
       gameOver: false,
       winner: false,
       effectContext: {},
+      gameLog: [],
     };
   },
   
@@ -312,13 +311,17 @@ export const DreamBuildersGame: Game<GameState> = {
         if (choiceIndex < 0 || choiceIndex >= player.hand.length) return INVALID_MOVE;
         player.hand.splice(choiceIndex, 1);
         player.pendingChoice = undefined;
-        G.gameLog.push(`Player ${playerID} discarded a card.`);
+        if (G.gameLog) {
+          G.gameLog.push(`Player ${playerID} discarded a card.`);
+        }
       } else if (choice.type === 'destroy_product' && choice.effect === 'fast_pivot') {
         if (!choice.cards || choiceIndex < 0 || choiceIndex >= choice.cards.length) return INVALID_MOVE;
         const productToDestroyId = choice.cards[choiceIndex].id;
         resolveFastPivotEffect(G, playerID, productToDestroyId);
         player.pendingChoice = undefined;
-        G.gameLog.push(`Player ${playerID} used Fast Pivot to destroy ${choice.cards[choiceIndex].name}, draw 2 cards, and discount next Product.`);
+        if (G.gameLog) {
+          G.gameLog.push(`Player ${playerID} used Fast Pivot to destroy ${choice.cards[choiceIndex].name}, draw 2 cards, and discount next Product.`);
+        }
       }
       // Add more choice types here as needed
     },
