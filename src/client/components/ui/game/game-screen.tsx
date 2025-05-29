@@ -450,12 +450,7 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
     // Solo Hustler - Shoestring Budget effect (first card each turn costs 1 less)
     const shoestringBudget = tools.find(t => t.effect === 'shoestring_budget');
     if (shoestringBudget && effectContext && !effectContext.firstCardDiscountUsed) {
-      // Only apply if at least one card has been played since Shoestring Budget was put into play
-      // This prevents Shoestring Budget from discounting itself
-      const cardsPlayedThisTurn = effectContext.cardsPlayedThisTurn as number || 0;
-      if (cardsPlayedThisTurn > 0) {
-        discount += 1;
-      }
+      discount += 1;
     }
     
     // Can't reduce below 0 or be negative discount
