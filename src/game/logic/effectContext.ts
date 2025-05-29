@@ -46,6 +46,9 @@ export interface EffectContext {
   // Automation mechanics (Automation Architect)
   automatedSales?: boolean;
   toolEffectBonus?: number;
+  
+  // Card effect delays
+  midnightOilDiscardPending?: boolean;
 }
 
 // Initialize effect context for each player
@@ -78,6 +81,7 @@ export function initEffectContext(): EffectContext {
     effectsDoubled: false,
     automatedSales: false,
     toolEffectBonus: 0,
+    midnightOilDiscardPending: false,
   };
 }
 
@@ -120,5 +124,6 @@ export function clearTempEffects(G: GameState, playerID: string) {
     ctx.effectsDoubled = false;
     ctx.automatedSales = false;
     ctx.toolEffectBonus = 0;
+    ctx.midnightOilDiscardPending = false;
   }
 } 

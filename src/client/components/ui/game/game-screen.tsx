@@ -328,6 +328,17 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
   const itemsSoldThisTurn = effectContext?.itemsSoldThisTurn as number || 0
   const soldProductThisTurn = effectContext?.soldProductThisTurn as boolean || false
 
+  // Check for pending choice
+  const pendingChoice = (currentPlayer as Record<string, unknown>).pendingChoice as {
+    type: string;
+    effect: string;
+    cards?: Card[];
+    cardIndices?: number[];
+  } | undefined
+
+  // Check for delayed effects
+  const midnightOilPending = effectContext?.midnightOilDiscardPending as boolean || false
+
   // Hero power costs from game constants
   const HERO_ABILITY_COSTS: Record<string, number> = {
     marketer: 2,
@@ -443,6 +454,31 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
   }
 
   const canUseHeroPower = isMyTurn && !currentPlayer.heroAbilityUsed && Number(currentPlayer.capital || 0) >= heroCost
+
+  // Handle delayed midnight oil discard
+  useEffect(() => {
+    if (midnightOilPending && isMyTurn) {
+      // Show drawing feedback for 1.5 seconds, then trigger discard choice
+      const timer = setTimeout(() => {
+        // Use the proper move to trigger the discard choice
+        moves.triggerMidnightOilDiscard?.();
+        setGameLog(prev => [`Ready to discard...`, ...prev.slice(0, 4)]);
+      }, 1500);
+      
+      // Show drawing message immediately
+      setGameLog(prev => [`Drew 3 cards from Midnight Oil!`, ...prev.slice(0, 4)]);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [midnightOilPending, isMyTurn, moves]);
+
+  // Handle make choice
+  const handleMakeChoice = (choiceIndex: number) => {
+    if (!isMyTurn || !pendingChoice) return
+    hideTooltip() // Hide any tooltips when making a choice
+    moves.makeChoice?.(choiceIndex)
+    setGameLog(prev => [`Discarded card`, ...prev.slice(0, 4)])
+  }
 
   return (
     <div style={{
@@ -697,7 +733,29 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
 
           {/* Hand */}
           <div>
-            <h4 style={{ fontSize: FONT_SIZES.subheading }}>Your Hand ({hand.length})</h4>
+            <h4 style={{ fontSize: FONT_SIZES.subheading }}>
+              Your Hand ({hand.length})
+              {pendingChoice?.type === 'discard' && (
+                <span style={{ 
+                  color: '#ef4444', 
+                  marginLeft: '10px',
+                  fontSize: FONT_SIZES.body 
+                }}>
+                  - Click a card to discard it
+                </span>
+              )}
+              {midnightOilPending && (
+                <span style={{ 
+                  color: '#10b981', 
+                  marginLeft: '10px',
+                  fontSize: FONT_SIZES.body,
+                  fontWeight: 'bold',
+                  animation: 'pulse 1s infinite'
+                }}>
+                  ✨ Drawing 3 cards...
+                </span>
+              )}
+            </h4>
             <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
               {hand.length === 0 ? (
                 <div style={{ 
@@ -712,9 +770,21 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
               ) : (
                 hand.map((card, i) => {
                   const canPlay = isMyTurn && Number(card.cost || 0) <= Number(currentPlayer.capital || 0)
+                  const isDiscardMode = pendingChoice?.type === 'discard'
+                  
+                  // Handle discard mode vs normal play mode
+                  const handleCardClick = () => {
+                    if (isDiscardMode) {
+                      handleMakeChoice(i)
+                    } else if (canPlay) {
+                      handlePlayCard(i)
+                    }
+                  }
+                  
+                  const canInteract = isDiscardMode || canPlay
                   
                   // Wrap disabled cards in a div to handle tooltip events
-                  if (!canPlay) {
+                  if (!canInteract) {
                     return (
                       <div
                         key={i}
@@ -741,25 +811,43 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
                     )
                   }
                   
-                  // For enabled cards, use the original button with events
+                  // For interactive cards (playable or discardable)
                   return (
                     <button
                       key={i}
-                      onClick={() => handlePlayCard(i)}
+                      onClick={handleCardClick}
                       onMouseEnter={(e) => showTooltip(card, e)}
                       onMouseLeave={hideTooltip}
                       onMouseMove={(e) => showTooltip(card, e)}
                       style={{
                         ...CARD_STYLES,
-                        background: '#1d4ed8',
+                        background: isDiscardMode ? '#dc2626' : '#1d4ed8',
                         color: 'white',
-                        border: 'none',
-                        cursor: 'pointer'
+                        border: isDiscardMode ? '2px solid #ef4444' : 'none',
+                        cursor: 'pointer',
+                        position: 'relative'
                       }}
                     >
                       <div style={{ fontWeight: 'bold', fontSize: FONT_SIZES.medium }}>{card.name || 'Card'}</div>
                       <div style={{ fontSize: FONT_SIZES.body }}>Cost: {card.cost || 0}</div>
                       <div style={{ fontSize: FONT_SIZES.small }}>{card.type || 'Unknown'}</div>
+                      
+                      {isDiscardMode && (
+                        <div style={{
+                          position: 'absolute',
+                          bottom: '5px',
+                          left: '50%',
+                          transform: 'translateX(-50%)',
+                          background: '#fbbf24',
+                          color: '#000',
+                          padding: '2px 6px',
+                          borderRadius: '3px',
+                          fontSize: '12px',
+                          fontWeight: 'bold'
+                        }}>
+                          DISCARD
+                        </div>
+                      )}
                     </button>
                   )
                 })

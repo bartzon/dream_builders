@@ -546,6 +546,20 @@ export const cardEffects: Record<string, (G: GameState, playerID: string, card: 
     }
   },
 
+  'midnight_oil': (G, playerID) => {
+    const player = G.players[playerID];
+    
+    // Draw 3 cards
+    drawCard(player);
+    drawCard(player);
+    drawCard(player);
+    
+    // Set a flag to indicate we need to discard after drawing
+    if (!G.effectContext) G.effectContext = {};
+    if (!G.effectContext[playerID]) G.effectContext[playerID] = initEffectContext();
+    G.effectContext[playerID].midnightOilDiscardPending = true;
+  },
+
   // === BRAND BUILDER EFFECTS ===
   'brand_story': (G, playerID) => {
     if (!G.effectContext) G.effectContext = {};

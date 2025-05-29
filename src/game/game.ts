@@ -237,6 +237,53 @@ export const DreamBuildersGame: Game<GameState> = {
         heroAbilityEffects[effectName](G, playerID);
       }
     },
+
+    makeChoice: ({ G, ctx, playerID }, choiceIndex: number) => {
+      if (playerID !== ctx.currentPlayer) return INVALID_MOVE;
+      
+      const player = G.players[playerID];
+      
+      // Check if there's a pending choice
+      if (!player.pendingChoice) return INVALID_MOVE;
+      
+      const choice = player.pendingChoice;
+      
+      // Handle different choice types
+      if (choice.type === 'discard') {
+        // Validate choice index
+        if (choiceIndex < 0 || choiceIndex >= player.hand.length) return INVALID_MOVE;
+        
+        // Remove the chosen card from hand
+        player.hand.splice(choiceIndex, 1);
+        
+        // Clear the pending choice
+        player.pendingChoice = undefined;
+      }
+      
+      // Add more choice types here as needed
+    },
+
+    triggerMidnightOilDiscard: ({ G, ctx, playerID }) => {
+      if (playerID !== ctx.currentPlayer) return INVALID_MOVE;
+      
+      const player = G.players[playerID];
+      
+      // Check if midnight oil discard is pending
+      if (!G.effectContext?.[playerID]?.midnightOilDiscardPending) return INVALID_MOVE;
+      
+      // Create the discard choice
+      if (player.hand.length > 0) {
+        player.pendingChoice = {
+          type: 'discard',
+          effect: 'midnight_oil',
+        };
+        
+        // Clear the pending flag
+        if (G.effectContext?.[playerID]) {
+          G.effectContext[playerID].midnightOilDiscardPending = false;
+        }
+      }
+    },
   },
   
   endIf: ({ G }) => {
