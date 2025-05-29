@@ -7,6 +7,7 @@ export const sharedProductPool: Card[] = [
     cost: 3,
     type: 'Product',
     text: 'Every pup deserves a masterpiece.',
+    flavor: 'Your dog called. They want to hang in the Louvre.',
     effect: 'custom_dog_portrait_sale',
     revenuePerSale: 3000,
     inventory: 2
@@ -17,6 +18,7 @@ export const sharedProductPool: Card[] = [
     cost: 2,
     type: 'Product',
     text: 'Hot cocoa not included — but recommended.',
+    flavor: 'For mugs that spark joy (and caffeine).',
     effect: 'holiday_mug_sale',
     revenuePerSale: 2000,
     inventory: 4
@@ -27,6 +29,7 @@ export const sharedProductPool: Card[] = [
     cost: 1,
     type: 'Product',
     text: 'Declutter your day, digitally.',
+    flavor: 'Because your to-do list deserves better than sticky notes.',
     effect: 'minimalist_planner_sale',
     revenuePerSale: 1000,
     inventory: 5
@@ -37,6 +40,7 @@ export const sharedProductPool: Card[] = [
     cost: 2,
     type: 'Product',
     text: 'Smells like success.',
+    flavor: 'Light it up and let the vibes sell themselves.',
     effect: 'soy_candle_sale',
     revenuePerSale: 3000,
     inventory: 3
@@ -47,6 +51,7 @@ export const sharedProductPool: Card[] = [
     cost: 4,
     type: 'Product',
     text: 'Ugly? Never. Iconic? Always.',
+    flavor: 'One sleigh ride away from going viral.',
     effect: 'sweater_bundle_sale',
     revenuePerSale: 6000,
     inventory: 2
@@ -57,6 +62,7 @@ export const sharedProductPool: Card[] = [
     cost: 3,
     type: 'Product',
     text: 'Namaste and hustle.',
+    flavor: 'Downward dog meets upward sales.',
     effect: 'yoga_course_sale',
     revenuePerSale: 4000,
     inventory: 3
@@ -67,6 +73,7 @@ export const sharedProductPool: Card[] = [
     cost: 3,
     type: 'Product',
     text: 'Because your brand deserves a glow-up.',
+    flavor: 'Where branding meets bandwidth.',
     effect: 'ai_logo_sale',
     revenuePerSale: 4000,
     inventory: 3
@@ -77,6 +84,7 @@ export const sharedProductPool: Card[] = [
     cost: 2,
     type: 'Product',
     text: 'Say my name, say my name.',
+    flavor: 'If it isn\'t on a chain, does it even count?',
     effect: 'name_necklace_sale',
     revenuePerSale: 3000,
     inventory: 4
@@ -87,6 +95,7 @@ export const sharedProductPool: Card[] = [
     cost: 3,
     type: 'Product',
     text: 'For the goodest customers.',
+    flavor: 'Unbox tail-wagging happiness.',
     effect: 'pet_box_sale',
     revenuePerSale: 5000,
     inventory: 2
@@ -97,6 +106,7 @@ export const sharedProductPool: Card[] = [
     cost: 1,
     type: 'Product',
     text: 'Cha-ching season is open.',
+    flavor: 'Swipe fast or cry later.',
     effect: 'black_friday_sale',
     revenuePerSale: 1000,
     inventory: 5
@@ -107,6 +117,7 @@ export const sharedProductPool: Card[] = [
     cost: 2,
     type: 'Product',
     text: 'Recharge your customers and yourself.',
+    flavor: 'Bubble baths are serious business.',
     effect: 'self_care_sale',
     revenuePerSale: 3000,
     inventory: 3
@@ -117,6 +128,7 @@ export const sharedProductPool: Card[] = [
     cost: 1,
     type: 'Product',
     text: 'Small, sticky joy.',
+    flavor: 'Peel. Stick. Profit.',
     effect: 'sticker_pack_sale',
     revenuePerSale: 1000,
     inventory: 5
@@ -127,6 +139,7 @@ export const sharedProductPool: Card[] = [
     cost: 2,
     type: 'Product',
     text: 'Wear your hustle.',
+    flavor: 'Limited edition, unlimited ambition.',
     effect: 'tshirt_drop_sale',
     revenuePerSale: 2000,
     inventory: 4
@@ -137,6 +150,7 @@ export const sharedProductPool: Card[] = [
     cost: 3,
     type: 'Product',
     text: 'Old-school charm, right on time.',
+    flavor: 'Time is money, but this one adds style.',
     effect: 'desk_clock_sale',
     revenuePerSale: 4000,
     inventory: 2
@@ -147,6 +161,7 @@ export const sharedProductPool: Card[] = [
     cost: 2,
     type: 'Product',
     text: 'Taste the grind.',
+    flavor: 'Every sip brews loyalty.',
     effect: 'coffee_sampler_sale',
     revenuePerSale: 3000,
     inventory: 3
@@ -157,6 +172,7 @@ export const sharedProductPool: Card[] = [
     cost: 1,
     type: 'Product',
     text: 'Say \'I do\' to better design.',
+    flavor: 'You had them at RSVP.',
     effect: 'wedding_invite_sale',
     revenuePerSale: 2000,
     inventory: 4
@@ -167,6 +183,7 @@ export const sharedProductPool: Card[] = [
     cost: 2,
     type: 'Product',
     text: 'Tiny art, major charm.',
+    flavor: 'Collect them all — your jacket demands it.',
     effect: 'enamel_pin_sale',
     revenuePerSale: 3000,
     inventory: 4
@@ -177,6 +194,7 @@ export const sharedProductPool: Card[] = [
     cost: 2,
     type: 'Product',
     text: 'Save the planet, one checkout at a time.',
+    flavor: 'Trendy, sturdy, and guilt-free.',
     effect: 'eco_tote_sale',
     revenuePerSale: 3000,
     inventory: 3
@@ -187,6 +205,7 @@ export const sharedProductPool: Card[] = [
     cost: 1,
     type: 'Product',
     text: 'You\'re the boss now.',
+    flavor: 'Your roadmap to inbox freedom.',
     effect: 'freelancing_ebook_sale',
     revenuePerSale: 1000,
     inventory: 5
@@ -197,6 +216,7 @@ export const sharedProductPool: Card[] = [
     cost: 2,
     type: 'Product',
     text: 'Style that sells itself.',
+    flavor: 'Protect your device and your vibe.',
     effect: 'phone_case_sale',
     revenuePerSale: 3000,
     inventory: 3
@@ -207,6 +227,7 @@ export const sharedProductPool: Card[] = [
     cost: 1,
     type: 'Product',
     text: 'Pixels never looked so pretty.',
+    flavor: 'One download away from dazzling.',
     effect: 'art_print_sale',
     revenuePerSale: 1000,
     inventory: 4
@@ -217,6 +238,7 @@ export const sharedProductPool: Card[] = [
     cost: 1,
     type: 'Product',
     text: 'Organized and adorable.',
+    flavor: 'Productivity with personality.',
     effect: 'planner_stickers_sale',
     revenuePerSale: 1000,
     inventory: 5
@@ -227,6 +249,7 @@ export const sharedProductPool: Card[] = [
     cost: 3,
     type: 'Product',
     text: 'Bold, warm, and way too relatable.',
+    flavor: 'Every meme, a masterpiece.',
     effect: 'pop_hoodie_sale',
     revenuePerSale: 5000,
     inventory: 2
@@ -237,6 +260,7 @@ export const sharedProductPool: Card[] = [
     cost: 2,
     type: 'Product',
     text: 'Hydration hustle.',
+    flavor: 'Stay cool while you save the world.',
     effect: 'water_bottle_sale',
     revenuePerSale: 3000,
     inventory: 4
@@ -247,6 +271,7 @@ export const sharedProductPool: Card[] = [
     cost: 2,
     type: 'Product',
     text: 'Brush up on your beauty game.',
+    flavor: 'Blend, buff, and bank profits.',
     effect: 'makeup_brush_sale',
     revenuePerSale: 3000,
     inventory: 3
@@ -257,6 +282,7 @@ export const sharedProductPool: Card[] = [
     cost: 2,
     type: 'Product',
     text: 'A surprise in every sale.',
+    flavor: 'Next month\'s excitement, today.',
     effect: 'subscription_trial_sale',
     revenuePerSale: 3000,
     inventory: 3
@@ -267,6 +293,7 @@ export const sharedProductPool: Card[] = [
     cost: 1,
     type: 'Product',
     text: 'Track it, stack it.',
+    flavor: 'Every penny has a plan.',
     effect: 'budget_tracker_sale',
     revenuePerSale: 2000,
     inventory: 4
@@ -277,6 +304,7 @@ export const sharedProductPool: Card[] = [
     cost: 2,
     type: 'Product',
     text: 'RAWR means \'thank you for your order!\'',
+    flavor: 'Jurassic-sized cuteness.',
     effect: 'dinosaur_tee_sale',
     revenuePerSale: 3000,
     inventory: 4
@@ -287,6 +315,7 @@ export const sharedProductPool: Card[] = [
     cost: 3,
     type: 'Product',
     text: 'Fizz the biz.',
+    flavor: 'Turns bathtubs into profit pods.',
     effect: 'bath_bomb_sale',
     revenuePerSale: 5000,
     inventory: 2
@@ -297,8 +326,9 @@ export const sharedProductPool: Card[] = [
     cost: 1,
     type: 'Product',
     text: 'Snail mail never felt so good.',
+    flavor: 'A personal touch with professional margins.',
     effect: 'greeting_cards_sale',
     revenuePerSale: 2000,
     inventory: 4
   }
-]; 
+];

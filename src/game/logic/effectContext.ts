@@ -9,6 +9,7 @@ export interface EffectContext {
   nextProductBonus?: number;
   doubleRevenueThisTurn?: boolean;
   nextActionRevenue?: number;
+  nextProductDiscount?: number;
   
   // Cost modifiers
   nextCardDiscount?: number;
@@ -50,6 +51,7 @@ export interface EffectContext {
   
   // Card effect delays
   midnightOilDiscardPending?: boolean;
+  fastPivotProductDestroyPending?: boolean;
   
   // Action tracking (for Quick Learner)
   lastActionEffect?: string;
@@ -67,6 +69,7 @@ export function initEffectContext(): EffectContext {
     nextProductBonus: 0,
     doubleRevenueThisTurn: false,
     nextActionRevenue: 0,
+    nextProductDiscount: 0,
     nextCardDiscount: 0,
     extraCardPlays: 0,
     extraActionPlays: 0,
@@ -90,6 +93,7 @@ export function initEffectContext(): EffectContext {
     automatedSales: false,
     toolEffectBonus: 0,
     midnightOilDiscardPending: false,
+    fastPivotProductDestroyPending: false,
     lastActionEffect: undefined,
     lastActionCard: undefined,
     firstCardDiscountUsed: false,
@@ -117,6 +121,7 @@ export function clearTempEffects(G: GameState, playerID: string) {
     ctx.nextProductBonus = 0;
     ctx.doubleRevenueThisTurn = false;
     ctx.nextActionRevenue = 0;
+    ctx.nextProductDiscount = 0;
     ctx.extraCardPlays = 0;
     ctx.extraActionPlays = 0;
     ctx.doubleCapitalGain = false;
@@ -136,6 +141,7 @@ export function clearTempEffects(G: GameState, playerID: string) {
     ctx.automatedSales = false;
     ctx.toolEffectBonus = 0;
     ctx.midnightOilDiscardPending = false;
+    ctx.fastPivotProductDestroyPending = false;
     ctx.lastActionEffect = undefined;
     ctx.lastActionCard = undefined;
     ctx.firstCardDiscountUsed = false;

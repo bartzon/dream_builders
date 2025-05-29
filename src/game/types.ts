@@ -1,4 +1,4 @@
-export type CardType = 'Product' | 'Tool' | 'Action' | 'Employee';
+export type CardType = 'Product' | 'Tool' | 'Action' | 'Employee' | 'Effect';
 
 export type Keyword = 'Recurring' | 'Fulfill' | 'Overhead' | 'Automate' | 'Synergy';
 
@@ -10,6 +10,7 @@ export interface Card {
   keywords?: string[];
   text: string;
   effect?: string;
+  flavor?: string;
   resilience?: number;
   synergyCondition?: string;
   inventory?: number;

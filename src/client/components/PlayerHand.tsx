@@ -101,6 +101,13 @@ export function PlayerHand({ cards, onPlayCard, playerCapital, isMyTurn }: Playe
                   {card.text}
                 </div>
 
+                {/* Flavor Text */}
+                {card.flavor && (
+                  <div className="text-xs text-slate-400 italic mb-2 pt-2 border-t border-slate-600">
+                    "{card.flavor}"
+                  </div>
+                )}
+
                 {/* Keywords */}
                 {card.keywords && card.keywords.length > 0 && (
                   <div className="flex flex-wrap gap-1 mb-2">

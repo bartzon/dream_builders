@@ -67,6 +67,9 @@ export function BoardLane({ title, cards, color, onSellProduct, isMyTurn }: Boar
                 <div className="mb-1">Keywords: {card.keywords.join(', ')}</div>
               )}
               <div className="text-xs opacity-90">{card.text}</div>
+              {card.flavor && (
+                <div className="text-xs italic opacity-70 mt-1">"{card.flavor}"</div>
+              )}
               {card.type === 'Product' && (
                 <div className="mt-1">
                   {card.inventory !== undefined && (

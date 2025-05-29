@@ -3,24 +3,23 @@ import type { GameState, PlayerState } from './state';
 import { allHeroes, type Hero } from './data/heroes';
 import { sharedProductPool } from './data/shared-products';
 import type { Card } from './types';
-import { 
-  cardEffects,
-  heroAbilityEffects,
+import { INVALID_MOVE } from 'boardgame.io/core';
+import { GAME_CONFIG } from './constants';
+
+// Logic Imports from their respective files
+import { cardEffects, resolveFastPivotEffect, drawCards, applyTemporaryBonus } from './logic/cardEffects';
+import { heroAbilityEffects } from './logic/heroAbilities';
+import {
   processPassiveEffects,
   processOverheadCosts,
   processAutomaticSales,
   processRecurringRevenue,
   getCardDiscount,
   getCardCostInfo,
-  handleCardPlayEffects,
-  initEffectContext,
-  clearTempEffects,
-  drawCard,
-  initializePlayer,
-  checkGameEnd
-} from './logic/index';
-import { INVALID_MOVE } from 'boardgame.io/core';
-import { GAME_CONFIG } from './constants';
+  // handleCardPlayEffects, // Assuming this might be part of a general game flow or specific effect logic
+} from './logic/turnEffects';
+import { initEffectContext, clearTempEffects } from './logic/effectContext';
+import { drawCard, initializePlayer, checkGameEnd, handleCardPlayEffects } from './logic/index'; // Assuming index.ts exports these
 
 // Helper function to shuffle an array
 function shuffleArray<T>(array: T[]): T[] {
@@ -254,31 +253,6 @@ export const DreamBuildersGame: Game<GameState> = {
       }
     },
 
-    makeChoice: ({ G, ctx, playerID }, choiceIndex: number) => {
-      if (playerID !== ctx.currentPlayer) return INVALID_MOVE;
-      
-      const player = G.players[playerID];
-      
-      // Check if there's a pending choice
-      if (!player.pendingChoice) return INVALID_MOVE;
-      
-      const choice = player.pendingChoice;
-      
-      // Handle different choice types
-      if (choice.type === 'discard') {
-        // Validate choice index
-        if (choiceIndex < 0 || choiceIndex >= player.hand.length) return INVALID_MOVE;
-        
-        // Remove the chosen card from hand
-        player.hand.splice(choiceIndex, 1);
-        
-        // Clear the pending choice
-        player.pendingChoice = undefined;
-      }
-      
-      // Add more choice types here as needed
-    },
-
     triggerMidnightOilDiscard: ({ G, ctx, playerID }) => {
       if (playerID !== ctx.currentPlayer) return INVALID_MOVE;
       
@@ -299,6 +273,54 @@ export const DreamBuildersGame: Game<GameState> = {
           G.effectContext[playerID].midnightOilDiscardPending = false;
         }
       }
+    },
+
+    triggerFastPivotDestroyChoice: ({ G, ctx, playerID }) => {
+      if (playerID !== ctx.currentPlayer) return INVALID_MOVE;
+      const player = G.players[playerID];
+
+      if (!G.effectContext?.[playerID]?.fastPivotProductDestroyPending) return INVALID_MOVE;
+
+      const productsOnBoard = player.board.Products.filter(p => p.isActive !== false);
+
+      if (productsOnBoard.length > 0) {
+        player.pendingChoice = {
+          type: 'destroy_product',
+          effect: 'fast_pivot',
+          cards: productsOnBoard.map(p => ({ ...p })), 
+        };
+        if (G.effectContext?.[playerID]) {
+          G.effectContext[playerID].fastPivotProductDestroyPending = false;
+        }
+      } else {
+        if (G.effectContext?.[playerID]) {
+          G.effectContext[playerID].fastPivotProductDestroyPending = false;
+        }
+      }
+    },
+
+    makeChoice: ({ G, ctx, playerID }, choiceIndex: number) => {
+      if (playerID !== ctx.currentPlayer) return INVALID_MOVE;
+      
+      const player = G.players[playerID];
+      
+      if (!player.pendingChoice) return INVALID_MOVE;
+      
+      const choice = player.pendingChoice;
+      
+      if (choice.type === 'discard') {
+        if (choiceIndex < 0 || choiceIndex >= player.hand.length) return INVALID_MOVE;
+        player.hand.splice(choiceIndex, 1);
+        player.pendingChoice = undefined;
+        G.gameLog.push(`Player ${playerID} discarded a card.`);
+      } else if (choice.type === 'destroy_product' && choice.effect === 'fast_pivot') {
+        if (!choice.cards || choiceIndex < 0 || choiceIndex >= choice.cards.length) return INVALID_MOVE;
+        const productToDestroyId = choice.cards[choiceIndex].id;
+        resolveFastPivotEffect(G, playerID, productToDestroyId);
+        player.pendingChoice = undefined;
+        G.gameLog.push(`Player ${playerID} used Fast Pivot to destroy ${choice.cards[choiceIndex].name}, draw 2 cards, and discount next Product.`);
+      }
+      // Add more choice types here as needed
     },
   },
   

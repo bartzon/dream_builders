@@ -53,6 +53,7 @@ interface Card {
   isActive?: boolean
   overheadCost?: number
   appeal?: number
+  flavor?: string
 }
 
 interface TooltipProps {
@@ -166,18 +167,6 @@ function CardTooltip({ card, visible, x, y }: TooltipProps) {
         </div>
       )}
 
-      {/* Effect */}
-      {card.effect && (
-        <div style={{ 
-          marginBottom: '8px',
-          lineHeight: '1.4',
-          color: '#fbbf24',
-          fontStyle: 'italic'
-        }}>
-          <strong>Effect:</strong> {card.effect}
-        </div>
-      )}
-
       {/* Stats */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px', fontSize: FONT_SIZES.tooltipMeta }}>
         {card.resilience !== undefined && (
@@ -223,6 +212,21 @@ function CardTooltip({ card, visible, x, y }: TooltipProps) {
           color: '#c4b5fd'
         }}>
           <strong>Synergy:</strong> {card.synergyCondition}
+        </div>
+      )}
+
+      {/* Flavor Text - Always at the bottom */}
+      {card.flavor && (
+        <div style={{ 
+          marginTop: '12px',
+          paddingTop: '8px',
+          borderTop: '1px solid #374151',
+          lineHeight: '1.4',
+          color: '#94a3b8',
+          fontStyle: 'italic',
+          fontSize: FONT_SIZES.medium
+        }}>
+          "{card.flavor}"
         </div>
       )}
     </div>

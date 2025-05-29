@@ -2,7 +2,7 @@ import type { Card } from "./types";
 import type { EffectContext } from "./logic/effectContext";
 
 export interface PendingChoice {
-  type: 'discard' | 'choose_card' | 'choose_option';
+  type: 'discard' | 'choose_card' | 'choose_option' | 'destroy_product';
   cards?: Card[];
   options?: string[];
   cardIndices?: number[];
@@ -32,4 +32,5 @@ export interface GameState {
   gameOver: boolean;
   winner: boolean;
   effectContext?: Record<string, EffectContext>;
+  gameLog?: string[];
 } 

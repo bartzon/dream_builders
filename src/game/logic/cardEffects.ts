@@ -10,17 +10,17 @@ function ensureEffectContext(G: GameState, playerID: string) {
   return G.effectContext[playerID];
 }
 
-function gainCapital(G: GameState, playerID: string, amount: number) {
+export function gainCapital(G: GameState, playerID: string, amount: number) {
   const player = G.players[playerID];
   player.capital = Math.min(10, player.capital + amount);
 }
 
-function gainRevenue(G: GameState, playerID: string, amount: number) {
+export function gainRevenue(G: GameState, playerID: string, amount: number) {
   const player = G.players[playerID];
   player.revenue += amount;
 }
 
-function drawCards(G: GameState, playerID: string, count: number) {
+export function drawCards(G: GameState, playerID: string, count: number) {
   const player = G.players[playerID];
   for (let i = 0; i < count; i++) {
     drawCard(player);
@@ -62,7 +62,7 @@ function sellAllInventoryFromProduct(G: GameState, playerID: string): boolean {
   return false;
 }
 
-function applyTemporaryBonus(G: GameState, playerID: string, bonusType: string, amount: number) {
+export function applyTemporaryBonus(G: GameState, playerID: string, bonusType: string, amount: number) {
   const ctx = ensureEffectContext(G, playerID);
   switch (bonusType) {
     case 'nextProductBonus':
@@ -70,6 +70,9 @@ function applyTemporaryBonus(G: GameState, playerID: string, bonusType: string, 
       break;
     case 'nextCardDiscount':
       ctx.nextCardDiscount = amount;
+      break;
+    case 'nextProductDiscount':
+      ctx.nextProductDiscount = amount;
       break;
     case 'extraActionPlays':
       ctx.extraActionPlays = (ctx.extraActionPlays || 0) + amount;
@@ -468,8 +471,13 @@ export const cardEffects: Record<string, (G: GameState, playerID: string, card: 
   'diy_assembly': passiveEffect,
 
   'fast_pivot': (G, playerID) => {
-    drawCards(G, playerID, 1);
-    applyTemporaryBonus(G, playerID, 'extraCardPlays', 1);
+    const player = G.players[playerID];
+    const productsOnBoard = player.board.Products;
+
+    if (productsOnBoard && productsOnBoard.length > 0) {
+      const ctx = ensureEffectContext(G, playerID);
+      ctx.fastPivotProductDestroyPending = true;
+    }
   },
 
   'freelancer_network': (G, playerID) => {
@@ -704,4 +712,19 @@ export const cardEffects: Record<string, (G: GameState, playerID: string, card: 
   },
 
   shoestring_budget: passiveEffect, // Handled in getCardDiscount
-}; 
+};
+
+export function resolveFastPivotEffect(G: GameState, playerID: string, productToDestroyId: string) {
+  const player = G.players[playerID];
+  const productIndexInBoard = player.board.Products.findIndex(p => p.id === productToDestroyId);
+
+  if (productIndexInBoard !== -1) {
+    player.board.Products.splice(productIndexInBoard, 1); // Destroy product
+    drawCards(G, playerID, 2); // Draw 2 cards
+    applyTemporaryBonus(G, playerID, 'nextProductDiscount', 2); // Next Product costs 2 less
+  } else {
+    // Handle case where product might have been removed by another effect in the interim
+    // Or log an error/warning
+    console.warn(`Fast Pivot: Product with ID ${productToDestroyId} not found on board for player ${playerID}.`);
+  }
+} 
