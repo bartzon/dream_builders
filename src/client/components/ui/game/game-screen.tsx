@@ -727,20 +727,49 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
               ) : (
                 hand.map((card, i) => {
                   const canPlay = isMyTurn && Number(card.cost || 0) <= Number(currentPlayer.capital || 0)
+                  
+                  // Wrap disabled cards in a div to handle tooltip events
+                  if (!canPlay) {
+                    return (
+                      <div
+                        key={i}
+                        onMouseEnter={(e) => showTooltip(card, e)}
+                        onMouseLeave={hideTooltip}
+                        onMouseMove={(e) => showTooltip(card, e)}
+                        style={{ display: 'inline-block' }}
+                      >
+                        <button
+                          disabled={true}
+                          style={{
+                            ...CARD_STYLES,
+                            background: '#666',
+                            color: 'white',
+                            border: 'none',
+                            cursor: 'not-allowed'
+                          }}
+                        >
+                          <div style={{ fontWeight: 'bold', fontSize: FONT_SIZES.medium }}>{card.name || 'Card'}</div>
+                          <div style={{ fontSize: FONT_SIZES.body }}>Cost: {card.cost || 0}</div>
+                          <div style={{ fontSize: FONT_SIZES.small }}>{card.type || 'Unknown'}</div>
+                        </button>
+                      </div>
+                    )
+                  }
+                  
+                  // For enabled cards, use the original button with events
                   return (
                     <button
                       key={i}
-                      onClick={() => canPlay && handlePlayCard(i)}
-                      disabled={!canPlay}
+                      onClick={() => handlePlayCard(i)}
                       onMouseEnter={(e) => showTooltip(card, e)}
                       onMouseLeave={hideTooltip}
                       onMouseMove={(e) => showTooltip(card, e)}
                       style={{
                         ...CARD_STYLES,
-                        background: canPlay ? '#1d4ed8' : '#666',
+                        background: '#1d4ed8',
                         color: 'white',
                         border: 'none',
-                        cursor: canPlay ? 'pointer' : 'not-allowed'
+                        cursor: 'pointer'
                       }}
                     >
                       <div style={{ fontWeight: 'bold', fontSize: FONT_SIZES.medium }}>{card.name || 'Card'}</div>
