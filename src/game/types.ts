@@ -41,7 +41,6 @@ export interface GameState {
   players: {
     [playerID: string]: PlayerState;
   };
-  teamRevenue: number;
   turnOrder: string[];
   currentPlayerIndex: number;
 } 

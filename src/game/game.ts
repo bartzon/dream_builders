@@ -86,9 +86,6 @@ export const DreamBuildersGame: Game<GameState> = {
       players,
       currentPlayer: '0',
       turn: 1,
-      teamRevenue: 0,
-      teamExpenses: 0,
-      marketPressure: 0,
       gameOver: false,
       winner: false,
       effectContext: {},
@@ -244,10 +241,10 @@ export const DreamBuildersGame: Game<GameState> = {
   
   endIf: ({ G }) => {
     if (G.gameOver) {
-      return { winner: G.winner ? 'team' : 'defeat' };
+      return { winner: G.winner ? 'victory' : 'defeat' };
     }
   },
   
   minPlayers: 1,
-  maxPlayers: 4,
+  maxPlayers: 1,
 }; 

@@ -29,11 +29,14 @@ export function spendCapital(player: PlayerState, amount: number): boolean {
  * Check if the game has ended
  */
 export function checkGameEnd(G: GameState): void {
-  // Win condition: Team revenue >= goal
-  if (G.teamRevenue >= GAME_CONFIG.REVENUE_GOAL) {
-    G.gameOver = true;
-    G.winner = true;
-    return;
+  // Win condition: Player revenue >= goal
+  for (const playerID in G.players) {
+    const player = G.players[playerID];
+    if (player.revenue >= GAME_CONFIG.REVENUE_GOAL) {
+      G.gameOver = true;
+      G.winner = true;
+      return;
+    }
   }
   
   // Loss condition: All players have exhausted decks and can't act

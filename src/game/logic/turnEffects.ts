@@ -81,7 +81,6 @@ export function processPassiveEffects(G: GameState, playerID: string) {
   const serverFarm = player.board.Products.find(p => p.effect === 'server_farm');
   if (serverFarm) {
     player.revenue += 10000;
-    G.teamRevenue += 10000;
   }
   
   // Brand Builder Effects
@@ -92,7 +91,6 @@ export function processPassiveEffects(G: GameState, playerID: string) {
       if (product.appeal && product.appeal > 0) {
         const bonus = product.appeal * 5000;
         player.revenue += bonus;
-        G.teamRevenue += bonus;
       }
     });
   }
@@ -109,7 +107,6 @@ export function processPassiveEffects(G: GameState, playerID: string) {
       drawCard(player);
     } else {
       player.revenue += 20000;
-      G.teamRevenue += 20000;
     }
   }
   
@@ -124,7 +121,6 @@ export function processPassiveEffects(G: GameState, playerID: string) {
       drawCard(player);
     } else {
       player.revenue += 25000;
-      G.teamRevenue += 25000;
     }
   }
   
@@ -136,7 +132,6 @@ export function processPassiveEffects(G: GameState, playerID: string) {
     // For now, just check if they have many cards in hand (active player)
     if (player.hand.length >= 5) {
       player.revenue += 50000;
-      G.teamRevenue += 50000;
     }
   }
 }
@@ -318,7 +313,6 @@ export function handleCardPlayEffects(G: GameState, playerID: string, card: Card
       const visionaryConf = player.board.Tools.find(t => t.effect === 'visionary_conference');
       if (visionaryConf) {
         player.revenue += 25000;
-        G.teamRevenue += 25000;
       }
       
       // Innovation Lab effect - draw when playing actions
@@ -330,7 +324,6 @@ export function handleCardPlayEffects(G: GameState, playerID: string, card: Card
       // Thought Leadership effect - add revenue to action
       if (ctx.nextActionRevenue && ctx.nextActionRevenue > 0) {
         player.revenue += ctx.nextActionRevenue;
-        G.teamRevenue += ctx.nextActionRevenue;
         ctx.nextActionRevenue = 0;
       }
     }

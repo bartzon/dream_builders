@@ -121,11 +121,9 @@ export const heroAbilityEffects: Record<string, (G: GameState, playerID: string)
     // Draw a card
     drawCard(player);
     
-    // All Products generate +$10,000 this turn
-    const totalProducts = Object.values(G.players).reduce((sum, p) => 
-      sum + p.board.Products.length, 0
-    );
-    G.teamRevenue += 10000 * totalProducts;
+    // Boost all products by $10k
+    const totalProducts = player.board.Products.length;
+    player.revenue += 10000 * totalProducts;
     
     player.heroAbilityUsed = true;
   },
@@ -162,7 +160,7 @@ export const heroAbilityEffects: Record<string, (G: GameState, playerID: string)
                       player.board.Employees.length;
     
     // All cards generate +$20,000 this turn
-    G.teamRevenue += 20000 * totalCards;
+    player.revenue += 20000 * totalCards;
     
     player.heroAbilityUsed = true;
   },
@@ -184,7 +182,7 @@ export const heroAbilityEffects: Record<string, (G: GameState, playerID: string)
     }
     
     // Gain $50,000
-    G.teamRevenue += 50000;
+    player.revenue += 50000;
     
     player.heroAbilityUsed = true;
   },

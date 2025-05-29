@@ -311,7 +311,7 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
     y: number
   }>({ visible: false, x: 0, y: 0 })
 
-  const [lastTeamRevenue, setLastTeamRevenue] = useState(0)
+  const [lastPlayerRevenue, setLastPlayerRevenue] = useState(0)
 
   // Extract basic game state
   const gameState = G as Record<string, unknown>
@@ -368,13 +368,12 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
 
   // Game statistics
   const REVENUE_GOAL = 1_000_000
-  const teamRevenue = Number(gameState.teamRevenue || 0)
   const playerRevenue = Number(currentPlayer.revenue || 0)
-  const goalProgress = Math.min((teamRevenue / REVENUE_GOAL) * 100, 100)
+  const goalProgress = Math.min((playerRevenue / REVENUE_GOAL) * 100, 100)
 
-  // Automatic cha-ching sound when team revenue increases (products sold automatically)
+  // Automatic cha-ching sound when player revenue increases (products sold automatically)
   useEffect(() => {
-    if (teamRevenue > lastTeamRevenue && lastTeamRevenue > 0) {
+    if (playerRevenue > lastPlayerRevenue && lastPlayerRevenue > 0) {
       // Revenue increased, play cha-ching sound
       try {
         const audio = new Audio('/sounds/cha_ching_sound.mp3')
@@ -386,8 +385,8 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
         // Ignore audio errors
       }
     }
-    setLastTeamRevenue(teamRevenue)
-  }, [teamRevenue, lastTeamRevenue])
+    setLastPlayerRevenue(playerRevenue)
+  }, [playerRevenue, lastPlayerRevenue])
 
   // Handle tooltip
   const showTooltip = (card: Card, event: React.MouseEvent) => {
@@ -498,21 +497,9 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
               borderRadius: '6px',
               border: '1px solid #10b981'
             }}>
-              <div style={{ fontSize: FONT_SIZES.body, color: '#6ee7b7' }}>Your Revenue</div>
+              <div style={{ fontSize: FONT_SIZES.body, color: '#6ee7b7' }}>Revenue</div>
               <div style={{ fontSize: FONT_SIZES.heading, fontWeight: 'bold', color: '#10b981' }}>
                 ${playerRevenue.toLocaleString()}
-              </div>
-            </div>
-            
-            <div style={{ 
-              background: 'rgba(59, 130, 246, 0.2)', 
-              padding: '8px 12px', 
-              borderRadius: '6px',
-              border: '1px solid #3b82f6'
-            }}>
-              <div style={{ fontSize: FONT_SIZES.body, color: '#93c5fd' }}>Team Revenue</div>
-              <div style={{ fontSize: FONT_SIZES.heading, fontWeight: 'bold', color: '#3b82f6' }}>
-                ${teamRevenue.toLocaleString()}
               </div>
             </div>
             

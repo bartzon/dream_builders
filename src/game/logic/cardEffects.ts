@@ -67,7 +67,6 @@ export function sellProduct(G: GameState, playerID: string, product: Card, quant
   
   // Update revenue
   player.revenue += totalRevenue;
-  G.teamRevenue += totalRevenue;
   
   // Trigger the product's own sale effect
   if (product.effect && cardEffects[product.effect]) {
@@ -80,21 +79,17 @@ export function sellProduct(G: GameState, playerID: string, product: Card, quant
   const salesCloser = player.board.Employees.find(e => e.effect === 'sales_closer');
   if (salesCloser) {
     player.revenue += 20000;
-    G.teamRevenue += 20000;
   }
   
   // Loyalty Program effect
   const loyaltyProgram = player.board.Tools.find(t => t.effect === 'loyalty_program');
   if (loyaltyProgram) {
     player.revenue += 15000;
-    G.teamRevenue += 15000;
   }
   
   // Logistics Specialist effect
   const logisticsSpec = player.board.Employees.find(e => e.effect === 'logistics_specialist');
   if (logisticsSpec) {
-    player.revenue += 15000;
-    G.teamRevenue += 15000;
     // Restore 1 inventory
     if (product.inventory !== undefined) {
       product.inventory += 1;
@@ -104,8 +99,6 @@ export function sellProduct(G: GameState, playerID: string, product: Card, quant
   // Investor Network effect
   const investorNetwork = player.board.Employees.find(e => e.effect === 'investor_network');
   if (investorNetwork) {
-    player.revenue += 50000;
-    G.teamRevenue += 50000;
     drawCard(player);
   }
   
@@ -184,7 +177,6 @@ export const cardEffects: Record<string, (G: GameState, playerID: string, card: 
     const ctx = G.effectContext?.[playerID];
     if (ctx?.soldProductLastTurn) {
       player.revenue += 50000;
-      G.teamRevenue += 50000;
     }
   },
   
@@ -225,9 +217,6 @@ export const cardEffects: Record<string, (G: GameState, playerID: string, card: 
     if (product && product.inventory) {
       const quantity = product.inventory;
       sellProduct(G, playerID, product, quantity);
-      // Add bonus revenue
-      player.revenue += 10000 * quantity;
-      G.teamRevenue += 10000 * quantity;
     }
   },
   
@@ -266,9 +255,6 @@ export const cardEffects: Record<string, (G: GameState, playerID: string, card: 
     const product = player.board.Products.find(p => p.inventory && p.inventory > 0);
     if (product) {
       sellProduct(G, playerID, product, 1);
-      // Add bonus revenue
-      player.revenue += 100000;
-      G.teamRevenue += 100000;
     }
   },
   
@@ -395,9 +381,6 @@ export const cardEffects: Record<string, (G: GameState, playerID: string, card: 
     const product = player.board.Products.find(p => p.inventory && p.inventory > 0);
     if (product) {
       sellProduct(G, playerID, product, 1);
-      // Add bonus revenue
-      player.revenue += 25000;
-      G.teamRevenue += 25000;
     }
   },
   
@@ -450,7 +433,6 @@ export const cardEffects: Record<string, (G: GameState, playerID: string, card: 
   'series_a_funding': (G, playerID) => {
     const player = G.players[playerID];
     player.revenue += 200000;
-    G.teamRevenue += 200000;
   },
   
   'visionary_conference': () => {
@@ -485,7 +467,6 @@ export const cardEffects: Record<string, (G: GameState, playerID: string, card: 
       product.inventory = 0;
       const revenue = 50000 * quantity;
       player.revenue += revenue;
-      G.teamRevenue += revenue;
     }
   },
   
@@ -703,7 +684,6 @@ export const cardEffects: Record<string, (G: GameState, playerID: string, card: 
     
     if (cardsPlayed >= 2) {
       player.revenue += 75000;
-      G.teamRevenue += 75000;
       drawCard(player);
       drawCard(player);
     }
@@ -835,7 +815,6 @@ export const cardEffects: Record<string, (G: GameState, playerID: string, card: 
       
       product.inventory = 0;
       player.revenue += totalRevenue;
-      G.teamRevenue += totalRevenue;
     }
   },
 

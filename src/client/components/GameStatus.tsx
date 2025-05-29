@@ -8,7 +8,8 @@ interface GameStatusProps {
 }
 
 export function GameStatus({ gameState, currentPlayerID }: GameStatusProps) {
-  const progressPercentage = (gameState.teamRevenue / GAME_CONFIG.REVENUE_GOAL) * 100;
+  const currentPlayer = gameState.players[currentPlayerID];
+  const progressPercentage = (currentPlayer.revenue / GAME_CONFIG.REVENUE_GOAL) * 100;
   
   return (
     <div className="bg-white rounded-lg shadow-md p-4 mb-4">
@@ -17,9 +18,9 @@ export function GameStatus({ gameState, currentPlayerID }: GameStatusProps) {
       {/* Revenue Progress */}
       <div className="mb-4">
         <div className="flex justify-between text-sm mb-1">
-          <span>Team Revenue</span>
+          <span>Revenue</span>
           <span className="font-semibold">
-            {formatCurrency(gameState.teamRevenue)} / {formatCurrency(GAME_CONFIG.REVENUE_GOAL)}
+            {formatCurrency(currentPlayer.revenue)} / {formatCurrency(GAME_CONFIG.REVENUE_GOAL)}
           </span>
         </div>
         <div className="w-full bg-gray-200 rounded-full h-3">

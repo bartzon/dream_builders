@@ -19,9 +19,6 @@ export interface GameState {
   players: Record<string, PlayerState>;
   currentPlayer: string;
   turn: number;
-  teamRevenue: number;
-  teamExpenses?: number;
-  marketPressure?: number;
   gameOver: boolean;
   winner: boolean;
   effectContext?: Record<string, EffectContext>;
