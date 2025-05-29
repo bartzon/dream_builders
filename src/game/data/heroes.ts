@@ -1,5 +1,11 @@
 import type { HeroClass } from '../types';
-import { marketerDeck, developerDeck, operatorDeck, visionaryDeck } from './decks';
+import { 
+  soloHustlerDeck, 
+  brandBuilderDeck, 
+  automationArchitectDeck, 
+  communityLeaderDeck, 
+  serialFounderDeck 
+} from './decks';
 
 export interface HeroPower {
   name: string;
@@ -10,72 +16,101 @@ export interface HeroPower {
 
 export interface Hero extends HeroClass {
   heroPower: HeroPower;
+  flavorText: string;
+  playstyle: string;
 }
 
-export const marketerHero: Hero = {
-  id: 'marketer',
-  name: 'The Marketer',
+// New Hero Definitions
+export const soloHustlerHero: Hero = {
+  id: 'solo_hustler',
+  name: 'The Solo Hustler',
   color: 'Red',
-  abilityName: 'Launch Campaign',
-  abilityDescription: 'Gain 1 capital and draw a card.',
-  starterDeck: marketerDeck,
+  abilityName: 'Grind',
+  abilityDescription: 'Draw 1 card. If it\'s a Product, reduce its cost by 1 this turn.',
+  starterDeck: soloHustlerDeck,
+  flavorText: 'A first-time merchant juggling everything from design to fulfillment.',
+  playstyle: 'Fast and scrappy, focused on card draw and early tempo.',
   heroPower: {
-    name: 'Launch Campaign',
-    description: 'Gain 2 capital and draw a card. All Products generate +$10,000 this turn.',
-    cost: 2,
-    effect: 'marketer_hero_power',
+    name: 'Grind',
+    description: 'Draw 1 card. If it\'s a Product, reduce its cost by 1 this turn.',
+    cost: 1,
+    effect: 'solo_hustler_grind',
   },
 };
 
-export const developerHero: Hero = {
-  id: 'developer',
-  name: 'The Developer',
+export const brandBuilderHero: Hero = {
+  id: 'brand_builder',
+  name: 'The Brand Builder',
+  color: 'White',
+  abilityName: 'Engage',
+  abilityDescription: 'Give a Product +1 Appeal this turn.',
+  starterDeck: brandBuilderDeck,
+  flavorText: 'Believes in design, storytelling, and long-term community.',
+  playstyle: 'Synergy-focused, slow burn with strong product support.',
+  heroPower: {
+    name: 'Engage',
+    description: 'Give a Product +1 Appeal this turn.',
+    cost: 2,
+    effect: 'brand_builder_engage',
+  },
+};
+
+export const automationArchitectHero: Hero = {
+  id: 'automation_architect',
+  name: 'The Automation Architect',
   color: 'Blue',
-  abilityName: 'Deploy Code',
-  abilityDescription: 'Reduce the cost of the next card you play by 1.',
-  starterDeck: developerDeck,
+  abilityName: 'Deploy Script',
+  abilityDescription: 'Gain 1 recurring Capital next turn.',
+  starterDeck: automationArchitectDeck,
+  flavorText: 'A technical founder building tools that run the business for them.',
+  playstyle: 'Builds an engine of passive income over time.',
   heroPower: {
-    name: 'Deploy Code',
-    description: 'The next card you play this turn costs 2 less. Draw a card.',
-    cost: 1,
-    effect: 'developer_hero_power',
-  },
-};
-
-export const operatorHero: Hero = {
-  id: 'operator',
-  name: 'The Operator',
-  color: 'Green',
-  abilityName: 'Optimize',
-  abilityDescription: 'Gain 1 capital and +1 sales this turn.',
-  starterDeck: operatorDeck,
-  heroPower: {
-    name: 'Optimize Operations',
-    description: 'Gain 1 capital. All your cards generate +$20,000 this turn.',
+    name: 'Deploy Script',
+    description: 'Gain 1 recurring Capital next turn.',
     cost: 2,
-    effect: 'operator_hero_power',
+    effect: 'automation_architect_deploy',
   },
 };
 
-export const visionaryHero: Hero = {
-  id: 'visionary',
-  name: 'The Visionary',
-  color: 'Black',
-  abilityName: 'Think Big',
-  abilityDescription: 'Draw 2 cards, lose 1 capital.',
-  starterDeck: visionaryDeck,
+export const communityLeaderHero: Hero = {
+  id: 'community_leader',
+  name: 'The Community Leader',
+  color: 'Green',
+  abilityName: 'Go Viral',
+  abilityDescription: 'If you played 2+ cards this turn, add a copy of a Product in play to your inventory.',
+  starterDeck: communityLeaderDeck,
+  flavorText: 'Uses social media and content creation to drive engagement.',
+  playstyle: 'High variance, explosive combo turns with viral momentum.',
   heroPower: {
-    name: 'Think Big',
-    description: 'Draw 3 cards, then discard 1. Gain $50,000.',
+    name: 'Go Viral',
+    description: 'If you played 2+ cards this turn, add a copy of a Product in play to your inventory.',
     cost: 1,
-    effect: 'visionary_hero_power',
+    effect: 'community_leader_viral',
+  },
+};
+
+export const serialFounderHero: Hero = {
+  id: 'serial_founder',
+  name: 'The Serial Founder',
+  color: 'Black',
+  abilityName: 'Double Down',
+  abilityDescription: 'Choose one: draw a card OR refresh 1 used Product.',
+  starterDeck: serialFounderDeck,
+  flavorText: 'Veteran merchant running multiple stores and growth strategies.',
+  playstyle: 'Balanced and flexible with a powerful mid-game.',
+  heroPower: {
+    name: 'Double Down',
+    description: 'Choose one: draw a card OR refresh 1 used Product.',
+    cost: 2,
+    effect: 'serial_founder_double_down',
   },
 };
 
 // Export all heroes as an array for convenience
 export const allHeroes: Hero[] = [
-  marketerHero,
-  developerHero,
-  operatorHero,
-  visionaryHero,
+  soloHustlerHero,
+  brandBuilderHero,
+  automationArchitectHero,
+  communityLeaderHero,
+  serialFounderHero,
 ]; 

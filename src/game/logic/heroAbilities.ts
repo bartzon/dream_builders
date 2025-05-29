@@ -4,6 +4,112 @@ import { initEffectContext } from './effectContext';
 
 // Hero Ability Effects Registry
 export const heroAbilityEffects: Record<string, (G: GameState, playerID: string) => void> = {
+  // === NEW HERO POWERS ===
+  
+  // Solo Hustler Hero Power: Grind
+  // Draw 1 card. If it's a Product, reduce its cost by 1 this turn.
+  'solo_hustler_grind': (G, playerID) => {
+    const player = G.players[playerID];
+    
+    // Set up effect context if needed
+    if (!G.effectContext) G.effectContext = {};
+    if (!G.effectContext[playerID]) G.effectContext[playerID] = initEffectContext();
+    
+    // Draw a card
+    const handSizeBefore = player.hand.length;
+    drawCard(player);
+    
+    // If we drew a card and it's a Product, reduce its cost
+    if (player.hand.length > handSizeBefore) {
+      const drawnCard = player.hand[player.hand.length - 1];
+      if (drawnCard.type === 'Product') {
+        G.effectContext[playerID].productCostReduction = 1;
+      }
+    }
+    
+    player.heroAbilityUsed = true;
+  },
+  
+  // Brand Builder Hero Power: Engage
+  // Give a Product +1 Appeal this turn.
+  'brand_builder_engage': (G, playerID) => {
+    const player = G.players[playerID];
+    
+    // Set up effect context if needed
+    if (!G.effectContext) G.effectContext = {};
+    if (!G.effectContext[playerID]) G.effectContext[playerID] = initEffectContext();
+    
+    // For now, give all Products +1 Appeal this turn
+    // In a full implementation, player would choose which Product
+    G.effectContext[playerID].globalAppealBoost = 1;
+    
+    player.heroAbilityUsed = true;
+  },
+  
+  // Automation Architect Hero Power: Deploy Script
+  // Gain 1 recurring Capital next turn.
+  'automation_architect_deploy': (G, playerID) => {
+    const player = G.players[playerID];
+    
+    // Set up effect context if needed
+    if (!G.effectContext) G.effectContext = {};
+    if (!G.effectContext[playerID]) G.effectContext[playerID] = initEffectContext();
+    
+    // Add recurring capital for next turn
+    G.effectContext[playerID].recurringCapitalNextTurn = 
+      (G.effectContext[playerID].recurringCapitalNextTurn || 0) + 1;
+    
+    player.heroAbilityUsed = true;
+  },
+  
+  // Community Leader Hero Power: Go Viral
+  // If you played 2+ cards this turn, add a copy of a Product in play to your inventory.
+  'community_leader_viral': (G, playerID) => {
+    const player = G.players[playerID];
+    
+    // Check if combo threshold was met
+    const cardsPlayed = G.effectContext?.[playerID]?.cardsPlayedThisTurn || 0;
+    if (cardsPlayed >= 2) {
+      // Find a Product to copy inventory from
+      // In full implementation, player would choose
+      const product = player.board.Products.find(p => p.inventory !== undefined);
+      if (product && product.inventory !== undefined) {
+        product.inventory += 1;
+      }
+    }
+    
+    player.heroAbilityUsed = true;
+  },
+  
+  // Serial Founder Hero Power: Double Down
+  // Choose one: draw a card OR refresh 1 used Product.
+  'serial_founder_double_down': (G, playerID) => {
+    const player = G.players[playerID];
+    
+    // For now, choose automatically based on situation
+    // In full implementation, player would choose
+    const hasExhaustedProduct = player.board.Products.some(p => 
+      p.inventory !== undefined && p.inventory === 0
+    );
+    
+    if (hasExhaustedProduct) {
+      // Refresh a product
+      const exhaustedProduct = player.board.Products.find(p => 
+        p.inventory !== undefined && p.inventory === 0
+      );
+      if (exhaustedProduct && exhaustedProduct.inventory !== undefined) {
+        exhaustedProduct.inventory = 3; // Refresh with 3 inventory
+      }
+    } else {
+      // Draw a card
+      drawCard(player);
+    }
+    
+    player.heroAbilityUsed = true;
+  },
+  
+  // === LEGACY HERO POWERS ===
+  
   // Marketer Hero Power: Launch Campaign
   // Gain 2 capital and draw a card. All Products generate +$10,000 this turn.
   'marketer_hero_power': (G, playerID) => {

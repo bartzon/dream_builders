@@ -16,6 +16,7 @@ export interface Card {
   revenuePerSale?: number;
   isActive?: boolean;
   overheadCost?: number;
+  appeal?: number;
 }
 
 export interface HeroClass {

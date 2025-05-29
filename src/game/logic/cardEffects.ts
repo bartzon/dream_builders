@@ -48,6 +48,18 @@ export function sellProduct(G: GameState, playerID: string, product: Card, quant
     if (scalingAlgo) {
       totalRevenue *= 2;
     }
+    
+    // === NEW APPEAL SYSTEM (Brand Builder) ===
+    
+    // Apply Appeal bonuses
+    if (product.appeal && product.appeal > 0) {
+      totalRevenue += product.appeal * 5000 * quantity; // $5k per Appeal per item
+    }
+    
+    // Global Appeal boost from hero power or Brand Story
+    if (ctx.globalAppealBoost) {
+      totalRevenue += ctx.globalAppealBoost * 5000 * quantity;
+    }
   }
   
   // Update inventory
@@ -96,6 +108,20 @@ export function sellProduct(G: GameState, playerID: string, product: Card, quant
   const openSourceSDK = player.board.Tools.find(t => t.effect === 'open_source_sdk');
   if (openSourceSDK) {
     drawCard(player);
+  }
+  
+  // === NEW ON-SALE EFFECTS ===
+  
+  // Brand Ambassador effect - other Products gain Appeal
+  const brandAmbassadorNew = player.board.Employees.find(e => e.effect === 'brand_ambassador_new');
+  if (brandAmbassadorNew) {
+    player.board.Products.forEach(otherProduct => {
+      if (otherProduct !== product && otherProduct.appeal !== undefined) {
+        otherProduct.appeal = (otherProduct.appeal || 0) + 1;
+      } else if (otherProduct !== product) {
+        otherProduct.appeal = 1;
+      }
+    });
   }
   
   // Mark that a product was sold this turn
@@ -486,5 +512,325 @@ export const cardEffects: Record<string, (G: GameState, playerID: string, card: 
   
   'global_launch_event': () => {
     // Can only be played if two actions played - handled in game logic
+  },
+
+  // === SOLO HUSTLER EFFECTS ===
+  'hustle_hard': (G, playerID) => {
+    const player = G.players[playerID];
+    drawCard(player);
+    drawCard(player);
+    player.capital = Math.min(10, player.capital + 1);
+  },
+
+  'bootstrap_capital': (G, playerID) => {
+    const player = G.players[playerID];
+    player.capital = Math.min(10, player.capital + 2);
+  },
+
+  'diy_assembly': () => {
+    // Passive effect - reduces Product costs by 1
+  },
+
+  'fast_pivot': (G, playerID) => {
+    const player = G.players[playerID];
+    drawCard(player);
+    if (!G.effectContext) G.effectContext = {};
+    if (!G.effectContext[playerID]) G.effectContext[playerID] = initEffectContext();
+    G.effectContext[playerID].extraCardPlays = (G.effectContext[playerID].extraCardPlays || 0) + 1;
+  },
+
+  'freelancer_network': (G, playerID) => {
+    const player = G.players[playerID];
+    drawCard(player);
+    drawCard(player);
+  },
+
+  'resourceful_solutions': (G, playerID) => {
+    if (!G.effectContext) G.effectContext = {};
+    if (!G.effectContext[playerID]) G.effectContext[playerID] = initEffectContext();
+    G.effectContext[playerID].nextCardDiscount = 2;
+  },
+
+  'scrappy_marketing': (G, playerID) => {
+    const player = G.players[playerID];
+    const hasProduct = player.board.Products.length > 0;
+    if (hasProduct) {
+      drawCard(player);
+      drawCard(player);
+    }
+  },
+
+  // === BRAND BUILDER EFFECTS ===
+  'brand_story': (G, playerID) => {
+    if (!G.effectContext) G.effectContext = {};
+    if (!G.effectContext[playerID]) G.effectContext[playerID] = initEffectContext();
+    G.effectContext[playerID].globalAppealBoost = 1;
+  },
+
+  'community_manager': () => {
+    // Passive effect - handled in sellProduct
+  },
+
+  'design_workshop': () => {
+    // Passive effect - new Products enter with +1 Appeal
+  },
+
+  'storytelling_campaign': (G, playerID) => {
+    const player = G.players[playerID];
+    // In full implementation, player would choose
+    const product = player.board.Products[0];
+    if (product && product.appeal !== undefined) {
+      product.appeal = (product.appeal || 0) + 2;
+    }
+  },
+
+  'brand_ambassador_new': () => {
+    // Passive effect - when selling Products, other Products gain Appeal
+  },
+
+  'quality_materials': () => {
+    // Passive effect - Products cost 1 more but gain +1 Appeal
+  },
+
+  'flagship_store': (G, playerID, card) => {
+    // Revenue increases based on total Appeal
+    const player = G.players[playerID];
+    let totalAppeal = 0;
+    player.board.Products.forEach(product => {
+      totalAppeal += product.appeal || 0;
+    });
+    if (card.revenuePerSale) {
+      card.revenuePerSale += totalAppeal * 5000;
+    }
+  },
+
+  'brand_recognition': (G, playerID) => {
+    const player = G.players[playerID];
+    let totalAppeal = 0;
+    player.board.Products.forEach(product => {
+      totalAppeal += product.appeal || 0;
+    });
+    for (let i = 0; i < totalAppeal; i++) {
+      drawCard(player);
+    }
+  },
+
+  // === AUTOMATION ARCHITECT EFFECTS ===
+  'basic_script': () => {
+    // Passive effect - gain 1 capital each turn
+  },
+
+  'automated_pipeline': () => {
+    // Passive effect - automatically sell 1 item from each Product each turn
+  },
+
+  'server_farm': () => {
+    // Passive effect - generates passive income
+  },
+
+  'code_deployment': (G, playerID) => {
+    const player = G.players[playerID];
+    // Play a Tool from hand for free
+    const toolInHand = player.hand.find(card => card.type === 'Tool');
+    if (toolInHand) {
+      const toolIndex = player.hand.indexOf(toolInHand);
+      player.hand.splice(toolIndex, 1);
+      player.board.Tools.push(toolInHand);
+      
+      // Execute Tool effect if it has one
+      if (toolInHand.effect && cardEffects[toolInHand.effect]) {
+        cardEffects[toolInHand.effect](G, playerID, toolInHand);
+      }
+    }
+  },
+
+  'process_optimization': () => {
+    // Passive effect - reduce all overhead costs by 1
+  },
+
+  'ml_model': () => {
+    // Passive effect - gain capital equal to number of Tools each turn
+  },
+
+  'scheduled_task': (G, playerID) => {
+    if (!G.effectContext) G.effectContext = {};
+    if (!G.effectContext[playerID]) G.effectContext[playerID] = initEffectContext();
+    G.effectContext[playerID].recurringCapitalNextTurn = 
+      (G.effectContext[playerID].recurringCapitalNextTurn || 0) + 1;
+  },
+
+  'cloud_service': (_G, _playerID, card) => {
+    // Revenue doubles each time it's sold
+    if (card.revenuePerSale) {
+      card.revenuePerSale *= 2;
+    }
+  },
+
+  'system_integration': (G, playerID) => {
+    if (!G.effectContext) G.effectContext = {};
+    if (!G.effectContext[playerID]) G.effectContext[playerID] = initEffectContext();
+    G.effectContext[playerID].toolEffectBonus = 1;
+  },
+
+  // === COMMUNITY LEADER EFFECTS ===
+  'viral_post': (G, playerID) => {
+    const player = G.players[playerID];
+    drawCard(player);
+    
+    const cardsPlayed = G.effectContext?.[playerID]?.cardsPlayedThisTurn || 0;
+    if (cardsPlayed >= 2) {
+      drawCard(player);
+      drawCard(player);
+    }
+  },
+
+  'content_creation': (G, playerID, card) => {
+    // Revenue increases with each card played this turn
+    const cardsPlayed = G.effectContext?.[playerID]?.cardsPlayedThisTurn || 0;
+    if (card.revenuePerSale) {
+      card.revenuePerSale += cardsPlayed * 5000;
+    }
+  },
+
+  'influencer_collab': (G, playerID) => {
+    const player = G.players[playerID];
+    const cardsPlayed = G.effectContext?.[playerID]?.cardsPlayedThisTurn || 0;
+    
+    if (cardsPlayed >= 2) {
+      player.revenue += 75000;
+      G.teamRevenue += 75000;
+      drawCard(player);
+      drawCard(player);
+    }
+  },
+
+  'social_media_manager': () => {
+    // Passive effect - when playing 2nd card each turn, gain 1 capital
+  },
+
+  'trending_product': () => {
+    // Passive effect - gains inventory when other cards are played
+  },
+
+  'engagement_boost': (G, playerID) => {
+    if (!G.effectContext) G.effectContext = {};
+    if (!G.effectContext[playerID]) G.effectContext[playerID] = initEffectContext();
+    G.effectContext[playerID].extraActionPlays = (G.effectContext[playerID].extraActionPlays || 0) + 1;
+  },
+
+  'community_platform': (G, playerID, card) => {
+    // Revenue scales with hand size
+    const player = G.players[playerID];
+    if (card.revenuePerSale) {
+      card.revenuePerSale += player.hand.length * 3000;
+    }
+  },
+
+  'hashtag_campaign': (G, playerID) => {
+    if (!G.effectContext) G.effectContext = {};
+    if (!G.effectContext[playerID]) G.effectContext[playerID] = initEffectContext();
+    G.effectContext[playerID].effectsDoubled = true;
+  },
+
+  'content_creator': () => {
+    // Passive effect - if played 3+ cards each turn, gain $50k
+  },
+
+  'meme_magic': () => {
+    // Special cost reduction handled in game logic
+  },
+
+  // === SERIAL FOUNDER EFFECTS ===
+  'strategic_pivot': (G, playerID) => {
+    const player = G.players[playerID];
+    // For now, automatically choose based on situation
+    // In full implementation, player would choose
+    
+    // Simple heuristic: if low on cards, draw; if low on capital, gain capital; otherwise refresh
+    if (player.hand.length < 3) {
+      drawCard(player);
+      drawCard(player);
+    } else if (player.capital < 3) {
+      player.capital = Math.min(10, player.capital + 3);
+    } else {
+      // Refresh a product
+      const product = player.board.Products.find(p => p.inventory !== undefined && p.inventory < 3);
+      if (product && product.inventory !== undefined) {
+        product.inventory = 3;
+      }
+    }
+  },
+
+  'advisory_board': (G, playerID) => {
+    const player = G.players[playerID];
+    
+    // Count different card types in play
+    const hasTools = player.board.Tools.length > 0;
+    const hasProducts = player.board.Products.length > 0;
+    const hasEmployees = player.board.Employees.length > 0;
+    
+    let cardsToDraw = 0;
+    if (hasTools) cardsToDraw++;
+    if (hasProducts) cardsToDraw++;
+    if (hasEmployees) cardsToDraw++;
+    
+    for (let i = 0; i < cardsToDraw; i++) {
+      drawCard(player);
+    }
+  },
+
+  'growth_hacking': () => {
+    // Passive effect - choose different bonus each turn
+  },
+
+  'market_expansion': (G, playerID, card) => {
+    // Revenue increases with number of Products controlled
+    const player = G.players[playerID];
+    const productCount = player.board.Products.length;
+    if (card.revenuePerSale) {
+      card.revenuePerSale += productCount * 5000;
+    }
+  },
+
+  'experience_leverage': (G, playerID) => {
+    if (!G.effectContext) G.effectContext = {};
+    if (!G.effectContext[playerID]) G.effectContext[playerID] = initEffectContext();
+    G.effectContext[playerID].nextCardDiscount = 2;
+  },
+
+  'business_development': () => {
+    // Passive effect - choose different bonus each turn
+  },
+
+  'diversified_revenue': (G, playerID, card) => {
+    // Revenue based on variety of cards in play
+    const player = G.players[playerID];
+    const hasTools = player.board.Tools.length > 0 ? 1 : 0;
+    const hasProducts = player.board.Products.length > 0 ? 1 : 0;
+    const hasEmployees = player.board.Employees.length > 0 ? 1 : 0;
+    
+    const variety = hasTools + hasProducts + hasEmployees;
+    if (card.revenuePerSale) {
+      card.revenuePerSale += variety * 10000;
+    }
+  },
+
+  'venture_network': () => {
+    // Passive effect - draw card when playing Products
+  },
+
+  'exit_strategy': (G, playerID) => {
+    const player = G.players[playerID];
+    // In full implementation, player would choose
+    const product = player.board.Products.find(p => p.inventory && p.inventory > 0);
+    if (product && product.inventory && product.revenuePerSale) {
+      const quantity = product.inventory;
+      const doubleRevenue = product.revenuePerSale * 2;
+      const totalRevenue = quantity * doubleRevenue;
+      
+      product.inventory = 0;
+      player.revenue += totalRevenue;
+      G.teamRevenue += totalRevenue;
+    }
   },
 }; 
