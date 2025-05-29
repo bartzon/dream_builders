@@ -69,6 +69,11 @@ export function sellProduct(G: GameState, playerID: string, product: Card, quant
   player.revenue += totalRevenue;
   G.teamRevenue += totalRevenue;
   
+  // Trigger the product's own sale effect
+  if (product.effect && cardEffects[product.effect]) {
+    cardEffects[product.effect](G, playerID, product);
+  }
+  
   // Trigger on-sale effects
   
   // Sales Closer effect
@@ -832,5 +837,152 @@ export const cardEffects: Record<string, (G: GameState, playerID: string, card: 
       player.revenue += totalRevenue;
       G.teamRevenue += totalRevenue;
     }
+  },
+
+  // === SHARED PRODUCT SALE EFFECTS ===
+  
+  // Generic sale effect function for products that draw cards when sold
+  'sale_with_draw': (G, playerID) => {
+    const player = G.players[playerID];
+    drawCard(player);
+  },
+
+  // Products that draw a card when sold
+  'custom_dog_portrait_sale': (G, playerID) => {
+    const player = G.players[playerID];
+    drawCard(player);
+  },
+
+  'minimalist_planner_sale': (G, playerID) => {
+    const player = G.players[playerID];
+    drawCard(player);
+  },
+
+  'ai_logo_sale': (G, playerID) => {
+    const player = G.players[playerID];
+    drawCard(player);
+  },
+
+  'sticker_pack_sale': (G, playerID) => {
+    const player = G.players[playerID];
+    drawCard(player);
+  },
+
+  'digital_wedding_invite_sale': (G, playerID) => {
+    const player = G.players[playerID];
+    drawCard(player);
+  },
+
+  'freelancing_ebook_sale': (G, playerID) => {
+    const player = G.players[playerID];
+    drawCard(player);
+  },
+
+  'digital_art_print_sale': (G, playerID) => {
+    const player = G.players[playerID];
+    drawCard(player);
+  },
+
+  'handwritten_greeting_cards_sale': (G, playerID) => {
+    const player = G.players[playerID];
+    drawCard(player);
+  },
+
+  // Special sale effects
+  'black_friday_sale': (G, playerID) => {
+    if (!G.effectContext) G.effectContext = {};
+    if (!G.effectContext[playerID]) G.effectContext[playerID] = initEffectContext();
+    G.effectContext[playerID].nextProductBonus = 2000;
+  },
+
+  'desk_clock_sale': (G, playerID) => {
+    if (!G.effectContext) G.effectContext = {};
+    if (!G.effectContext[playerID]) G.effectContext[playerID] = initEffectContext();
+    G.effectContext[playerID].nextCardDiscount = 1;
+  },
+
+  // Simple sale effects (revenue already handled by revenuePerSale)
+  'holiday_mug_sale': () => {
+    // Revenue already handled by revenuePerSale property
+  },
+
+  'soy_candle_sale': () => {
+    // Revenue already handled by revenuePerSale property
+  },
+
+  'sweater_bundle_sale': () => {
+    // Revenue already handled by revenuePerSale property
+  },
+
+  'yoga_course_sale': () => {
+    // Revenue already handled by revenuePerSale property
+  },
+
+  'name_necklace_sale': () => {
+    // Revenue already handled by revenuePerSale property
+  },
+
+  'pet_box_sale': () => {
+    // Revenue already handled by revenuePerSale property
+  },
+
+  'self_care_sale': () => {
+    // Revenue already handled by revenuePerSale property
+  },
+
+  'tshirt_drop_sale': () => {
+    // Revenue already handled by revenuePerSale property
+  },
+
+  'coffee_sampler_sale': () => {
+    // Revenue already handled by revenuePerSale property
+  },
+
+  'enamel_pin_sale': () => {
+    // Revenue already handled by revenuePerSale property
+  },
+
+  'eco_tote_sale': () => {
+    // Revenue already handled by revenuePerSale property
+  },
+
+  'phone_case_sale': () => {
+    // Revenue already handled by revenuePerSale property
+  },
+
+  'planner_stickers_sale': () => {
+    // Revenue already handled by revenuePerSale property
+  },
+
+  'pop_hoodie_sale': () => {
+    // Revenue already handled by revenuePerSale property
+  },
+
+  'water_bottle_sale': () => {
+    // Revenue already handled by revenuePerSale property
+  },
+
+  'makeup_brush_sale': () => {
+    // Revenue already handled by revenuePerSale property
+  },
+
+  'subscription_trial_sale': () => {
+    // Revenue already handled by revenuePerSale property
+  },
+
+  'budget_tracker_sale': () => {
+    // Revenue already handled by revenuePerSale property
+  },
+
+  'dinosaur_tee_sale': () => {
+    // Revenue already handled by revenuePerSale property
+  },
+
+  'bath_bomb_sale': () => {
+    // Revenue already handled by revenuePerSale property
+  },
+
+  'greeting_cards_sale': () => {
+    // Revenue already handled by revenuePerSale property
   },
 }; 

@@ -1,6 +1,7 @@
 import type { Game } from 'boardgame.io';
 import type { GameState, PlayerState } from './state';
 import { allHeroes, type Hero } from './data/heroes';
+import { sharedProductPool } from './data/shared-products';
 import type { Card } from './types';
 import { 
   cardEffects,
@@ -21,45 +22,33 @@ import {
 import { INVALID_MOVE } from 'boardgame.io/core';
 import { GAME_CONFIG } from './constants';
 
-// Helper function to create a 30-card deck from a 10-card starter deck
-function createFullDeck(starterDeck: Card[]): Card[] {
-  const fullDeck: Card[] = [];
-  const maxCopiesPerCard = 4;
-  const targetDeckSize = 30;
-  
-  // First, add 3 copies of each card (10 * 3 = 30)
-  for (const card of starterDeck) {
-    for (let i = 0; i < 3; i++) {
-      fullDeck.push({
-        ...card,
-        keywords: card.keywords || [],
-        // Ensure Product cards have proper defaults
-        isActive: card.type === 'Product' ? (card.isActive !== false) : card.isActive,
-      });
-    }
+// Helper function to shuffle an array
+function shuffleArray<T>(array: T[]): T[] {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
   }
+  return shuffled;
+}
+
+// Helper function to select random cards from an array
+function selectRandomCards<T>(cards: T[], count: number): T[] {
+  const shuffled = shuffleArray(cards);
+  return shuffled.slice(0, Math.min(count, shuffled.length));
+}
+
+// New drafting function that creates a 30-card deck
+function createDraftedDeck(heroStarterDeck: Card[]): Card[] {
+  // Get 15 random cards from hero's unique deck (now all non-Product cards)
+  const heroCards = selectRandomCards(heroStarterDeck, 15);
   
-  // If we need more cards to reach 30, add additional copies
-  // (This logic is here for flexibility if we change the numbers later)
-  while (fullDeck.length < targetDeckSize) {
-    for (const card of starterDeck) {
-      if (fullDeck.length >= targetDeckSize) break;
-      
-      // Count how many copies of this card we already have
-      const copiesInDeck = fullDeck.filter(c => c.id === card.id).length;
-      
-      if (copiesInDeck < maxCopiesPerCard) {
-        fullDeck.push({
-          ...card,
-          keywords: card.keywords || [],
-          // Ensure Product cards have proper defaults
-          isActive: card.type === 'Product' ? (card.isActive !== false) : card.isActive,
-        });
-      }
-    }
-  }
+  // Get 15 random cards from shared product pool
+  const productCards = selectRandomCards(sharedProductPool, 15);
   
-  return fullDeck;
+  // Combine and shuffle
+  const combinedDeck = [...heroCards, ...productCards];
+  return shuffleArray(combinedDeck);
 }
 
 export const DreamBuildersGame: Game<GameState> = {
@@ -85,7 +74,7 @@ export const DreamBuildersGame: Game<GameState> = {
       }
       
       // Create a 30-card deck from the hero's 10-card starter deck
-      const fullDeck = createFullDeck(hero.starterDeck);
+      const fullDeck = createDraftedDeck(hero.starterDeck);
       
       // Use the hero ID directly (no capitalization needed)
       players[playerID] = initializePlayer(hero.id as PlayerState['hero'], fullDeck);
