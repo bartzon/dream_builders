@@ -226,7 +226,7 @@ export const automationArchitectDeck: Card[] = [
     cost: 2,
     type: 'Tool',
     keywords: ['Conversion', 'Product'],
-    text: 'Your Products sell for 1 more.',
+    text: 'Your Products sell for $1000 more.',
     effect: 'optimize_checkout',
     flavor: 'One-click to success.',
   },

@@ -3,7 +3,10 @@ import type { Card } from '../types';
 import { drawCard } from './utils';
 import { initEffectContext } from './effectContext';
 
-// Helper Functions for Common Operations
+// ==========================================
+// CORE HELPER FUNCTIONS
+// ==========================================
+
 function ensureEffectContext(G: GameState, playerID: string) {
   if (!G.effectContext) G.effectContext = {};
   if (!G.effectContext[playerID]) G.effectContext[playerID] = initEffectContext();
@@ -27,19 +30,58 @@ export function drawCards(G: GameState, playerID: string, count: number) {
   }
 }
 
+// ==========================================
+// INVENTORY MANAGEMENT HELPERS
+// ==========================================
+
 function findProductWithInventory(player: PlayerState): Card | undefined {
   return player.board.Products.find((p: Card) => p.inventory && p.inventory > 0);
 }
 
-// Additional Helper Functions for Common Patterns
-function addInventoryToProduct(player: PlayerState, amount: number): boolean {
-  const product = player.board.Products.find(p => p.inventory !== undefined);
-  if (product && product.inventory !== undefined) {
+function addInventoryToSpecificProduct(product: Card, amount: number): void {
+  if (product.inventory !== undefined) {
     product.inventory += amount;
-    return true;
   }
-  return false;
 }
+
+function createProductChoice(player: PlayerState, effect: string, filter?: (p: Card) => boolean): void {
+  const products = filter 
+    ? player.board.Products.filter(p => p.isActive !== false && filter(p))
+    : player.board.Products.filter(p => p.isActive !== false);
+  
+  if (products.length === 0) return;
+  
+  if (products.length === 1) {
+    // Auto-resolve if only one choice
+    handleSingleProductChoice(player, products[0], effect);
+  } else {
+    // Create pending choice for multiple options
+    player.pendingChoice = {
+      type: 'choose_card',
+      effect,
+      cards: products.map(p => ({ ...p })),
+    };
+  }
+}
+
+function handleSingleProductChoice(player: PlayerState, product: Card, effect: string): void {
+  switch (effect) {
+    case 'add_inventory_to_product':
+      addInventoryToSpecificProduct(product, 2);
+      break;
+    case 'add_inventory_if_empty':
+      if (product.inventory === 0) product.inventory = 3;
+      break;
+    case 'simple_inventory_boost':
+    case 'draw_and_inventory':
+      addInventoryToSpecificProduct(product, 1);
+      break;
+  }
+}
+
+// ==========================================
+// SALES HELPERS
+// ==========================================
 
 function sellFirstAvailableProduct(G: GameState, playerID: string): boolean {
   const player = G.players[playerID];
@@ -51,16 +93,9 @@ function sellFirstAvailableProduct(G: GameState, playerID: string): boolean {
   return false;
 }
 
-function sellAllInventoryFromProduct(G: GameState, playerID: string): boolean {
-  const player = G.players[playerID];
-  const product = findProductWithInventory(player);
-  if (product && product.inventory) {
-    const quantity = product.inventory;
-    sellProduct(G, playerID, product, quantity);
-    return true;
-  }
-  return false;
-}
+// ==========================================
+// BONUS APPLICATION HELPERS
+// ==========================================
 
 export function applyTemporaryBonus(G: GameState, playerID: string, bonusType: string, amount: number) {
   const ctx = ensureEffectContext(G, playerID);
@@ -86,35 +121,13 @@ export function applyTemporaryBonus(G: GameState, playerID: string, bonusType: s
   }
 }
 
-function boostProductRevenue(card: Card, amount: number) {
-  if (card.revenuePerSale) {
-    card.revenuePerSale += amount;
-  }
-}
-
-function doubleProductRevenue(card: Card) {
-  if (card.revenuePerSale) {
-    card.revenuePerSale *= 2;
-  }
-}
-
-function checkActionPlayedThisTurn(G: GameState, playerID: string): boolean {
-  const ctx = G.effectContext?.[playerID];
-  return !!(ctx?.playedActionsThisTurn && ctx.playedActionsThisTurn > 0);
-}
-
-function addAppealToProduct(product: Card, amount: number) {
-  if (product.appeal !== undefined) {
-    product.appeal = (product.appeal || 0) + amount;
-  } else {
-    product.appeal = amount;
-  }
-}
-
 // No-op function for passive effects handled elsewhere
 const passiveEffect = () => {};
 
-// Helper function to sell a product
+// ==========================================
+// MAIN SELL PRODUCT FUNCTION
+// ==========================================
+
 export function sellProduct(G: GameState, playerID: string, product: Card, quantity: number = 1): number {
   if (!product.inventory || product.inventory < quantity) return 0;
   
@@ -125,58 +138,11 @@ export function sellProduct(G: GameState, playerID: string, product: Card, quant
   // Apply any revenue modifiers
   const ctx = G.effectContext?.[playerID];
   if (ctx) {
-    // Flash Sale Frenzy effect
-    if (ctx.flashSaleActive) {
-      totalRevenue += 50000 * quantity;
-    }
-    
-    // Limited Time Offer effect
-    if (ctx.nextProductBonus && ctx.nextProductBonus > 0) {
-      totalRevenue += ctx.nextProductBonus;
-      ctx.nextProductBonus = 0;
-    }
-    
-    // Social Media Ads effect
-    const socialMediaAds = player.board.Tools.find(t => t.effect === 'social_media_ads');
-    if (socialMediaAds) {
-      totalRevenue += 10000 * quantity;
-    }
-    
-    // Global Supply Network effect
-    const globalSupply = player.board.Tools.find(t => t.effect === 'global_supply_network');
-    if (globalSupply) {
-      totalRevenue += 20000 * quantity;
-    }
-    
-    // Packaging Upgrade effect
-    const packaging = player.board.Tools.find(t => t.effect === 'packaging_upgrade');
-    if (packaging) {
-      totalRevenue += 10000 * quantity;
-    }
-    
     // Product-specific revenue boost (from Supplier Collab)
     if (ctx.productRevenueBoosts && ctx.productRevenueBoosts[product.id]) {
       totalRevenue += ctx.productRevenueBoosts[product.id];
       // Use up the boost
       delete ctx.productRevenueBoosts[product.id];
-    }
-    
-    // Scaling Algorithm effect (Developer)
-    const scalingAlgo = player.board.Tools.find(t => t.effect === 'scaling_algorithm');
-    if (scalingAlgo) {
-      totalRevenue *= 2;
-    }
-    
-    // === NEW APPEAL SYSTEM (Brand Builder) ===
-    
-    // Apply Appeal bonuses
-    if (product.appeal && product.appeal > 0) {
-      totalRevenue += product.appeal * 5000 * quantity; // $5k per Appeal per item
-    }
-    
-    // Global Appeal boost from hero power or Brand Story
-    if (ctx.globalAppealBoost) {
-      totalRevenue += ctx.globalAppealBoost * 5000 * quantity;
     }
   }
   
@@ -191,55 +157,6 @@ export function sellProduct(G: GameState, playerID: string, product: Card, quant
     cardEffects[product.effect](G, playerID, product);
   }
   
-  // Trigger on-sale effects
-  
-  // Sales Closer effect
-  const salesCloser = player.board.Employees.find(e => e.effect === 'sales_closer');
-  if (salesCloser) {
-    player.revenue += 20000;
-  }
-  
-  // Loyalty Program effect
-  const loyaltyProgram = player.board.Tools.find(t => t.effect === 'loyalty_program');
-  if (loyaltyProgram) {
-    player.revenue += 15000;
-  }
-  
-  // Logistics Specialist effect
-  const logisticsSpec = player.board.Employees.find(e => e.effect === 'logistics_specialist');
-  if (logisticsSpec) {
-    // Restore 1 inventory
-    if (product.inventory !== undefined) {
-      product.inventory += 1;
-    }
-  }
-  
-  // Investor Network effect
-  const investorNetwork = player.board.Employees.find(e => e.effect === 'investor_network');
-  if (investorNetwork) {
-    drawCard(player);
-  }
-  
-  // Open Source SDK effect
-  const openSourceSDK = player.board.Tools.find(t => t.effect === 'open_source_sdk');
-  if (openSourceSDK) {
-    drawCard(player);
-  }
-  
-  // === NEW ON-SALE EFFECTS ===
-  
-  // Brand Ambassador effect - other Products gain Appeal
-  const brandAmbassadorNew = player.board.Employees.find(e => e.effect === 'brand_ambassador_new');
-  if (brandAmbassadorNew) {
-    player.board.Products.forEach(otherProduct => {
-      if (otherProduct !== product && otherProduct.appeal !== undefined) {
-        otherProduct.appeal = (otherProduct.appeal || 0) + 1;
-      } else if (otherProduct !== product) {
-        otherProduct.appeal = 1;
-      }
-    });
-  }
-  
   // Mark that a product was sold this turn
   if (ctx) {
     ctx.soldProductThisTurn = true;
@@ -248,224 +165,15 @@ export function sellProduct(G: GameState, playerID: string, product: Card, quant
   return totalRevenue;
 }
 
-// Card Effects Registry
-export const cardEffects: Record<string, (G: GameState, playerID: string, card: Card) => void> = {
-  // === MARKETER EFFECTS ===
-  'flash_sale_frenzy': (G, playerID) => {
-    const ctx = ensureEffectContext(G, playerID);
-    ctx.flashSaleActive = true;
-  },
-  
-  'popup_shop': passiveEffect,
-  
-  'sales_closer': passiveEffect,
-  
-  'social_media_ads': passiveEffect,
-  
-  'mega_launch_event': (G, playerID, card) => {
-    if (checkActionPlayedThisTurn(G, playerID)) {
-      boostProductRevenue(card, 50000);
-    }
-  },
-  
-  'limited_time_offer': (G, playerID) => {
-    applyTemporaryBonus(G, playerID, 'nextProductBonus', 40000);
-  },
-  
-  'viral_campaign': (G, playerID) => {
-    drawCards(G, playerID, 2);
-    
-    // Check if sold a product last turn
-    const ctx = G.effectContext?.[playerID];
-    if (ctx?.soldProductLastTurn) {
-      gainRevenue(G, playerID, 50000);
-    }
-  },
-  
-  'loyalty_program': passiveEffect,
-  
-  'influencer_partnership': passiveEffect,
-  
-  'popup_market_stall': passiveEffect,
-  
-  'email_blast': (G, playerID) => {
-    sellFirstAvailableProduct(G, playerID);
-  },
-  
-  'brand_ambassador': passiveEffect,
-  
-  'ad_budget_boost': passiveEffect,
-  
-  'seasonal_sale': (G, playerID) => {
-    sellAllInventoryFromProduct(G, playerID);
-  },
-  
-  'flash_mob_event': (G, playerID, card) => {
-    if (checkActionPlayedThisTurn(G, playerID)) {
-      doubleProductRevenue(card);
-    }
-  },
-  
-  // === DEVELOPER EFFECTS ===
-  'automate_checkout': passiveEffect,
-  
-  'scaling_algorithm': passiveEffect,
-  
-  'bug_fix_sprint': (G, playerID) => {
-    const player = G.players[playerID];
-    addInventoryToProduct(player, 2);
-  },
-  
-  'ai_optimization': (G, playerID) => {
-    sellFirstAvailableProduct(G, playerID);
-  },
-  
-  'saas_platform': passiveEffect,
-  
-  'code_refactor': (G, playerID) => {
-    const player = G.players[playerID];
-    addInventoryToProduct(player, 3);
-  },
-  
-  'beta_tester_squad': passiveEffect,
-  
-  'load_balancer': passiveEffect,
-  
-  'cloud_infrastructure': passiveEffect,
-  
-  'debug_sprint': (G, playerID) => {
-    const player = G.players[playerID];
-    addInventoryToProduct(player, 2);
-  },
-  
-  'ai_salesbot': passiveEffect,
-  
-  'continuous_deployment': (G, playerID) => {
-    applyTemporaryBonus(G, playerID, 'extraActionPlays', 1);
-  },
-  
-  'security_patch': passiveEffect,
-  
-  'open_source_sdk': passiveEffect,
-  
-  'tech_conference': (G, playerID, card) => {
-    if (checkActionPlayedThisTurn(G, playerID)) {
-      boostProductRevenue(card, 40000);
-    }
-  },
-  
-  // === OPERATOR EFFECTS ===
-  'fulfillment_center': (G, playerID, card) => {
-    // Check if 2+ items sold this turn
-    const ctx = G.effectContext?.[playerID];
-    if (ctx?.itemsSoldThisTurn && ctx.itemsSoldThisTurn >= 2) {
-      boostProductRevenue(card, 30000);
-    }
-  },
-  
-  'logistics_specialist': passiveEffect,
-  
-  'express_shipping': (G, playerID) => {
-    sellFirstAvailableProduct(G, playerID);
-  },
-  
-  'global_supply_network': passiveEffect,
-  
-  'automation_hub': (G, playerID) => {
-    // In full implementation, player would choose a lane
-    // For now, sell 1 from each product
-    const player = G.players[playerID];
-    player.board.Products.forEach(product => {
-      if (product.inventory && product.inventory > 0) {
-        sellProduct(G, playerID, product, 1);
-      }
-    });
-  },
-  
-  'warehouse_manager': passiveEffect,
-  
-  'delivery_drone_fleet': passiveEffect,
-  
-  'stock_replenishment': (G, playerID) => {
-    const player = G.players[playerID];
-    addInventoryToProduct(player, 4);
-  },
-  
-  'quality_control': (G, playerID) => {
-    sellFirstAvailableProduct(G, playerID);
-  },
-  
-  'supply_chain_expansion': passiveEffect,
-  
-  'customer_support_team': passiveEffect,
-  
-  'packaging_upgrade': passiveEffect,
-  
-  'express_returns': (G, playerID) => {
-    const player = G.players[playerID];
-    addInventoryToProduct(player, 2);
-  },
-  
-  'inventory_forecast': passiveEffect,
-  
-  'regional_warehouse': passiveEffect,
-  
-  // === VISIONARY EFFECTS ===
-  'disruptive_pivot': (G, playerID) => {
-    // Double all revenue gained from sales this turn
-    const ctx = ensureEffectContext(G, playerID);
-    ctx.doubleRevenueThisTurn = true;
-  },
-  
-  'moonshot_rd': passiveEffect,
-  
-  'investor_network': passiveEffect,
-  
-  'series_a_funding': (G, playerID) => {
-    gainRevenue(G, playerID, 200000);
-  },
-  
-  'visionary_conference': passiveEffect,
-  
-  'futuristic_prototype': (G, playerID, card) => {
-    if (checkActionPlayedThisTurn(G, playerID)) {
-      doubleProductRevenue(card);
-    }
-  },
-  
-  'innovation_lab': passiveEffect,
-  
-  'venture_capitalist': passiveEffect,
-  
-  'market_disruptor': (G, playerID) => {
-    const player = G.players[playerID];
-    const product = findProductWithInventory(player);
-    if (product && product.inventory) {
-      const quantity = product.inventory;
-      product.inventory = 0;
-      const revenue = 50000 * quantity;
-      gainRevenue(G, playerID, revenue);
-    }
-  },
-  
-  'strategic_partnership': passiveEffect,
-  
-  'patent_portfolio': passiveEffect,
-  
-  'tech_incubator': passiveEffect,
-  
-  'accelerator_program': (G, playerID) => {
-    drawCards(G, playerID, 2);
-    gainCapital(G, playerID, 1);
-  },
-  
-  'thought_leadership': (G, playerID) => {
-    applyTemporaryBonus(G, playerID, 'nextActionRevenue', 30000);
-  },
-  
-  'global_launch_event': passiveEffect,
+// ==========================================
+// CARD EFFECTS REGISTRY
+// ==========================================
 
-  // === SOLO HUSTLER EFFECTS ===
+export const cardEffects: Record<string, (G: GameState, playerID: string, card: Card) => void> = {
+  // ==========================================
+  // SOLO HUSTLER EFFECTS
+  // ==========================================
+  
   'hustle_hard': (G, playerID) => {
     drawCards(G, playerID, 2);
     gainCapital(G, playerID, 1);
@@ -475,7 +183,7 @@ export const cardEffects: Record<string, (G: GameState, playerID: string, card: 
     gainCapital(G, playerID, 2);
   },
 
-  'diy_assembly': passiveEffect,
+  'diy_assembly': passiveEffect, // Cost reduction handled in getCardDiscount
 
   'fast_pivot': (G, playerID) => {
     const player = G.players[playerID];
@@ -509,129 +217,156 @@ export const cardEffects: Record<string, (G: GameState, playerID: string, card: 
     ctx.midnightOilDiscardPending = true;
   },
 
-  // === BRAND BUILDER EFFECTS ===
-  'brand_story': (G, playerID) => {
-    const ctx = ensureEffectContext(G, playerID);
-    ctx.globalAppealBoost = 1;
-  },
-
-  'community_manager': passiveEffect,
-
-  'design_workshop': passiveEffect,
-
-  'storytelling_campaign': (G, playerID) => {
-    const player = G.players[playerID];
-    const product = player.board.Products[0];
-    if (product) {
-      addAppealToProduct(product, 2);
-    }
-  },
-
-  'brand_ambassador_new': passiveEffect,
-
-  'quality_materials': passiveEffect,
-
-  'brand_recognition': (G, playerID) => {
-    const player = G.players[playerID];
-    let totalAppeal = 0;
-    player.board.Products.forEach(product => {
-      totalAppeal += product.appeal || 0;
-    });
-    drawCards(G, playerID, totalAppeal);
-  },
-
-  // === AUTOMATION ARCHITECT EFFECTS ===
-  'basic_script': passiveEffect,
-
-  'automated_pipeline': passiveEffect,
-
-  'code_deployment': (G, playerID) => {
-    const player = G.players[playerID];
-    const toolInHand = player.hand.find(card => card.type === 'Tool');
-    if (toolInHand) {
-      const toolIndex = player.hand.indexOf(toolInHand);
-      player.hand.splice(toolIndex, 1);
-      player.board.Tools.push(toolInHand);
-      
-      if (toolInHand.effect && cardEffects[toolInHand.effect]) {
-        cardEffects[toolInHand.effect](G, playerID, toolInHand);
-      }
-    }
-  },
-
-  'process_optimization': passiveEffect,
-
-  'ml_model': passiveEffect,
-
-  'scheduled_task': (G, playerID) => {
-    const ctx = ensureEffectContext(G, playerID);
-    ctx.recurringCapitalNextTurn = (ctx.recurringCapitalNextTurn || 0) + 1;
-  },
-
-  'system_integration': (G, playerID) => {
-    const ctx = ensureEffectContext(G, playerID);
-    ctx.toolEffectBonus = 1;
-  },
-
-  // === COMMUNITY LEADER EFFECTS ===
-  'viral_post': (G, playerID) => {
-    drawCards(G, playerID, 1);
+  'quick_learner': (G: GameState, playerID: string) => {
+    const lastActionEffect = G.effectContext?.[playerID]?.lastActionEffect;
+    const lastActionCard = G.effectContext?.[playerID]?.lastActionCard;
     
-    const cardsPlayed = G.effectContext?.[playerID]?.cardsPlayedThisTurn || 0;
-    if (cardsPlayed >= 2) {
-      drawCards(G, playerID, 2);
+    // Only copy if we have a valid Action effect to copy
+    if (lastActionEffect && lastActionCard && 
+        lastActionCard.type === 'Action' && 
+        cardEffects[lastActionEffect]) {
+      // Copy the last Action's effect
+      cardEffects[lastActionEffect](G, playerID, lastActionCard);
     }
+    // If no valid Action to copy, Quick Learner does nothing
+  },
+
+  'shoestring_budget': passiveEffect, // Cost reduction handled in getCardDiscount
+
+  // ==========================================
+  // BRAND BUILDER EFFECTS
+  // ==========================================
+  
+  'brand_vision': (G, playerID) => {
+    const player = G.players[playerID];
+    const hasProduct = player.board.Products.length > 0;
+    drawCards(G, playerID, hasProduct ? 2 : 1);
   },
 
   'influencer_collab': (G, playerID) => {
+    // Would add Audience in full implementation
+    gainCapital(G, playerID, 2);
+  },
+
+  'content_calendar': passiveEffect, // Recurring effect handled in processPassiveEffects
+
+  'viral_post': (G, playerID) => {
+    drawCards(G, playerID, 1);
     const cardsPlayed = G.effectContext?.[playerID]?.cardsPlayedThisTurn || 0;
     if (cardsPlayed >= 2) {
-      gainRevenue(G, playerID, 75000);
       drawCards(G, playerID, 2);
     }
   },
 
-  'social_media_manager': passiveEffect,
+  'email_list': passiveEffect, // Recurring effect handled in processPassiveEffects
 
-  'trending_product': passiveEffect,
+  'visual_identity': passiveEffect, // Cost reduction handled in getCardDiscount
 
-  'engagement_boost': (G, playerID) => {
-    applyTemporaryBonus(G, playerID, 'extraActionPlays', 1);
-  },
-
-  'community_platform': (G, playerID, card) => {
-    // Revenue scales with hand size
+  'founder_story': (G, playerID) => {
     const player = G.players[playerID];
-    if (card.revenuePerSale) {
-      boostProductRevenue(card, player.hand.length * 3000);
-    }
+    const hasEmployee = player.board.Employees.length > 0;
+    drawCards(G, playerID, hasEmployee ? 3 : 2);
   },
 
-  'hashtag_campaign': (G, playerID) => {
-    const ctx = ensureEffectContext(G, playerID);
-    ctx.effectsDoubled = true;
+  'social_proof': (G, playerID) => {
+    applyTemporaryBonus(G, playerID, 'nextCapitalGain', 1);
   },
 
-  'content_creator': passiveEffect,
-
-  'meme_magic': passiveEffect,
-
-  // === SERIAL FOUNDER EFFECTS ===
-  'strategic_pivot': (G, playerID) => {
+  'ugc_explosion': (G, playerID) => {
+    // Would double Audience if Product exists in full implementation
     const player = G.players[playerID];
-    // Simple heuristic: if low on cards, draw; if low on capital, gain capital; otherwise refresh
-    if (player.hand.length < 3) {
+    if (player.board.Products.length > 0) {
       drawCards(G, playerID, 2);
-    } else if (player.capital < 3) {
-      gainCapital(G, playerID, 3);
-    } else {
-      // Refresh a product
-      const product = player.board.Products.find(p => p.inventory !== undefined && p.inventory < 3);
-      if (product && product.inventory !== undefined) {
-        product.inventory = 3;
-      }
     }
   },
+
+  'personal_branding': passiveEffect, // Audience gain handled elsewhere
+
+  // ==========================================
+  // AUTOMATION ARCHITECT EFFECTS
+  // ==========================================
+  
+  'auto_fulfill': passiveEffect, // Recurring effect handled in processPassiveEffects
+
+  'optimize_checkout': passiveEffect, // Revenue boost handled in sellProduct
+
+  'analytics_dashboard': passiveEffect, // Deck manipulation handled in processPassiveEffects
+
+  'email_automation': passiveEffect, // Recurring effect handled in processPassiveEffects
+
+  'ab_test': (G, playerID) => {
+    const player = G.players[playerID];
+    drawCards(G, playerID, 2);
+    if (player.hand.length > 0) {
+      // Would trigger discard choice in full implementation
+    }
+  },
+
+  'scale_systems': passiveEffect, // Effect doubling handled in processPassiveEffects
+
+  'optimize_workflow': (G, playerID) => {
+    applyTemporaryBonus(G, playerID, 'nextCardDiscount', 2);
+  },
+
+  'custom_app': passiveEffect, // Modal card handled specially
+
+  'zap_everything': (G, playerID) => {
+    // Would trigger all Tool recurring effects in full implementation
+    const player = G.players[playerID];
+    player.board.Tools.forEach(() => {
+      // Trigger recurring effects
+    });
+  },
+
+  'technical_cofounder': passiveEffect, // Cost reduction handled in getCardDiscount
+
+  // ==========================================
+  // COMMUNITY LEADER EFFECTS
+  // ==========================================
+  
+  'town_hall': (G, playerID) => {
+    const player = G.players[playerID];
+    const employeeCount = player.board.Employees.length;
+    drawCards(G, playerID, employeeCount);
+  },
+
+  'mutual_aid': (G) => {
+    // Each player gains 1 capital
+    Object.keys(G.players).forEach(id => {
+      gainCapital(G, id, 1);
+    });
+  },
+
+  'hype_train': passiveEffect, // Team capital gain handled elsewhere
+
+  'mentorship_circle': passiveEffect, // Team draw handled elsewhere
+
+  'fanbase': passiveEffect, // Recurring effect handled in processPassiveEffects
+
+  'shared_spotlight': (G, playerID) => {
+    // Choose teammate to draw 2 - simplified for single player
+    drawCards(G, playerID, 2);
+  },
+
+  'community_manager': passiveEffect, // Cost reduction handled in getCardDiscount
+
+  'live_ama': (G, playerID) => {
+    drawCards(G, playerID, 2);
+    // Would add 2 Audience in full implementation
+  },
+
+  'merch_drop': passiveEffect, // Product with special cost reduction
+
+  'grassroots_launch': (G, playerID) => {
+    // Would add 5 Audience in full implementation
+    sellFirstAvailableProduct(G, playerID);
+  },
+
+  // ==========================================
+  // SERIAL FOUNDER EFFECTS
+  // ==========================================
+  
+  'legacy_playbook': passiveEffect, // Extra draw handled in processPassiveEffects
 
   'advisory_board': (G, playerID) => {
     const player = G.players[playerID];
@@ -647,55 +382,95 @@ export const cardEffects: Record<string, (G: GameState, playerID: string, card: 
     drawCards(G, playerID, cardsToDraw);
   },
 
-  'growth_hacking': passiveEffect,
+  'spin_off': passiveEffect, // Product with cost reduction based on Products
 
-  'market_expansion': (G, playerID, card) => {
-    // Revenue increases with number of Products controlled
+  'high_profile_exit': (G, playerID) => {
     const player = G.players[playerID];
-    const productCount = player.board.Products.length;
-    boostProductRevenue(card, productCount * 5000);
-  },
-
-  'experience_leverage': (G, playerID) => {
-    applyTemporaryBonus(G, playerID, 'nextCardDiscount', 2);
-  },
-
-  'business_development': passiveEffect,
-
-  'diversified_revenue': (G, playerID, card) => {
-    // Revenue based on variety of cards in play
-    const player = G.players[playerID];
-    const hasTools = player.board.Tools.length > 0 ? 1 : 0;
-    const hasProducts = player.board.Products.length > 0 ? 1 : 0;
-    const hasEmployees = player.board.Employees.length > 0 ? 1 : 0;
+    let productCount = 0;
     
-    const variety = hasTools + hasProducts + hasEmployees;
-    boostProductRevenue(card, variety * 10000);
+    // Sell all products and count them
+    player.board.Products.forEach(product => {
+      if (product.inventory && product.inventory > 0) {
+        sellProduct(G, playerID, product, product.inventory);
+        productCount++;
+      }
+    });
+    
+    // Gain 2 extra capital per product sold
+    gainCapital(G, playerID, productCount * 2);
   },
 
-  'venture_network': passiveEffect,
-
-  'exit_strategy': (G, playerID) => {
+  'tech_press_feature': (G, playerID) => {
+    // Would add 3-5 Audience based on Product in full implementation
     const player = G.players[playerID];
-    const product = findProductWithInventory(player);
-    if (product && product.inventory && product.revenuePerSale) {
-      const quantity = product.inventory;
-      const doubleRevenue = product.revenuePerSale * 2;
-      const totalRevenue = quantity * doubleRevenue;
-      
-      product.inventory = 0;
-      gainRevenue(G, playerID, totalRevenue);
-    }
+    const hasProduct = player.board.Products.length > 0;
+    drawCards(G, playerID, hasProduct ? 2 : 1);
   },
 
-  // === SIMPLE CARD DRAW ON SALE EFFECTS ===
+  'serial_operator': passiveEffect, // Cost reduction handled in getCardDiscount
+
+  'investor_buzz': (G, playerID) => {
+    const ctx = ensureEffectContext(G, playerID);
+    ctx.doubleCapitalGain = true;
+  },
+
+  'incubator_resources': passiveEffect, // Choice handled in processPassiveEffects
+
+  'board_of_directors': passiveEffect, // Recurring effect handled in processPassiveEffects
+
+  'black_friday_blitz': (G, playerID) => {
+    sellFirstAvailableProduct(G, playerID);
+    // Would check for 3rd product this turn for bonus
+  },
+
+  // ==========================================
+  // HERO POWER EFFECTS
+  // ==========================================
+  
+  'solo_hustler_grind': passiveEffect, // Handled in heroAbilities.ts
+  'brand_builder_engage': passiveEffect, // Handled in heroAbilities.ts
+  'automation_architect_deploy': passiveEffect, // Handled in heroAbilities.ts
+  'community_leader_viral': passiveEffect, // Handled in heroAbilities.ts
+  'serial_founder_double_down': passiveEffect, // Handled in heroAbilities.ts
+
+  // ==========================================
+  // PRODUCT SALE EFFECTS (SHARED PRODUCTS)
+  // ==========================================
+  
+  // Simple card draw on sale
   'custom_dog_portrait_sale': (G, playerID) => drawCards(G, playerID, 1),
   'minimalist_planner_sale': (G, playerID) => drawCards(G, playerID, 1),
   'ai_logo_sale': (G, playerID) => drawCards(G, playerID, 1),
   'sticker_pack_sale': (G, playerID) => drawCards(G, playerID, 1),
   'digital_wedding_invite_sale': (G, playerID) => drawCards(G, playerID, 1),
+  
+  // Products with no special effects
+  'holiday_mug_sale': passiveEffect,
+  'soy_candle_sale': passiveEffect,
+  'sweater_bundle_sale': passiveEffect,
+  'yoga_course_sale': passiveEffect,
+  'name_necklace_sale': passiveEffect,
+  'pet_box_sale': passiveEffect,
+  'self_care_sale': passiveEffect,
+  'tshirt_drop_sale': passiveEffect,
+  'coffee_sampler_sale': passiveEffect,
+  'wedding_invite_sale': passiveEffect,
+  'enamel_pin_sale': passiveEffect,
+  'eco_tote_sale': passiveEffect,
+  'freelancing_ebook_sale': passiveEffect,
+  'phone_case_sale': passiveEffect,
+  'art_print_sale': passiveEffect,
+  'planner_stickers_sale': passiveEffect,
+  'pop_hoodie_sale': passiveEffect,
+  'water_bottle_sale': passiveEffect,
+  'makeup_brush_sale': passiveEffect,
+  'subscription_trial_sale': passiveEffect,
+  'budget_tracker_sale': passiveEffect,
+  'dinosaur_tee_sale': passiveEffect,
+  'bath_bomb_sale': passiveEffect,
+  'greeting_cards_sale': passiveEffect,
 
-  // === SIMPLE EFFECTS ===
+  // Products with special effects
   'black_friday_sale': (G, playerID) => {
     applyTemporaryBonus(G, playerID, 'nextProductBonus', 2000);
   },
@@ -704,71 +479,20 @@ export const cardEffects: Record<string, (G: GameState, playerID: string, card: 
     applyTemporaryBonus(G, playerID, 'nextCardDiscount', 1);
   },
 
-  quick_learner: (G: GameState, playerID: string) => {
-    const lastActionEffect = G.effectContext?.[playerID]?.lastActionEffect;
-    const lastActionCard = G.effectContext?.[playerID]?.lastActionCard;
-    
-    // Only copy if we have a valid Action effect to copy
-    if (lastActionEffect && lastActionCard && 
-        lastActionCard.type === 'Action' && 
-        cardEffects[lastActionEffect]) {
-      // Copy the last Action's effect
-      cardEffects[lastActionEffect](G, playerID, lastActionCard);
-    }
-    // If no valid Action to copy, Quick Learner does nothing
-  },
-
-  shoestring_budget: passiveEffect, // Handled in getCardDiscount
-
-  // === INVENTORY SUPPORT EFFECTS ===
+  // ==========================================
+  // INVENTORY SUPPORT EFFECTS
+  // ==========================================
   
-  // Bulk Order Deal - Choose a Product. Add +2 inventory.
   'add_inventory_to_product': (G, playerID) => {
     const player = G.players[playerID];
-    const products = player.board.Products.filter(p => p.isActive !== false);
-    
-    if (products.length === 0) return;
-    
-    if (products.length === 1) {
-      // Only one product, add inventory directly
-      const product = products[0];
-      if (product.inventory !== undefined) {
-        product.inventory += 2;
-      }
-    } else {
-      // Multiple products, create a choice
-      player.pendingChoice = {
-        type: 'choose_card',
-        effect: 'add_inventory_to_product',
-        cards: products.map(p => ({ ...p })),
-      };
-    }
+    createProductChoice(player, 'add_inventory_to_product');
   },
   
-  // Reorder Notification - Choose a Product with 0 inventory. Add +3 inventory.
   'add_inventory_if_empty': (G, playerID) => {
     const player = G.players[playerID];
-    const emptyProducts = player.board.Products.filter(p => 
-      p.isActive !== false && p.inventory === 0
-    );
-    
-    if (emptyProducts.length === 0) return;
-    
-    if (emptyProducts.length === 1) {
-      // Only one empty product, add inventory directly
-      const product = emptyProducts[0];
-      product.inventory = 3;
-    } else {
-      // Multiple empty products, create a choice
-      player.pendingChoice = {
-        type: 'choose_card',
-        effect: 'add_inventory_if_empty',
-        cards: emptyProducts.map(p => ({ ...p })),
-      };
-    }
+    createProductChoice(player, 'add_inventory_if_empty', p => p.inventory === 0);
   },
   
-  // Dropship Restock - All Products with less than 2 inventory gain +1.
   'add_inventory_to_low_stock': (G, playerID) => {
     const player = G.players[playerID];
     player.board.Products.forEach(product => {
@@ -778,7 +502,6 @@ export const cardEffects: Record<string, (G: GameState, playerID: string, card: 
     });
   },
   
-  // Warehouse Expansion - Choose up to 3 Products. Add +1 inventory to each.
   'multi_product_inventory_boost': (G, playerID) => {
     const player = G.players[playerID];
     const products = player.board.Products.filter(p => p.isActive !== false);
@@ -788,9 +511,7 @@ export const cardEffects: Record<string, (G: GameState, playerID: string, card: 
     if (products.length <= 3) {
       // 3 or fewer products, boost them all
       products.forEach(product => {
-        if (product.inventory !== undefined) {
-          product.inventory += 1;
-        }
+        addInventoryToSpecificProduct(product, 1);
       });
     } else {
       // More than 3 products, create a multi-choice
@@ -798,12 +519,10 @@ export const cardEffects: Record<string, (G: GameState, playerID: string, card: 
         type: 'choose_card',
         effect: 'multi_product_inventory_boost',
         cards: products.map(p => ({ ...p })),
-        // Note: The UI would need to handle multi-selection for this
       };
     }
   },
   
-  // Viral Unboxing Video - Choose a Product. Add +1 inventory and +1 sale this turn.
   'inventory_and_sale_boost': (G, playerID) => {
     const player = G.players[playerID];
     const products = player.board.Products.filter(p => 
@@ -813,17 +532,12 @@ export const cardEffects: Record<string, (G: GameState, playerID: string, card: 
     if (products.length === 0) return;
     
     if (products.length === 1) {
-      // Only one product
       const product = products[0];
-      if (product.inventory !== undefined) {
-        product.inventory += 1;
-        // Immediately sell 1 if possible
-        if (product.inventory > 0) {
-          sellProduct(G, playerID, product, 1);
-        }
+      addInventoryToSpecificProduct(product, 1);
+      if (product.inventory && product.inventory > 0) {
+        sellProduct(G, playerID, product, 1);
       }
     } else {
-      // Multiple products, create a choice
       player.pendingChoice = {
         type: 'choose_card',
         effect: 'inventory_and_sale_boost',
@@ -832,7 +546,6 @@ export const cardEffects: Record<string, (G: GameState, playerID: string, card: 
     }
   },
   
-  // Supplier Collab - Choose a Product. Add +2 inventory. Its next sale earns +1000.
   'inventory_boost_plus_revenue': (G, playerID) => {
     const player = G.players[playerID];
     const products = player.board.Products.filter(p => p.isActive !== false);
@@ -842,18 +555,13 @@ export const cardEffects: Record<string, (G: GameState, playerID: string, card: 
     const ctx = ensureEffectContext(G, playerID);
     
     if (products.length === 1) {
-      // Only one product
       const product = products[0];
-      if (product.inventory !== undefined) {
-        product.inventory += 2;
-        // Mark this product for revenue boost
-        if (!ctx.productRevenueBoosts) {
-          ctx.productRevenueBoosts = {};
-        }
-        ctx.productRevenueBoosts[product.id] = 1000;
+      addInventoryToSpecificProduct(product, 2);
+      if (!ctx.productRevenueBoosts) {
+        ctx.productRevenueBoosts = {};
       }
+      ctx.productRevenueBoosts[product.id] = 1000;
     } else {
-      // Multiple products, create a choice
       player.pendingChoice = {
         type: 'choose_card',
         effect: 'inventory_boost_plus_revenue',
@@ -862,60 +570,26 @@ export const cardEffects: Record<string, (G: GameState, playerID: string, card: 
     }
   },
   
-  // Fulfillment App Integration - At the start of your next 2 turns, add +1 inventory to a random Product.
   'delayed_inventory_boost': (G, playerID) => {
     const ctx = ensureEffectContext(G, playerID);
     ctx.delayedInventoryBoostTurns = 2;
   },
   
-  // Inventory Forecast Tool - Draw 1. Then choose a Product to gain +1 inventory.
   'draw_and_inventory': (G, playerID) => {
     drawCards(G, playerID, 1);
-    
     const player = G.players[playerID];
-    const products = player.board.Products.filter(p => p.isActive !== false);
-    
-    if (products.length === 0) return;
-    
-    if (products.length === 1) {
-      // Only one product
-      const product = products[0];
-      if (product.inventory !== undefined) {
-        product.inventory += 1;
-      }
-    } else {
-      // Multiple products, create a choice
-      player.pendingChoice = {
-        type: 'choose_card',
-        effect: 'draw_and_inventory',
-        cards: products.map(p => ({ ...p })),
-      };
-    }
+    createProductChoice(player, 'draw_and_inventory');
   },
   
-  // Last-Minute Restock - Choose any Product. Add +1 inventory.
   'simple_inventory_boost': (G, playerID) => {
     const player = G.players[playerID];
-    const products = player.board.Products.filter(p => p.isActive !== false);
-    
-    if (products.length === 0) return;
-    
-    if (products.length === 1) {
-      // Only one product
-      const product = products[0];
-      if (product.inventory !== undefined) {
-        product.inventory += 1;
-      }
-    } else {
-      // Multiple products, create a choice
-      player.pendingChoice = {
-        type: 'choose_card',
-        effect: 'simple_inventory_boost',
-        cards: products.map(p => ({ ...p })),
-      };
-    }
+    createProductChoice(player, 'simple_inventory_boost');
   },
 };
+
+// ==========================================
+// SPECIAL EFFECT HANDLERS
+// ==========================================
 
 export function resolveFastPivotEffect(G: GameState, playerID: string, productToDestroyId: string) {
   const player = G.players[playerID];
@@ -926,8 +600,6 @@ export function resolveFastPivotEffect(G: GameState, playerID: string, productTo
     drawCards(G, playerID, 2); // Draw 2 cards
     applyTemporaryBonus(G, playerID, 'nextProductDiscount', 2); // Next Product costs 2 less
   } else {
-    // Handle case where product might have been removed by another effect in the interim
-    // Or log an error/warning
     console.warn(`Fast Pivot: Product with ID ${productToDestroyId} not found on board for player ${playerID}.`);
   }
 } 
