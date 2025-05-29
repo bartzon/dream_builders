@@ -50,10 +50,10 @@ export function PlayerBoard({
           <button
             onClick={onUseHeroAbility}
             disabled={player.heroAbilityUsed || player.capital < heroCost}
-            className={`px-3 py-1.5 rounded-lg font-semibold transition-colors text-sm ${
+            className={`px-3 py-1.5 rounded-lg font-semibold text-sm ${
               player.heroAbilityUsed || player.capital < heroCost
                 ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                : `${heroColor} text-white hover:opacity-90`
+                : `${heroColor} text-white`
             }`}
           >
             Hero ({heroCost})

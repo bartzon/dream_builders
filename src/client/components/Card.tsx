@@ -1,6 +1,5 @@
 import React from 'react';
 import type { Card as CardType } from '../../game/types';
-import { motion } from 'framer-motion';
 import { CARD_TYPE_COLORS, CARD_TYPE_BORDER_COLORS } from '../../game/constants';
 
 interface CardProps {
@@ -26,15 +25,13 @@ export function Card({ card, onClick, disabled = false, size = 'small' }: CardPr
   const isDisabled = disabled || isProductDisabled;
   
   return (
-    <motion.div
-      whileHover={!isDisabled ? { scale: 1.05 } : {}}
-      whileTap={!isDisabled ? { scale: 0.95 } : {}}
+    <div
       className={`
         ${sizeClasses[size]}
         ${typeColor}
         ${borderColor}
-        ${isDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:shadow-lg'}
-        rounded-lg border-2 p-2 text-white shadow-md transition-all duration-200
+        ${isDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+        rounded-lg border-2 p-2 text-white shadow-md
         flex flex-col justify-between
         ${card.isActive === false ? 'border-red-400' : ''}
       `}
@@ -97,6 +94,6 @@ export function Card({ card, onClick, disabled = false, size = 'small' }: CardPr
           )}
         </div>
       )}
-    </motion.div>
+    </div>
   );
 } 
