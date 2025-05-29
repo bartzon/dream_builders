@@ -994,7 +994,7 @@ export const cardEffects: Record<string, (G: GameState, playerID: string, card: 
   },
 
   shoestring_budget: () => {
-    // Implementation placeholder - effect to be defined
-    // For now, do nothing
+    // Passive Tool effect - handled in getCardDiscount
+    // Recurring: The first card you play each turn costs 1 less
   },
 }; 

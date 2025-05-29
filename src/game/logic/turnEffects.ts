@@ -292,6 +292,14 @@ export function getCardDiscount(G: GameState, playerID: string, card: Card): num
     }
   }
   
+  // Solo Hustler - Shoestring Budget effect (first card each turn costs 1 less)
+  const shoestringBudget = player.board.Tools.find(t => t.effect === 'shoestring_budget');
+  if (shoestringBudget && G.effectContext?.[playerID] && !G.effectContext[playerID].firstCardDiscountUsed) {
+    discount += 1;
+    // Mark that the first card discount has been used this turn
+    G.effectContext[playerID].firstCardDiscountUsed = true;
+  }
+  
   return Math.min(discount, card.cost); // Can't reduce below 0
 }
 

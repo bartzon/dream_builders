@@ -54,6 +54,9 @@ export interface EffectContext {
   // Action tracking (for Quick Learner)
   lastActionEffect?: string;
   lastActionCard?: Card; // Store the actual card for context
+  
+  // Shoestring Budget tracking
+  firstCardDiscountUsed?: boolean;
 }
 
 // Initialize effect context for each player
@@ -89,6 +92,7 @@ export function initEffectContext(): EffectContext {
     midnightOilDiscardPending: false,
     lastActionEffect: undefined,
     lastActionCard: undefined,
+    firstCardDiscountUsed: false,
   };
 }
 
@@ -134,5 +138,6 @@ export function clearTempEffects(G: GameState, playerID: string) {
     ctx.midnightOilDiscardPending = false;
     ctx.lastActionEffect = undefined;
     ctx.lastActionCard = undefined;
+    ctx.firstCardDiscountUsed = false;
   }
 } 
