@@ -27,7 +27,12 @@ export const ProductsSection = React.memo(({
     const isChooseMode = pendingChoice?.type === 'choose_card'
     const canChoose = isChooseMode && pendingChoice?.cards?.some(c => c.id === product.id)
     
+    // Special handling for add_inventory_if_empty effect - show all products
+    const isReorderNotification = pendingChoice?.effect === 'add_inventory_if_empty'
+    const meetsReorderCriteria = product.inventory === 0
+    
     const isClickable = canDestroy || canChoose
+    const isDimmed = (isChooseMode && !canChoose) || (isReorderNotification && !meetsReorderCriteria)
     
     const handleClick = () => {
       if (isClickable && pendingChoice?.cards) {
@@ -55,13 +60,16 @@ export const ProductsSection = React.memo(({
           background: 
             (isDestroyMode && canDestroy) ? '#dc2626' : 
             (isChooseMode && canChoose) ? '#059669' :
+            isDimmed ? '#4b5563' :
             '#065f46',
           border: 
             (isDestroyMode && canDestroy) ? '2px solid #ef4444' : 
             (isChooseMode && canChoose) ? '2px solid #10b981' :
+            isDimmed ? '1px solid #6b7280' :
             '1px solid #059669',
           cursor: isClickable ? 'pointer' : 'default',
-          position: 'relative'
+          position: 'relative',
+          opacity: isDimmed ? 0.6 : 1
         }}
         onMouseEnter={(e) => onShowTooltip(product, e)}
         onMouseLeave={onHideTooltip}
@@ -70,14 +78,27 @@ export const ProductsSection = React.memo(({
       >
         <BonusIndicator bonuses={bonuses} position="top-right" />
         
-        <div style={{ fontWeight: 'bold', marginBottom: '5px', fontSize: FONT_SIZES.medium }}>
+        <div style={{ 
+          fontWeight: 'bold', 
+          marginBottom: '5px', 
+          fontSize: FONT_SIZES.medium,
+          color: isDimmed ? '#9ca3af' : 'white'
+        }}>
           {product.name}
         </div>
-        <div style={{ fontSize: FONT_SIZES.body, marginBottom: '3px' }}>
+        <div style={{ 
+          fontSize: FONT_SIZES.body, 
+          marginBottom: '3px',
+          color: isDimmed ? '#9ca3af' : 'white'
+        }}>
           Cost: {product.cost}
         </div>
         {product.inventory !== undefined && (
-          <div style={{ fontSize: FONT_SIZES.body, marginBottom: '8px' }}>
+          <div style={{ 
+            fontSize: FONT_SIZES.body, 
+            marginBottom: '8px',
+            color: isDimmed ? '#9ca3af' : 'white'
+          }}>
             Stock: {product.inventory}
           </div>
         )}
@@ -86,8 +107,12 @@ export const ProductsSection = React.memo(({
           <ActionLabel text="DESTROY" color="#fbbf24" />
         )}
         
-        {isChooseMode && canChoose && (
+        {isChooseMode && canChoose && !isReorderNotification && (
           <ActionLabel text="BOOST" color="#10b981" textColor="#fff" />
+        )}
+        
+        {isReorderNotification && meetsReorderCriteria && (
+          <ActionLabel text="RESTOCK +3" color="#10b981" textColor="#fff" />
         )}
       </div>
     )
@@ -112,7 +137,9 @@ export const ProductsSection = React.memo(({
             marginLeft: '10px',
             fontSize: FONT_SIZES.body 
           }}>
-            - Click a product to boost its inventory
+            - {pendingChoice?.effect === 'add_inventory_if_empty' 
+                ? 'Click a product with 0 inventory to add +3' 
+                : 'Click a product to boost its inventory'}
           </span>
         )}
       </h4>
