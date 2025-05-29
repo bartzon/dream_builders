@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { CostDisplay } from '../CostDisplay'
+import { DebugPanel } from '../DebugPanel'
 import type { GameState } from '../../../../game/state'
 
 // Font size constants (increased by 25% from previous)
@@ -449,7 +450,12 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
     // Solo Hustler - Shoestring Budget effect (first card each turn costs 1 less)
     const shoestringBudget = tools.find(t => t.effect === 'shoestring_budget');
     if (shoestringBudget && effectContext && !effectContext.firstCardDiscountUsed) {
-      discount += 1;
+      // Only apply if at least one card has been played since Shoestring Budget was put into play
+      // This prevents Shoestring Budget from discounting itself
+      const cardsPlayedThisTurn = effectContext.cardsPlayedThisTurn as number || 0;
+      if (cardsPlayedThisTurn > 0) {
+        discount += 1;
+      }
     }
     
     // Can't reduce below 0 or be negative discount
@@ -951,6 +957,9 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
           </div>
         </div>
       </div>
+
+      {/* Debug Panel */}
+      <DebugPanel gameState={gameState} playerID={playerID} />
     </div>
   )
 } 
