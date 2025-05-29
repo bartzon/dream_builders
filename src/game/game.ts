@@ -161,6 +161,15 @@ export const DreamBuildersGame: Game<GameState> = {
         if (actionsPlayed < 2) return INVALID_MOVE;
       }
       
+      if (card.effect === 'quick_learner') {
+        // Can only be played if an Action was played this turn
+        const lastActionEffect = G.effectContext?.[playerID]?.lastActionEffect;
+        const lastActionCard = G.effectContext?.[playerID]?.lastActionCard;
+        if (!lastActionEffect || !lastActionCard || lastActionCard.type !== 'Action') {
+          return INVALID_MOVE;
+        }
+      }
+      
       // Apply cost reduction
       const discount = getCardDiscount(G, playerID, card);
       const finalCost = Math.max(0, card.cost - discount);
@@ -183,6 +192,12 @@ export const DreamBuildersGame: Game<GameState> = {
       
       // Play the card based on type
       if (card.type === 'Action') {
+        // Track this Action for Quick Learner
+        if (G.effectContext?.[playerID]) {
+          G.effectContext[playerID].lastActionEffect = card.effect;
+          G.effectContext[playerID].lastActionCard = { ...card }; // Store a copy
+        }
+        
         // Execute immediate effect
         if (card.effect && cardEffects[card.effect]) {
           cardEffects[card.effect](G, playerID, card);

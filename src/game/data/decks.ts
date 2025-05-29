@@ -80,7 +80,7 @@ export const soloHustlerDeck: Card[] = [
     cost: 2,
     type: 'Employee',
     keywords: ['Learning', 'Tempo'],
-    text: 'When played, copy the effect of the last Action played.',
+    text: 'Can only be played after an Action. Copy the effect of the last Action played this turn.',
     effect: 'quick_learner',
   },
   {

@@ -769,7 +769,15 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
                 </div>
               ) : (
                 hand.map((card, i) => {
-                  const canPlay = isMyTurn && Number(card.cost || 0) <= Number(currentPlayer.capital || 0)
+                  const canAffordCard = Number(card.cost || 0) <= Number(currentPlayer.capital || 0)
+                  
+                  // Check Quick Learner special restriction
+                  const isQuickLearner = card.effect === 'quick_learner'
+                  const lastActionEffect = effectContext?.lastActionEffect
+                  const lastActionCard = effectContext?.lastActionCard as Card | undefined
+                  const hasPlayedAction = lastActionEffect && lastActionCard && lastActionCard.type === 'Action'
+                  
+                  const canPlay = isMyTurn && canAffordCard && (!isQuickLearner || hasPlayedAction)
                   const isDiscardMode = pendingChoice?.type === 'discard'
                   
                   // Handle discard mode vs normal play mode

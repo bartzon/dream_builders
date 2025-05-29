@@ -978,4 +978,23 @@ export const cardEffects: Record<string, (G: GameState, playerID: string, card: 
   'greeting_cards_sale': () => {
     // Revenue already handled by revenuePerSale property
   },
+
+  quick_learner: (G: GameState, playerID: string) => {
+    const lastActionEffect = G.effectContext?.[playerID]?.lastActionEffect;
+    const lastActionCard = G.effectContext?.[playerID]?.lastActionCard;
+    
+    // Only copy if we have a valid Action effect to copy
+    if (lastActionEffect && lastActionCard && 
+        lastActionCard.type === 'Action' && 
+        cardEffects[lastActionEffect]) {
+      // Copy the last Action's effect
+      cardEffects[lastActionEffect](G, playerID, lastActionCard);
+    }
+    // If no valid Action to copy, Quick Learner does nothing
+  },
+
+  shoestring_budget: () => {
+    // Implementation placeholder - effect to be defined
+    // For now, do nothing
+  },
 }; 

@@ -1,4 +1,5 @@
 import type { GameState } from '../state';
+import type { Card } from '../types';
 
 // Effect context to track temporary state modifications
 export interface EffectContext {
@@ -49,6 +50,10 @@ export interface EffectContext {
   
   // Card effect delays
   midnightOilDiscardPending?: boolean;
+  
+  // Action tracking (for Quick Learner)
+  lastActionEffect?: string;
+  lastActionCard?: Card; // Store the actual card for context
 }
 
 // Initialize effect context for each player
@@ -82,6 +87,8 @@ export function initEffectContext(): EffectContext {
     automatedSales: false,
     toolEffectBonus: 0,
     midnightOilDiscardPending: false,
+    lastActionEffect: undefined,
+    lastActionCard: undefined,
   };
 }
 
@@ -125,5 +132,7 @@ export function clearTempEffects(G: GameState, playerID: string) {
     ctx.automatedSales = false;
     ctx.toolEffectBonus = 0;
     ctx.midnightOilDiscardPending = false;
+    ctx.lastActionEffect = undefined;
+    ctx.lastActionCard = undefined;
   }
 } 
