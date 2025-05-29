@@ -21,9 +21,9 @@ function DreamBuildersBoard({ G, ctx, moves, playerID, events }: BoardProps<Game
     }
   };
   
-  const handleSellProduct = (productId: string) => {
+  const handleSellProduct = (productIndex: number) => {
     if (isMyTurn) {
-      moves.sellProduct(productId);
+      moves.sellProduct(productIndex);
     }
   };
   

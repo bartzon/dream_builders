@@ -13,11 +13,16 @@ export const GAME_CONFIG = {
   
   // Hero abilities
   HERO_ABILITY_COSTS: {
-    // Legacy heroes
+    // Legacy heroes (old format)
     marketer: 2,
     developer: 1,
     operator: 2,
     visionary: 1,
+    // Legacy heroes (keeping original names for compatibility)
+    Marketer: 2,
+    Developer: 1,
+    Operator: 2,
+    Visionary: 1,
     // New heroes
     solo_hustler: 1,
     brand_builder: 2,
@@ -45,11 +50,16 @@ export const CARD_TYPE_BORDER_COLORS = {
 
 // Hero colors for UI
 export const HERO_COLORS = {
-  // Legacy heroes
+  // Legacy heroes (old format)
   marketer: 'bg-red-600',
   developer: 'bg-blue-600',
   operator: 'bg-gray-600',
   visionary: 'bg-purple-600',
+  // Legacy heroes (keeping original names for compatibility)
+  Marketer: 'bg-red-600',
+  Developer: 'bg-blue-600',
+  Operator: 'bg-gray-600',
+  Visionary: 'bg-purple-600',
   // New heroes
   solo_hustler: 'bg-red-600',      // Red - Fast and scrappy
   brand_builder: 'bg-pink-600',    // Pink/White - Design and community

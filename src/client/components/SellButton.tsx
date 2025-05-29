@@ -2,17 +2,18 @@ import type { Card } from '../../game/types';
 
 interface SellButtonProps {
   product: Card;
-  onSell: (productId: string) => void;
+  productIndex: number;
+  onSell: (productIndex: number) => void;
   disabled?: boolean;
 }
 
-export function SellButton({ product, onSell, disabled = false }: SellButtonProps) {
+export function SellButton({ product, productIndex, onSell, disabled = false }: SellButtonProps) {
   const canSell = product.inventory && product.inventory > 0 && product.isActive !== false;
   const isDisabled = disabled || !canSell;
   
   return (
     <button
-      onClick={() => !isDisabled && onSell(product.id)}
+      onClick={() => !isDisabled && onSell(productIndex)}
       disabled={isDisabled}
       className={`
         px-3 py-1 rounded text-xs font-semibold

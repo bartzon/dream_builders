@@ -33,6 +33,8 @@ function createFullDeck(starterDeck: Card[]): Card[] {
       fullDeck.push({
         ...card,
         keywords: card.keywords || [],
+        // Ensure Product cards have proper defaults
+        isActive: card.type === 'Product' ? (card.isActive !== false) : card.isActive,
       });
     }
   }
@@ -50,6 +52,8 @@ function createFullDeck(starterDeck: Card[]): Card[] {
         fullDeck.push({
           ...card,
           keywords: card.keywords || [],
+          // Ensure Product cards have proper defaults
+          isActive: card.type === 'Product' ? (card.isActive !== false) : card.isActive,
         });
       }
     }
@@ -72,9 +76,8 @@ export const DreamBuildersGame: Game<GameState> = {
       // Create a 30-card deck from the hero's 10-card starter deck
       const fullDeck = createFullDeck(hero.starterDeck);
       
-      // Capitalize hero ID for state compatibility
-      const heroName = hero.id.charAt(0).toUpperCase() + hero.id.slice(1) as PlayerState['hero'];
-      players[playerID] = initializePlayer(heroName, fullDeck);
+      // Use the hero ID directly (no capitalization needed)
+      players[playerID] = initializePlayer(hero.id as PlayerState['hero'], fullDeck);
       
       // Set initial capital to turn 1 value
       players[playerID].capital = 1;
@@ -162,13 +165,6 @@ export const DreamBuildersGame: Game<GameState> = {
         if (actionsPlayed < 2) return INVALID_MOVE;
       }
       
-      // Check if player can play actions
-      if (card.type === 'Action') {
-        const extraActions = G.effectContext?.[playerID]?.extraActionPlays || 0;
-        const actionsPlayed = G.effectContext?.[playerID]?.playedActionsThisTurn || 0;
-        if (actionsPlayed >= 1 && extraActions <= 0) return INVALID_MOVE;
-      }
-      
       // Apply cost reduction
       const discount = getCardDiscount(G, playerID, card);
       const finalCost = Math.max(0, card.cost - discount);
@@ -204,7 +200,9 @@ export const DreamBuildersGame: Game<GameState> = {
         // Add to appropriate board zone
         const boardZone = `${card.type}s` as keyof typeof player.board;
         if (player.board[boardZone]) {
+          console.log(`Adding ${card.type} to board:`, { id: card.id, name: card.name, inventory: card.inventory });
           (player.board[boardZone] as Card[]).push(card);
+          console.log(`Board now has ${(player.board[boardZone] as Card[]).length} ${card.type}s`);
         }
         
         // Execute any immediate effects
@@ -219,20 +217,39 @@ export const DreamBuildersGame: Game<GameState> = {
       }
     },
     
-    sellProduct: ({ G, ctx, playerID }, productId: string) => {
+    sellProduct: ({ G, ctx, playerID }, productIndex: number) => {
       if (playerID !== ctx.currentPlayer) return INVALID_MOVE;
       
       const player = G.players[playerID];
       
-      // Find the product on the board
-      const productIndex = player.board.Products.findIndex(p => p.id === productId);
-      if (productIndex === -1) return INVALID_MOVE;
+      // Validate the product index
+      if (productIndex < 0 || productIndex >= player.board.Products.length) {
+        console.log('Invalid product index:', productIndex, 'Available products:', player.board.Products.length);
+        return INVALID_MOVE;
+      }
       
       const product = player.board.Products[productIndex];
       
+      // Debug logging
+      console.log('Selling product at index', productIndex, ':', {
+        id: product.id,
+        name: product.name,
+        inventory: product.inventory,
+        isActive: product.isActive
+      });
+      
       // Check if product can be sold
-      if (!product.inventory || product.inventory <= 0) return INVALID_MOVE;
-      if (product.isActive === false) return INVALID_MOVE;
+      if (!product.inventory || product.inventory <= 0) {
+        console.log('Product has no inventory:', product.inventory);
+        return INVALID_MOVE;
+      }
+      
+      if (product.isActive === false) {
+        console.log('Product is inactive:', product.isActive);
+        return INVALID_MOVE;
+      }
+      
+      console.log('Product validation passed, selling:', product.name);
       
       // Sell the product
       sellProduct(G, playerID, product, 1);
@@ -258,8 +275,8 @@ export const DreamBuildersGame: Game<GameState> = {
       
       if (player.heroAbilityUsed) return INVALID_MOVE;
       
-      // Find the hero with proper type
-      const hero = allHeroes.find(h => h.id === player.hero.toLowerCase()) as Hero | undefined;
+      // Find the hero - player.hero is now the direct hero ID
+      const hero = allHeroes.find(h => h.id === player.hero) as Hero | undefined;
       if (!hero) return INVALID_MOVE;
       
       // Check cost using hero power

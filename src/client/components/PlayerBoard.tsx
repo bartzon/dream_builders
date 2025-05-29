@@ -9,7 +9,7 @@ interface PlayerBoardProps {
   isMyTurn: boolean;
   onPlayCard?: (index: number) => void;
   onUseHeroAbility?: () => void;
-  onSellProduct?: (productId: string) => void;
+  onSellProduct?: (productIndex: number) => void;
 }
 
 export function PlayerBoard({ 
@@ -20,8 +20,8 @@ export function PlayerBoard({
   onUseHeroAbility,
   onSellProduct
 }: PlayerBoardProps) {
-  const heroColor = HERO_COLORS[player.hero.toLowerCase() as keyof typeof HERO_COLORS] || 'bg-gray-600';
-  const heroCost = GAME_CONFIG.HERO_ABILITY_COSTS[player.hero.toLowerCase() as keyof typeof GAME_CONFIG.HERO_ABILITY_COSTS] || 2;
+  const heroColor = HERO_COLORS[player.hero as keyof typeof HERO_COLORS] || 'bg-gray-600';
+  const heroCost = GAME_CONFIG.HERO_ABILITY_COSTS[player.hero as keyof typeof GAME_CONFIG.HERO_ABILITY_COSTS] || 2;
   
   return (
     <div className={`bg-white rounded-lg shadow-md p-3 mb-3 ${isCurrentPlayer ? 'border-2 border-blue-500' : ''}`}>
@@ -97,6 +97,7 @@ export function PlayerBoard({
                     {isCurrentPlayer && isMyTurn && onSellProduct && (
                       <SellButton
                         product={card}
+                        productIndex={index}
                         onSell={onSellProduct}
                         disabled={!isMyTurn}
                       />

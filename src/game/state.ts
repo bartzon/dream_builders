@@ -11,7 +11,7 @@ export interface PlayerState {
   };
   revenue: number;
   capital: number;
-  hero: "Marketer" | "Developer" | "Operator" | "Visionary" | "Solo_hustler" | "Brand_builder" | "Automation_architect" | "Community_leader" | "Serial_founder";
+  hero: "Marketer" | "Developer" | "Operator" | "Visionary" | "solo_hustler" | "brand_builder" | "automation_architect" | "community_leader" | "serial_founder";
   heroAbilityUsed: boolean;
 }
 
