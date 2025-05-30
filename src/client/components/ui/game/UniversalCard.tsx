@@ -3,7 +3,7 @@ import type { ClientCard } from '../../../types/game';
 import { FONT_SIZES, CARD_STYLES, COLORS, CARD_TYPE_COLORS } from '../../../constants/ui';
 import type { BonusInfo } from './BonusIndicator';
 
-export type CardDisplayMode = 'hand' | 'board' | 'choiceModal' | 'tooltip';
+export type CardDisplayMode = 'hand' | 'board' | 'choiceModal' | 'tooltip' | 'sidebarDetail';
 
 interface UniversalCardProps {
   card: ClientCard;
@@ -56,8 +56,8 @@ export const UniversalCard: React.FC<UniversalCardProps> = React.memo(({
 
   const containerStyle: React.CSSProperties = {
     ...CARD_STYLES,
-    width: displayMode === 'tooltip' ? '150px' : '170px',
-    height: displayMode === 'tooltip' ? '220px' : '280px',
+    width: displayMode === 'sidebarDetail' ? '100%' : (displayMode === 'tooltip' ? '150px' : '170px'),
+    height: displayMode === 'sidebarDetail' ? '440px' : (displayMode === 'tooltip' ? '220px' : '280px'),
     padding: '0',
     background: COLORS.bgDark,
     border: `3px solid ${showPlayableBorder ? COLORS.success : (isSelected ? COLORS.warning : (isAffected ? COLORS.warningLight : COLORS.bgLight))}`,
@@ -77,7 +77,7 @@ export const UniversalCard: React.FC<UniversalCardProps> = React.memo(({
     background: `linear-gradient(to right, ${cardTypeColor}, ${COLORS.bgMedium})`,
     padding: '8px 10px',
     fontWeight: 'bold',
-    fontSize: isCompact ? FONT_SIZES.small : FONT_SIZES.large,
+    fontSize: displayMode === 'sidebarDetail' ? FONT_SIZES.heading : (isCompact ? FONT_SIZES.small : FONT_SIZES.large),
     color: COLORS.textLight,
     borderBottom: `2px solid ${COLORS.bgLight}`,
     textAlign: 'center',
@@ -107,7 +107,7 @@ export const UniversalCard: React.FC<UniversalCardProps> = React.memo(({
   };
 
   const artPlaceholderStyle: React.CSSProperties = {
-    height: isCompact && !forceShowArt ? '50px' : (displayMode === 'tooltip' ? '120px' : '100px'),
+    height: displayMode === 'sidebarDetail' ? '200px' : (isCompact && !forceShowArt ? '50px' : (displayMode === 'tooltip' ? '120px' : '100px')),
     background: COLORS.bgMedium,
     margin: '10px',
     borderRadius: '6px',
@@ -121,23 +121,22 @@ export const UniversalCard: React.FC<UniversalCardProps> = React.memo(({
 
   const descriptionStyle: React.CSSProperties = {
     padding: '0 10px 10px 10px',
-    fontSize: '10px',
+    fontSize: displayMode === 'sidebarDetail' ? FONT_SIZES.small : (!isCompact ? '12px' : '10px'),
     color: COLORS.textLight,
     lineHeight: '1.4',
     textAlign: 'center',
     flexGrow: 1,
     overflow: 'hidden',
     display: '-webkit-box',
-    WebkitLineClamp: isCompact ? 2 : 3,
+    WebkitLineClamp: displayMode === 'sidebarDetail' ? 6 : (isCompact ? 2 : 3),
     WebkitBoxOrient: 'vertical',
-    maxHeight: isCompact ? '40px' : '50px',
   };
 
   const typeAndKeywordsStyle: React.CSSProperties = {
-    padding: '5px 10px',
+    padding: displayMode === 'sidebarDetail' ? '6px 10px' : '5px 10px',
     background: COLORS.bgLight,
     borderTop: `1px solid ${COLORS.textMuted}`,
-    fontSize: '10px',
+    fontSize: displayMode === 'sidebarDetail' ? FONT_SIZES.small : '10px',
     color: COLORS.textMuted,
     textAlign: 'center',
   };
@@ -180,6 +179,11 @@ export const UniversalCard: React.FC<UniversalCardProps> = React.memo(({
         </div>
       )}
 
+      {/* Spacer to push type/keywords to bottom if no description and not compact */}
+      {!card.text && !isCompact && (
+        <div style={{ flexGrow: 1 }}></div>
+      )}
+
       {(!isCompact || (card.keywords && card.keywords.length > 0)) && (
         <div style={typeAndKeywordsStyle}>
           {card.type}
@@ -189,8 +193,8 @@ export const UniversalCard: React.FC<UniversalCardProps> = React.memo(({
                 <span key={kw} style={{
                   background: COLORS.primaryDark,
                   color: COLORS.textLight,
-                  fontSize: '9px',
-                  padding: '1px 4px',
+                  fontSize: displayMode === 'sidebarDetail' ? '12px' : '9px',
+                  padding: displayMode === 'sidebarDetail' ? '2px 5px' : '1px 4px',
                   borderRadius: '3px',
                 }}>{kw}</span>
               ))}

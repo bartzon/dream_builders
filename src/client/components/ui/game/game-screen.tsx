@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { DebugPanel } from '../DebugPanel'
-import { CardTooltip } from './CardTooltip'
 import { HeroPowerTooltip } from './HeroPowerTooltip'
 import { GameHeader } from './GameHeader'
 import { HeroControls } from './HeroControls'
@@ -19,6 +18,7 @@ import type { ClientCard, PendingChoice as ClientPendingChoice, EffectContextUI 
 import { HeroDisplay } from './HeroDisplay'
 import { ChoiceModal } from './ChoiceModal'
 import { BUTTON_STYLES, FONT_SIZES } from "../../../constants/ui"
+import { RightSidebar } from './RightSidebar'
 
 interface GameScreenProps {
   gameState: unknown
@@ -221,7 +221,7 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
       fontFamily: '"Inter", "ShopifySans", "Helvetica Neue", "sans-serif"'
     }}>
       {/* Tooltips */}
-      <CardTooltip {...cardTooltip} />
+      {/* <CardTooltip {...cardTooltip} /> */}
       <HeroPowerTooltip
         {...heroPowerTooltip}
         heroPowerName={heroPowerInfo.name}
@@ -296,6 +296,13 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
             affectedCardIds={affectedCardIds}
           />
         </div>
+
+        {/* Right - Card Tooltip Display Area */}
+        <RightSidebar
+          hoveredCard={cardTooltip.card}
+          isTooltipVisible={cardTooltip.visible}
+        />
+
       </div>
 
       {/* Bottom Row - Hero Display and Hand */}
