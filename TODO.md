@@ -27,11 +27,6 @@ This file tracks unimplemented features, card effects, and mechanics.
 
 ## II. Incomplete Card Effects & Hero Powers
 
-### Solo Hustler
-- **Quick Learner (Employee)**
-    - **Text**: "Can only be played after an Action. Copy the effect of the last Action played this turn."
-    - **Status**: Currently logs a warning. Needs access to the main `cardEffects` registry to function, or a redesign to pass the effect function/key.
-
 ### Brand Builder
 - **Hero Power: Engage**
     - **Text**: "Give a Product +1 Appeal this turn."

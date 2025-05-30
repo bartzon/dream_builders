@@ -158,19 +158,34 @@ export const DreamBuildersGame: Game<GameState> = {
         // Track this Action for Quick Learner
         if (G.effectContext?.[playerID]) {
           G.effectContext[playerID].lastActionEffect = card.effect;
-          G.effectContext[playerID].lastActionCard = { ...card }; // Store a copy
+          G.effectContext[playerID].lastActionCard = { ...card }; 
         }
-        
         // Execute immediate effect
         if (card.effect && cardEffects[card.effect]) {
           cardEffects[card.effect](G, playerID, card);
         }
-        
         // Use up extra action play if applicable
         if (G.effectContext?.[playerID] && G.effectContext[playerID].extraActionPlays) {
           G.effectContext[playerID].extraActionPlays = Math.max(0, G.effectContext[playerID].extraActionPlays - 1);
         }
-      } else {
+      } else if (card.effect === 'quick_learner') {
+        // Quick Learner is an Employee but its effect triggers on play like an Action
+        const lastActionEffect = G.effectContext?.[playerID]?.lastActionEffect;
+        const lastActionCard = G.effectContext?.[playerID]?.lastActionCard;
+
+        if (lastActionEffect && lastActionCard && cardEffects[lastActionEffect]) {
+          if (G.gameLog) G.gameLog.push(`Quick Learner copies ${lastActionCard.name}!`);
+          cardEffects[lastActionEffect](G, playerID, lastActionCard); // Execute the *last Action's* effect
+        } else {
+          // Should not happen if play restriction is working, but as a fallback:
+          if (G.gameLog) G.gameLog.push(`Quick Learner found no Action to copy.`);
+        }
+        // Add Quick Learner to board (as it's an Employee)
+        const boardZone = `${card.type}s` as keyof typeof player.board;
+        if (player.board[boardZone]) {
+          (player.board[boardZone] as Card[]).push(card);
+        }
+      } else { // For Tools, Products, other Employees
         // Add to appropriate board zone
         const boardZone = `${card.type}s` as keyof typeof player.board;
         if (player.board[boardZone]) {
@@ -178,8 +193,7 @@ export const DreamBuildersGame: Game<GameState> = {
           (player.board[boardZone] as Card[]).push(card);
           console.log(`Board now has ${(player.board[boardZone] as Card[]).length} ${card.type}s`);
         }
-        
-        // Execute any immediate effects
+        // Execute any immediate on-play effects for these card types (if any)
         if (card.effect && cardEffects[card.effect]) {
           cardEffects[card.effect](G, playerID, card);
         }

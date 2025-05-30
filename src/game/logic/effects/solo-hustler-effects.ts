@@ -54,9 +54,7 @@ export const soloHustlerCardEffects: Record<string, (G: GameState, playerID: str
     ctx.midnightOilDiscardPending = true;
   },
   // Quick Learner: Can only be played after an Action. Copy the effect of the last Action played this turn.
-  'quick_learner': (G: GameState, playerID: string) => {
-    console.warn('Quick Learner effect needs cardEffects registry to function correctly. Implementation deferred.');
-  },
+  'quick_learner': passiveEffect,
   // Shoestring Budget: Recurring: The first card you play each turn costs 1 less.
   'shoestring_budget': passiveEffect,
 }; 
