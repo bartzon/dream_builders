@@ -57,6 +57,15 @@ export function checkGameEnd(G: GameState): void {
       allPlayersStuck = false;
       break;
     }
+    
+    // Check if player has products with inventory that can still sell
+    const hasProductsWithInventory = player.board.Products.some(
+      product => product.inventory && product.inventory > 0 && product.isActive !== false
+    );
+    if (hasProductsWithInventory) {
+      allPlayersStuck = false;
+      break;
+    }
   }
   
   if (allPlayersStuck) {
