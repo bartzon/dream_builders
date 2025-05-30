@@ -201,13 +201,13 @@ export default function HeroSelection({ onHeroSelected }: HeroSelectionProps) {
       <div style={{
         display: 'flex',
         gap: '20px',
-        flexWrap: 'wrap',
         justifyContent: 'center',
         alignItems: 'center',
         paddingTop: '10px',
         paddingBottom: '20px',
         width: '100%',
-        maxWidth: 'calc(220px * 3 + 20px * 2)'
+        maxWidth: '1187px',
+        overflowX: 'auto',
       }}>
         {allHeroes.map((hero) => (
           <div
