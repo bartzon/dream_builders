@@ -1,19 +1,18 @@
 import React from 'react';
-import type { ClientCard, PendingChoice } from '../../../types/game'; // Use PendingChoice
+import type { ClientCard, PendingChoice, GameUIState } from '../../../types/game';
 import { FONT_SIZES, BUTTON_STYLES, COLORS } from '../../../constants/ui';
-import { ChoiceCardDisplay } from './ChoiceCardDisplay';
+import { UniversalCard, type CardDisplayMode } from './UniversalCard';
 
 interface ChoiceModalProps {
-  pendingChoice: PendingChoice | undefined; // Corrected type
+  pendingChoice: PendingChoice | undefined;
   onMakeChoice: (choiceIndex: number, optionText?: string) => void;
-  // Add other necessary props, e.g., uiState if needed for disabling options
-  currentProductsCount: number; // Needed for disabling Double Down option
+  uiState: GameUIState;
 }
 
 export const ChoiceModal: React.FC<ChoiceModalProps> = React.memo(({
   pendingChoice,
   onMakeChoice,
-  currentProductsCount,
+  uiState,
 }) => {
   if (!pendingChoice) return null;
 
@@ -23,7 +22,7 @@ export const ChoiceModal: React.FC<ChoiceModalProps> = React.memo(({
 
   const getOptionDisabledState = (optionText: string): boolean => {
     if (effect === 'serial_founder_double_down') {
-      if (optionText.toLowerCase().includes('add 2 inventory') && currentProductsCount === 0) {
+      if (optionText.toLowerCase().includes('add 2 inventory') && uiState.products.length === 0) {
         return true;
       }
     }
@@ -75,11 +74,11 @@ export const ChoiceModal: React.FC<ChoiceModalProps> = React.memo(({
           </p>
           <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', flexWrap: 'wrap' }}>
             {cards.map((card: ClientCard, index: number) => (
-              <div key={card.id || index} style={{ textAlign: 'center' }}>
-                <ChoiceCardDisplay card={card} />
+              <div key={card.id || index} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+                <UniversalCard card={card} displayMode={'choiceModal' as CardDisplayMode} />
                 <button 
                   onClick={() => onMakeChoice(index)}
-                  style={{...BUTTON_STYLES, background: COLORS.danger, marginTop: '8px', padding: '8px 16px'}}
+                  style={{...BUTTON_STYLES, background: COLORS.danger, padding: '6px 12px', fontSize: FONT_SIZES.small}}
                 >
                   Discard {card.name}
                 </button>
@@ -104,9 +103,10 @@ export const ChoiceModal: React.FC<ChoiceModalProps> = React.memo(({
           <p style={{fontSize: FONT_SIZES.body, margin: '0 0 10px 0'}}>You drew these cards. Click one to discard:</p>
           <div style={{ display: 'flex', justifyContent: 'center', gap: '15px', flexWrap: 'wrap' }}>
             {cards.map((card: ClientCard, index: number) => (
-              <ChoiceCardDisplay 
+              <UniversalCard 
                 key={card.id || index} 
                 card={card} 
+                displayMode={'choiceModal' as CardDisplayMode}
                 isClickable={true} 
                 onClick={() => onMakeChoice(index)} 
               />

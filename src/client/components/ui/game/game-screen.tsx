@@ -330,7 +330,7 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
       <ChoiceModal 
         pendingChoice={pendingChoice} 
         onMakeChoice={handleMakeChoice} 
-        currentProductsCount={uiState.products.length} 
+        uiState={uiState}
       />
 
       {/* Debug Panel */}

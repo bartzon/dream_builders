@@ -1,13 +1,14 @@
 import React from 'react';
 import type { ClientCard } from '../../../types/game';
 import { FONT_SIZES, CARD_STYLES, COLORS, CARD_TYPE_COLORS } from '../../../constants/ui';
+import { CostDisplay } from '../CostDisplay'; // Import CostDisplay
 
 interface ChoiceCardDisplayProps {
   card: ClientCard;
   onClick?: () => void;
   isClickable?: boolean;
   compact?: boolean;
-  // Add any other props needed for simple display, e.g., isSelected if we want to show a selection state
+  isSelected?: boolean; 
 }
 
 export const ChoiceCardDisplay: React.FC<ChoiceCardDisplayProps> = React.memo(({
@@ -15,26 +16,27 @@ export const ChoiceCardDisplay: React.FC<ChoiceCardDisplayProps> = React.memo(({
   onClick,
   isClickable = false,
   compact = false,
+  isSelected = false,
 }) => {
   const cardTypeColor = CARD_TYPE_COLORS[card.type.toLowerCase()] || COLORS.default;
-  const defaultBoxShadow = '0 2px 4px rgba(0,0,0,0.1)'; // Softer default shadow
+  const defaultBoxShadow = CARD_STYLES.boxShadow || '0 2px 4px rgba(0,0,0,0.1)';
 
   const containerStyle: React.CSSProperties = {
     ...CARD_STYLES,
-    minWidth: compact ? '100px' : '150px',
-    maxWidth: compact ? '120px' : '180px',
-    minHeight: compact ? '70px' : '100px',
-    padding: compact ? '8px' : '12px',
-    background: `linear-gradient(to bottom, ${cardTypeColor} 20%, ${COLORS.bgMedium} 100%)`,
-    border: `2px solid ${cardTypeColor}`,
+    width: compact ? '130px' : '160px',
+    minHeight: compact ? '80px' : '110px',
+    padding: compact ? '8px' : '10px',
+    background: `linear-gradient(to bottom, ${cardTypeColor} 15%, ${COLORS.bgMedium} 100%)`,
+    border: `2px solid ${isSelected ? COLORS.warning : cardTypeColor}`,
     color: COLORS.white,
     textAlign: 'left',
     cursor: isClickable && onClick ? 'pointer' : 'default',
-    boxShadow: defaultBoxShadow, // Default shadow, can be overridden by hover/selection if needed
+    boxShadow: isSelected ? `0 0 12px 4px ${COLORS.warning}` : defaultBoxShadow,
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'space-between',
-    transition: CARD_STYLES.transition + ', box-shadow 0.2s ease-in-out',
+    transition: CARD_STYLES.transition + ', box-shadow 0.2s ease-in-out, border-color 0.2s ease-in-out',
+    transform: isSelected ? 'scale(1.03)' : 'scale(1)',
   };
 
   return (
@@ -42,15 +44,15 @@ export const ChoiceCardDisplay: React.FC<ChoiceCardDisplayProps> = React.memo(({
       style={containerStyle} 
       onClick={isClickable ? onClick : undefined}
       onMouseEnter={(e) => {
-        if (isClickable && onClick) {
-          e.currentTarget.style.boxShadow = `0 0 10px 3px ${COLORS.warning}`;
-          e.currentTarget.style.transform = 'scale(1.03)';
+        if (isClickable && onClick && !isSelected) {
+          e.currentTarget.style.borderColor = COLORS.warningLight;
+          e.currentTarget.style.boxShadow = `0 0 8px 2px ${COLORS.warningLight}`;
         }
       }}
       onMouseLeave={(e) => {
-        if (isClickable && onClick) {
+        if (isClickable && onClick && !isSelected) {
+          e.currentTarget.style.borderColor = cardTypeColor;
           e.currentTarget.style.boxShadow = defaultBoxShadow;
-          e.currentTarget.style.transform = 'scale(1)';
         }
       }}
     >
@@ -62,26 +64,41 @@ export const ChoiceCardDisplay: React.FC<ChoiceCardDisplayProps> = React.memo(({
           whiteSpace: 'nowrap',
           overflow: 'hidden',
           textOverflow: 'ellipsis',
-          marginBottom: '4px',
+          marginBottom: '5px',
         }}>
           {card.name}
         </div>
-        <div style={{ fontSize: compact ? '11px' : FONT_SIZES.small, color: COLORS.textMuted }}>
-          Cost: {card.cost} | Type: {card.type}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: compact ? '2px' : '4px' }}>
+          <CostDisplay originalCost={card.cost} discount={0} size={compact ? 'tiny' : 'small'} className='text-white' />
+          <span style={{ fontSize: compact ? '10px' : FONT_SIZES.small, color: COLORS.textMuted }}>{card.type}</span>
         </div>
+        {card.keywords && card.keywords.length > 0 && !compact && (
+          <div style={{ marginBottom: '4px', display: 'flex', flexWrap: 'wrap', gap: '3px' }}>
+            {card.keywords.slice(0, 2).map(kw => (
+              <span key={kw} style={{
+                background: COLORS.primaryDark,
+                color: COLORS.textLight,
+                fontSize: '10px',
+                padding: '1px 4px',
+                borderRadius: '3px',
+              }}>{kw}</span>
+            ))}
+          </div>
+        )}
       </div>
       {!compact && card.text && (
         <p style={{
           fontSize: '11px',
           color: COLORS.textLight,
-          marginTop: '6px',
           lineHeight: '1.3',
-          maxHeight: '30px', // Adjust for 2 lines approx
+          maxHeight: '2.6em', // Approx 2 lines
           overflow: 'hidden',
           textOverflow: 'ellipsis',
-          WebkitBoxOrient: 'vertical',
-          WebkitLineClamp: 2, // Show max 2 lines of text
           display: '-webkit-box',
+          WebkitBoxOrient: 'vertical',
+          WebkitLineClamp: 2,
+          margin: '0',
+          marginTop: 'auto', // Pushes text to bottom if keywords are few/none
         }}>
           {card.text}
         </p>

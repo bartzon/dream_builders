@@ -70,11 +70,9 @@ This file tracks unimplemented features, card effects, and mechanics.
 ## III. UI & UX Enhancements
 
 - **Advanced Player Choice UI**: 
-    - Refine `ChoiceModal` to use `<ChoiceCardDisplay />` for card choices (Analytics Dashboard, A/B Test) to show card-like panels.
-    - UI for Serial Founder hero power choice (handled by `ChoiceModal` `choose_option`).
     - UI for Custom App modal play choice.
     - UI for Incubator Resources option choice.
-    // Multi-selection (e.g., Warehouse Expansion - current implementation is sequential single picks).
+    // Multi-selection (e.g., Warehouse Expansion - current implementation is sequential single picks) - Needs UI to show X of Y selected if choice persists across clicks.
 - **Tooltips**: Review all tooltips for clarity and completeness, especially for cards with complex or unimplemented effects.
 - **Visual Feedback**: 
     - Enhance for other game states or effects (e.g., when a choice is pending generally).

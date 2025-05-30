@@ -1,7 +1,8 @@
 import React from 'react'
-import { FONT_SIZES, CARD_STYLES } from '../../../constants/ui'
-import { BonusIndicator, type BonusInfo } from './BonusIndicator'
 import type { ClientCard, PendingChoice, EffectContextUI } from '../../../types/game'
+import { FONT_SIZES, COLORS } from '../../../constants/ui'
+import { BonusIndicator, type BonusInfo } from './BonusIndicator'
+import { UniversalCard, type CardDisplayMode } from './UniversalCard'
 
 interface ProductsSectionProps {
   products: ClientCard[]
@@ -24,20 +25,21 @@ export const ProductsSection = React.memo(({
 }: ProductsSectionProps) => {
   const renderProduct = (product: ClientCard, index: number) => {
     const isDestroyMode = pendingChoice?.type === 'destroy_product'
-    const canDestroy = isDestroyMode && pendingChoice?.cards?.some(c => c.id === product.id)
+    const productInChoiceList = pendingChoice?.cards?.find(c => c.id === product.id)
+    const canDestroy = isDestroyMode && !!productInChoiceList
     
     const isChooseMode = pendingChoice?.type === 'choose_card'
-    const canChoose = isChooseMode && pendingChoice?.cards?.some(c => c.id === product.id)
+    const canChoose = isChooseMode && !!productInChoiceList
     
-    // Special handling for add_inventory_if_empty effect - show all products
     const isReorderNotification = pendingChoice?.effect === 'add_inventory_if_empty'
     const meetsReorderCriteria = product.inventory === 0
     
-    const isClickable = canDestroy || (canChoose && (!isReorderNotification || meetsReorderCriteria))
-    const isDimmed = (isChooseMode && !canChoose) || (isReorderNotification && !meetsReorderCriteria && !canChoose) || (isDestroyMode && !canDestroy)
-    
+    let isClickableForChoice = false
+    if (isDestroyMode && canDestroy) isClickableForChoice = true
+    if (isChooseMode && canChoose && (!isReorderNotification || meetsReorderCriteria)) isClickableForChoice = true
+
     const handleClick = () => {
-      if (isClickable && pendingChoice?.cards) {
+      if (isClickableForChoice && pendingChoice?.cards) {
         const choiceIndex = pendingChoice.cards.findIndex(c => c.id === product.id)
         if (choiceIndex >= 0) {
           onMakeChoice(choiceIndex)
@@ -45,7 +47,6 @@ export const ProductsSection = React.memo(({
       }
     }
     
-    // Check for bonuses on this product
     const bonuses: BonusInfo[] = []
     if (product.id && effectContext.productRevenueBoosts?.[product.id]) {
       bonuses.push({
@@ -53,75 +54,36 @@ export const ProductsSection = React.memo(({
         value: effectContext.productRevenueBoosts[product.id]
       })
     }
+    if (product.isActive === false) {
+        bonuses.push({ type: 'delayed', value: '😴', label: 'Inactive' })
+    }
     
-    const isAffected = product.id ? affectedCardIds.has(product.id) : false;
-    const affectedStyle: React.CSSProperties = isAffected 
-      ? { boxShadow: '0 0 12px 4px rgba(129, 230, 217, 0.8)', transition: 'box-shadow 0.3s ease-out' } 
-      : { transition: 'box-shadow 0.3s ease-out' };
+    const isAffected = product.id ? affectedCardIds.has(product.id) : false
 
     return (
-      <div 
-        key={`${product.id || 'product'}-${index}`}
-        style={{
-          ...CARD_STYLES,
-          background: 
-            (isDestroyMode && canDestroy) ? '#dc2626' : 
-            (isChooseMode && canChoose && (!isReorderNotification || meetsReorderCriteria)) ? '#059669' :
-            isDimmed ? '#4b5563' :
-            '#065f46',
-          border: 
-            (isDestroyMode && canDestroy) ? '2px solid #ef4444' : 
-            (isChooseMode && canChoose && (!isReorderNotification || meetsReorderCriteria)) ? '2px solid #10b981' :
-            isDimmed ? '1px solid #6b7280' :
-            '1px solid #059669',
-          cursor: isClickable ? 'pointer' : 'default',
-          position: 'relative',
-          opacity: isDimmed ? 0.6 : 1,
-          ...affectedStyle
-        }}
-        onMouseEnter={(e) => onShowTooltip(product, e)}
-        onMouseLeave={onHideTooltip}
-        onMouseMove={(e) => onShowTooltip(product, e)}
-        onClick={handleClick}
-      >
-        <BonusIndicator bonuses={bonuses} position="top-right" />
-        
-        <div style={{ 
-          fontWeight: 'bold', 
-          marginBottom: '5px', 
-          fontSize: FONT_SIZES.medium,
-          color: isDimmed ? '#9ca3af' : 'white'
-        }}>
-          {product.name}
-        </div>
-        <div style={{ 
-          fontSize: FONT_SIZES.body, 
-          marginBottom: '3px',
-          color: isDimmed ? '#9ca3af' : 'white'
-        }}>
-          Cost: {product.cost}
-        </div>
-        {product.inventory !== undefined && (
-          <div style={{ 
-            fontSize: FONT_SIZES.body, 
-            marginBottom: '8px',
-            color: isDimmed ? '#9ca3af' : 'white'
-          }}>
-            Stock: {product.inventory}
-          </div>
-        )}
-        
+      <div key={`${product.id || 'product'}-${index}`} style={{position: 'relative'}}>
+        <UniversalCard
+          card={product}
+          displayMode={'board' as CardDisplayMode}
+          isClickable={isClickableForChoice}
+          onClick={handleClick}
+          isAffected={isAffected}
+          isSelected={isClickableForChoice || (isDestroyMode && canDestroy) || (isChooseMode && canChoose && (!isReorderNotification || meetsReorderCriteria))}
+          showBonuses={true}
+          onMouseEnterCard={(e) => onShowTooltip(product, e)}
+          onMouseLeaveCard={onHideTooltip}
+          onMouseMoveCard={(e) => onShowTooltip(product, e)}
+        />
         {isDestroyMode && canDestroy && (
-          <ActionLabel text="DESTROY" color="#fbbf24" />
+          <ActionLabel text="DESTROY" color={COLORS.danger} />
         )}
-        
         {isChooseMode && canChoose && !isReorderNotification && (
-          <ActionLabel text="BOOST" color="#10b981" textColor="#fff" />
+          <ActionLabel text="BOOST" color={COLORS.success} textColor={COLORS.white} />
         )}
-        
         {isReorderNotification && meetsReorderCriteria && (
-          <ActionLabel text="RESTOCK +3" color="#10b981" textColor="#fff" />
+          <ActionLabel text="RESTOCK +3" color={COLORS.success} textColor={COLORS.white} />
         )}
+        {bonuses.length > 0 && <BonusIndicator bonuses={bonuses} position="bottom-left" />}
       </div>
     )
   }
