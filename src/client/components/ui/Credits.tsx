@@ -143,9 +143,9 @@ export const Credits: React.FC<CreditsProps> = ({ isOpen, onClose }) => {
               fontStyle: 'italic',
             }}
           >
-            Designed with actual ideas. Built by actual humans. 
-            <br />
-            Enthusiastically hallucinated by actual AI.
+            Designed with actual ideas. Enthusiastically hallucinated by actual AI.
+            <br/>
+            No lines of code were written by hand during the making of this game.
           </p>
         </div>
 
