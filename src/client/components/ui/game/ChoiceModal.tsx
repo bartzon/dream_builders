@@ -100,7 +100,7 @@ export const ChoiceModal: React.FC<ChoiceModalProps> = React.memo(({
             {effect === 'brand_builder_engage_add_inventory' && 'Choose a product to add +2 inventory'}
             {effect === 'black_friday_blitz_sell_product' && 'Choose a product with inventory to sell'}
             {effect === 'add_inventory_if_empty' && 'Choose a product with 0 inventory to restock (+3)'}
-            {effect === 'multi_product_inventory_boost' && 'Choose products to add +1 inventory each (or End Turn to finish)'}
+            {effect === 'multi_product_inventory_boost' && 'Choose products to add +1 inventory each (up to 3 total)'}
             {!['serial_founder_double_down_add_inventory', 'brand_builder_engage_add_inventory', 'black_friday_blitz_sell_product', 'add_inventory_if_empty', 'multi_product_inventory_boost'].includes(effect || '') && 'Choose a product to boost'}
           </p>
           <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', flexWrap: 'wrap' }}>
@@ -126,6 +126,20 @@ export const ChoiceModal: React.FC<ChoiceModalProps> = React.memo(({
               );
             })}
           </div>
+          {effect === 'multi_product_inventory_boost' && (
+            <button
+              onClick={() => onMakeChoice(-1)} // -1 to signal "Done" selection
+              style={{
+                ...BUTTON_STYLES,
+                background: COLORS.bgLight,
+                color: COLORS.white,
+                marginTop: '15px',
+                padding: '10px 20px'
+              }}
+            >
+              Done Selecting
+            </button>
+          )}
         </div>
       );
       break;

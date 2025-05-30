@@ -431,6 +431,17 @@ export const DreamBuildersGame: Game<GameState> = {
           player.pendingChoice = undefined;
         } else {
           // Existing generic inventory/product choice logic
+          // Special handling for multi_product_inventory_boost "Done" button
+          if (choice.effect === 'multi_product_inventory_boost' && choiceIndex === -1) {
+            if (G.effectContext?.[playerID]) {
+              const selectedCount = G.effectContext[playerID].warehouseExpansionCount || 0;
+              G.effectContext[playerID].warehouseExpansionCount = 0;
+              if (G.gameLog) G.gameLog.push(`Warehouse Expansion: Finished selecting (${selectedCount} product${selectedCount === 1 ? '' : 's'} boosted).`);
+            }
+            player.pendingChoice = undefined;
+            return; // Early return to avoid invalid card access
+          }
+          
           if (!choice.cards || choiceIndex < 0 || choiceIndex >= choice.cards.length) return INVALID_MOVE;
           const chosenCard = choice.cards[choiceIndex];
           const boardProduct = player.board.Products.find(p => p.id === chosenCard.id);
