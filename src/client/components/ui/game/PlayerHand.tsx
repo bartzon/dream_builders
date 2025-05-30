@@ -68,12 +68,13 @@ export const PlayerHand = React.memo(({
     const isHovered = hoveredIndex === index
     const cardAngle = numCards > 1 ? (index - (numCards - 1) / 2) * (FAN_ANGLE / (numCards -1 )) * 2 : 0;
     const cardRaiseY = isHovered ? -HOVER_RAISE_Y : 0
-    const cardScale = isHovered ? HOVER_SCALE : 1
+    const cardScale = isHovered ? HOVER_SCALE : (canPlay ? 1 : 0.85)
     const cardZIndex = isHovered ? 100 : index
 
     const cardStyle: React.CSSProperties = {
       transition: 'transform 0.2s ease-out, filter 0.2s ease-out',
       transform: `translateY(${cardRaiseY}px) rotate(${cardAngle}deg) scale(${cardScale})`,
+      transformOrigin: 'bottom center',
       marginLeft: index > 0 ? `-${CARD_OVERLAP}px` : '0',
       zIndex: cardZIndex,
       position: 'relative', // Needed for z-index to work
