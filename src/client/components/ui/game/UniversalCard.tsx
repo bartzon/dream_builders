@@ -34,6 +34,18 @@ export const UniversalCard: React.FC<UniversalCardProps> = React.memo(({
   onMouseLeaveCard,
   onMouseMoveCard,
 }) => {
+  const [artworkSrc, setArtworkSrc] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (card.id) {
+      const imagePath = `/src/assets/cards/${card.id}.png`;
+      const img = new Image();
+      img.src = imagePath;
+      img.onload = () => setArtworkSrc(imagePath);
+      img.onerror = () => setArtworkSrc(null); // Keep placeholder if image fails to load
+    }
+  }, [card.id]);
+
   const cardTypeColor = CARD_TYPE_COLORS[card.type.toLowerCase()] || COLORS.default;
   const defaultBoxShadow = '0 4px 8px rgba(0,0,0,0.2), 0 6px 20px rgba(0,0,0,0.19)';
 
@@ -102,7 +114,7 @@ export const UniversalCard: React.FC<UniversalCardProps> = React.memo(({
     justifyContent: 'center',
     color: COLORS.textMuted,
     fontSize: FONT_SIZES.small,
-    border: `1px dashed ${COLORS.textMuted}`,
+    border: artworkSrc ? `1px solid ${COLORS.bgLight}` : `1px dashed ${COLORS.textMuted}`,
   };
 
   const descriptionStyle: React.CSSProperties = {
@@ -152,7 +164,11 @@ export const UniversalCard: React.FC<UniversalCardProps> = React.memo(({
 
       {!isCompact && (
         <div style={artPlaceholderStyle}>
-          Card Art
+          {artworkSrc ? (
+            <img src={artworkSrc} alt={`${card.name} artwork`} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '6px' }} />
+          ) : (
+            'Card Art'
+          )}
         </div>
       )}
 
