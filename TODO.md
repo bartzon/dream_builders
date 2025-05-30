@@ -60,9 +60,6 @@ This file tracks unimplemented features, card effects, and mechanics.
 - **Advisory Board (Tool)**
     - **Text**: "Whenever you play a Product, draw 1 card."
     - **Status**: Current effect in `serial-founder-effects.ts` draws based on counts of Products, Tools, and Employees *on the board*, not when a Product is played. Needs to be moved to `handleCardPlayEffects` in `turnEffects.ts` to trigger when a Product card is played.
-- **Incubator Resources (Tool)**
-    - **Text**: "At the start of your turn, gain 1 capital or draw 1."
-    - **Status**: `passiveEffect`. Needs logic in `processPassiveEffects` to offer this choice to the player.
 - **Black Friday Blitz (Action)**
     - **Text**: "Sell a Product. If it's your third Product this turn, gain 3 extra capital."
     - **Status**: Currently just sells a product. Conditional capital gain (checking if it's the 3rd *Product played or sold* this turn) is not implemented.

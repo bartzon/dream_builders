@@ -33,6 +33,7 @@ export const ChoiceModal: React.FC<ChoiceModalProps> = React.memo(({
     case 'choose_option':
       if (!options) return null;
       if (effect === 'serial_founder_double_down') title = 'Double Down: Choose an Effect';
+      else if (effect === 'incubator_resources_choice') title = 'Incubator Resources: Choose Bonus';
       // Add more titles for other 'choose_option' effects here
       // else if (effect === 'incubator_resources_choice') title = 'Incubator: Choose Resource';
       

@@ -1,4 +1,5 @@
 import type { GameState } from '../../state';
+import type { Card } from '../../types'; // Import Card type
 import { drawCard } from '../utils/deck-helpers'; // Assuming drawCard is what's needed
 
 export function handleSerialFounderChoicePassives(G: GameState, playerID: string): void {
@@ -30,5 +31,16 @@ export function handleSerialFounderChoicePassives(G: GameState, playerID: string
     } else { // turnMod === 0
       player.revenue += 25000;
     }
+  }
+
+  // Incubator Resources - choose capital or card draw at start of turn
+  const incubatorResources = player.board.Tools.find(t => t.effect === 'incubator_resources');
+  if (incubatorResources && !player.pendingChoice) { // Ensure no other choice is active
+    player.pendingChoice = {
+      type: 'choose_option',
+      effect: 'incubator_resources_choice',
+      options: ['Gain 1 Capital', 'Draw 1 Card'],
+      sourceCard: { ...incubatorResources } as Card // Pass a copy of the source card
+    };
   }
 } 

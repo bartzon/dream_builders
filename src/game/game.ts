@@ -23,7 +23,8 @@ import {
   drawCard, 
   initializePlayer, 
   checkGameEnd,
-  sellProduct // Specifically import sellProduct if needed directly, though often used via other effects
+  sellProduct,
+  gainCapital // Added gainCapital import
 } from './logic/index';
 
 // Helper function to shuffle an array (remains local or could be a general game util)
@@ -338,29 +339,46 @@ export const DreamBuildersGame: Game<GameState> = {
         }
         player.pendingChoice = undefined;
       } 
-      else if (choice.type === 'choose_option' && choice.effect === 'serial_founder_double_down') {
-        if (choiceIndex === 0) { // Option: Draw a card
-          drawCard(player);
-          if (G.gameLog) G.gameLog.push(`Serial Founder (Double Down): Chose to draw a card.`);
-          player.pendingChoice = undefined;
-        } else if (choiceIndex === 1) { // Option: Add 2 inventory to a Product
-          const activeProducts = player.board.Products.filter(p => p.isActive !== false && p.inventory !== undefined);
-          if (activeProducts.length > 0) {
-            player.pendingChoice = {
-              type: 'choose_card',
-              effect: 'serial_founder_double_down_add_inventory', // Specific sub-effect
-              cards: activeProducts.map(p => ({ ...p })),
-            };
-            if (G.gameLog) G.gameLog.push(`Serial Founder (Double Down): Chose to add inventory. Select a product.`);
-          } else {
-            if (G.gameLog) G.gameLog.push(`Serial Founder (Double Down): Chose to add inventory, but no products on board.`);
+      else if (choice.type === 'choose_option') {
+        if (choice.effect === 'serial_founder_double_down') {
+          if (choiceIndex === 0) { // Option: Draw a card
+            drawCard(player);
+            if (G.gameLog) G.gameLog.push(`Serial Founder (Double Down): Chose to draw a card.`);
             player.pendingChoice = undefined;
+          } else if (choiceIndex === 1) { // Option: Add 2 inventory to a Product
+            const activeProducts = player.board.Products.filter(p => p.isActive !== false && p.inventory !== undefined);
+            if (activeProducts.length > 0) {
+              player.pendingChoice = {
+                type: 'choose_card',
+                effect: 'serial_founder_double_down_add_inventory',
+                cards: activeProducts.map(p => ({ ...p })),
+              };
+              if (G.gameLog) G.gameLog.push(`Serial Founder (Double Down): Chose to add inventory. Select a product.`);
+            } else {
+              if (G.gameLog) G.gameLog.push(`Serial Founder (Double Down): Chose to add inventory, but no products on board.`);
+              player.pendingChoice = undefined;
+            }
+          } else {
+            return INVALID_MOVE;
           }
+        } else if (choice.effect === 'incubator_resources_choice') {
+          if (!choice.options || choiceIndex < 0 || choiceIndex >= choice.options.length) return INVALID_MOVE;
+          const chosenOptionText = choice.options[choiceIndex];
+
+          if (choiceIndex === 0) { // Gain 1 Capital
+            gainCapital(G, playerID, 1);
+            if (G.gameLog) G.gameLog.push(`Incubator Resources: Player ${playerID} chose "${chosenOptionText}".`);
+          } else if (choiceIndex === 1) { // Draw 1 Card
+            drawCard(player);
+            if (G.gameLog) G.gameLog.push(`Incubator Resources: Player ${playerID} chose "${chosenOptionText}".`);
+          }
+          player.pendingChoice = undefined;
         } else {
-          return INVALID_MOVE;
+          if (G.gameLog) G.gameLog.push(`Unhandled choose_option effect: ${choice.effect}`);
+          player.pendingChoice = undefined; 
         }
       } 
-      else if (choice.type === 'choose_card') { // General choose_card handler (must come AFTER specific choose_card effects)
+      else if (choice.type === 'choose_card') {
         if (choice.effect === 'serial_founder_double_down_add_inventory') {
           if (!choice.cards || choiceIndex < 0 || choiceIndex >= choice.cards.length) return INVALID_MOVE;
           const chosenProductInfo = choice.cards[choiceIndex];
