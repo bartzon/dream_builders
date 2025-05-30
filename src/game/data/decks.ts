@@ -56,7 +56,7 @@ export const soloHustlerDeck: Card[] = [
     id: 'sh6',
     name: 'Resourceful Solutions',
     cost: 1,
-    type: 'Tool',
+    type: 'Action',
     keywords: ['Economy'],
     text: 'Next card costs 2 less.',
     effect: 'resourceful_solutions',
