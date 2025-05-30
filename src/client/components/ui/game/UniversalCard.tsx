@@ -42,8 +42,8 @@ export const UniversalCard: React.FC<UniversalCardProps> = React.memo(({
 
   const containerStyle: React.CSSProperties = {
     ...CARD_STYLES,
-    width: isCompact ? '130px' : (displayMode === 'hand' ? '160px' : '170px'),
-    minHeight: isCompact ? '100px' : (displayMode === 'hand' ? '220px' : '240px'),
+    width: '170px',
+    height: '280px',
     padding: '0',
     background: COLORS.bgDark,
     border: `3px solid ${showPlayableBorder ? COLORS.success : (isSelected ? COLORS.warning : (isAffected ? COLORS.warningLight : COLORS.bgLight))}`,
@@ -93,7 +93,7 @@ export const UniversalCard: React.FC<UniversalCardProps> = React.memo(({
   };
 
   const artPlaceholderStyle: React.CSSProperties = {
-    height: isCompact ? '50px' : (displayMode === 'hand' ? '80px' : '100px'),
+    height: isCompact ? '50px' : '100px',
     background: COLORS.bgMedium,
     margin: '10px',
     borderRadius: '6px',
@@ -107,13 +107,16 @@ export const UniversalCard: React.FC<UniversalCardProps> = React.memo(({
 
   const descriptionStyle: React.CSSProperties = {
     padding: '0 10px 10px 10px',
-    fontSize: isCompact ? '10px' : '12px',
+    fontSize: '10px',
     color: COLORS.textLight,
     lineHeight: '1.4',
     textAlign: 'center',
     flexGrow: 1,
-    overflowY: 'auto',
-    maxHeight: displayMode === 'hand' ? '60px' : (isCompact ? '40px' : '50px'),
+    overflow: 'hidden',
+    display: '-webkit-box',
+    WebkitLineClamp: isCompact ? 2 : 3,
+    WebkitBoxOrient: 'vertical',
+    maxHeight: isCompact ? '40px' : '50px',
   };
 
   const typeAndKeywordsStyle: React.CSSProperties = {
@@ -164,7 +167,7 @@ export const UniversalCard: React.FC<UniversalCardProps> = React.memo(({
           {card.type}
           {card.keywords && card.keywords.length > 0 && !isCompact && (
             <div style={{ marginTop: '3px', display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '3px' }}>
-              {card.keywords.slice(0, displayMode === 'hand' ? 2 : 2).map(kw => (
+              {card.keywords.slice(0, 2).map(kw => (
                 <span key={kw} style={{
                   background: COLORS.primaryDark,
                   color: COLORS.textLight,
