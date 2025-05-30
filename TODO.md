@@ -53,9 +53,6 @@ This file tracks unimplemented features, card effects, and mechanics.
     - **Text**: "Your teammates may draw 1 extra card at the start of their turn."
     - **Status**: `passiveEffect`. Requires multiplayer support.
 
-### Serial Founder
-- **Black Friday Blitz (Action)**
-
 ## III. UI & UX Enhancements
 
 - **Advanced Player Choice UI**: 

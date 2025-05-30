@@ -13,9 +13,9 @@ interface HandCardProps {
     finalCost: number
   }
   onCardClick: () => void
-  onMouseEnterCard: (e: React.MouseEvent) => void
-  onMouseLeaveCard: () => void
-  onMouseMoveCard: (e: React.MouseEvent) => void
+  onMouseEnterCard?: (e: React.MouseEvent) => void
+  onMouseLeaveCard?: () => void
+  onMouseMoveCard?: (e: React.MouseEvent) => void
 }
 
 export const HandCard = React.memo(({

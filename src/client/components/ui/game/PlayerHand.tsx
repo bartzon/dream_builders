@@ -88,7 +88,6 @@ export const PlayerHand = React.memo(({
         <HandCard
           key={`${card.id || 'card'}-${index}`}
           card={card}
-          index={index}
           canPlay={canPlay}
           isDiscardMode={isDiscardMode}
           isAffected={isAffected}
