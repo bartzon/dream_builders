@@ -33,6 +33,40 @@ export const HandCard = React.memo(({
 }: HandCardProps) => {
   const canInteract = isDiscardMode || canPlay
   
+  // Base styles for the card
+  const baseCardStyle: React.CSSProperties = {
+    ...CARD_STYLES,
+    width: '150px', // Adjusted width
+    height: '220px', // Adjusted height
+    borderRadius: '10px', // More rounded corners
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    padding: '10px', // Adjusted padding
+    boxSizing: 'border-box',
+    position: 'relative',
+    color: 'white',
+    fontFamily: '"Arial", sans-serif', // A more modern, clean font
+  }
+
+  // Styles for different card states
+  const interactiveStyle: React.CSSProperties = {
+    ...baseCardStyle,
+    background: isDiscardMode ? 'linear-gradient(145deg, #ef4444, #dc2626)' : 'linear-gradient(145deg, #3b82f6, #1d4ed8)',
+    border: isDiscardMode ? '2px solid #f87171' : '2px solid #60a5fa',
+    cursor: 'pointer',
+    boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
+  }
+
+  const disabledStyle: React.CSSProperties = {
+    ...baseCardStyle,
+    background: 'linear-gradient(145deg, #718096, #4a5568)', // Darker, desaturated gradient
+    color: '#a0aec0', // Muted text color
+    border: '2px solid #718096',
+    cursor: 'not-allowed',
+    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+  }
+  
   // Check for cost discounts to display
   const bonuses: BonusInfo[] = []
   if (costInfo.discount > 0) {
@@ -54,27 +88,35 @@ export const HandCard = React.memo(({
       >
         <button
           disabled={true}
-          style={{
-            ...CARD_STYLES,
-            background: '#666',
-            color: 'white',
-            border: 'none',
-            cursor: 'not-allowed',
-            position: 'relative'
-          }}
+          style={disabledStyle}
         >
           <BonusIndicator bonuses={bonuses} position="top-right" />
-          <div style={{ fontWeight: 'bold', fontSize: FONT_SIZES.medium }}>{card.name || 'Card'}</div>
-          <div style={{ fontSize: FONT_SIZES.body, display: 'flex', alignItems: 'center', gap: '4px' }}>
-            Cost: 
+          <div style={{ textAlign: 'center', fontWeight: 'bold', fontSize: FONT_SIZES.medium, marginBottom: '5px' }}>{card.name || 'Card'}</div>
+          
+          {/* Placeholder for image/icon - Shopify/Ecommerce themed */}
+          <div style={{ 
+            flexGrow: 1, 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            background: 'rgba(255,255,255,0.1)', 
+            borderRadius: '5px',
+            margin: '5px 0',
+            minHeight: '60px', // Ensure space for potential image
+          }}>
+             {/* <img src="/path/to/ecommerce-icon.svg" alt={card.name} style={{width: '80%', height: '80%', objectFit: 'contain'}} /> */}
+             <span style={{fontSize: FONT_SIZES.small, color: '#cbd5e0'}}>Ecommerce Icon</span>
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '5px' }}>
+            <div style={{ fontSize: FONT_SIZES.small }}>{card.type || 'Unknown'}</div>
             <CostDisplay 
               originalCost={costInfo.originalCost}
               discount={costInfo.discount}
               size="small"
-              className="text-white"
+              className="text-gray-300" // Adjusted for disabled state
             />
           </div>
-          <div style={{ fontSize: FONT_SIZES.small }}>{card.type || 'Unknown'}</div>
         </button>
       </div>
     )
@@ -88,19 +130,28 @@ export const HandCard = React.memo(({
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
       onMouseMove={onMouseMove}
-      style={{
-        ...CARD_STYLES,
-        background: isDiscardMode ? '#dc2626' : '#1d4ed8',
-        color: 'white',
-        border: isDiscardMode ? '2px solid #ef4444' : 'none',
-        cursor: 'pointer',
-        position: 'relative'
-      }}
+      style={interactiveStyle}
     >
       <BonusIndicator bonuses={bonuses} position="top-right" />
-      <div style={{ fontWeight: 'bold', fontSize: FONT_SIZES.medium }}>{card.name || 'Card'}</div>
-      <div style={{ fontSize: FONT_SIZES.body, display: 'flex', alignItems: 'center', gap: '4px' }}>
-        Cost: 
+      <div style={{ textAlign: 'center', fontWeight: 'bold', fontSize: FONT_SIZES.medium, marginBottom: '5px' }}>{card.name || 'Card'}</div>
+
+      {/* Placeholder for image/icon - Shopify/Ecommerce themed */}
+      <div style={{ 
+        flexGrow: 1, 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'center', 
+        background: 'rgba(255,255,255,0.15)', 
+        borderRadius: '5px',
+        margin: '5px 0',
+        minHeight: '60px', // Ensure space for potential image
+      }}>
+        {/* <img src="/path/to/ecommerce-icon.svg" alt={card.name} style={{width: '80%', height: '80%', objectFit: 'contain'}} /> */}
+        <span style={{fontSize: FONT_SIZES.small, color: 'white'}}>Ecommerce Icon</span>
+      </div>
+      
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '5px' }}>
+        <div style={{ fontSize: FONT_SIZES.small }}>{card.type || 'Unknown'}</div>
         <CostDisplay 
           originalCost={costInfo.originalCost}
           discount={costInfo.discount}
@@ -108,20 +159,20 @@ export const HandCard = React.memo(({
           className="text-white"
         />
       </div>
-      <div style={{ fontSize: FONT_SIZES.small }}>{card.type || 'Unknown'}</div>
       
       {isDiscardMode && (
         <div style={{
           position: 'absolute',
-          bottom: '5px',
+          bottom: '10px', // Adjusted position
           left: '50%',
           transform: 'translateX(-50%)',
-          background: '#fbbf24',
-          color: '#000',
-          padding: '2px 6px',
-          borderRadius: '3px',
-          fontSize: '12px',
-          fontWeight: 'bold'
+          background: '#facc15', // Brighter yellow for discard
+          color: '#1f2937', // Darker text for contrast
+          padding: '3px 8px',
+          borderRadius: '5px',
+          fontSize: '14px', // Slightly larger
+          fontWeight: 'bold',
+          boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
         }}>
           DISCARD
         </div>
