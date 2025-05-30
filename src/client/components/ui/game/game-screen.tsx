@@ -236,22 +236,24 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
             onShowTooltip={showCardTooltip}
             onHideTooltip={hideCardTooltip}
           />
-
-          {/* Hand */}
-          <PlayerHand
-            hand={uiState.hand}
-            pendingChoiceType={uiState.pendingChoice?.type}
-            midnightOilPending={effectContext.midnightOilDiscardPending}
-            getCostInfo={getCostInfo}
-            capital={uiState.capital}
-            isMyTurn={isMyTurn}
-            effectContext={effectContext}
-            onPlayCard={handlePlayCard}
-            onMakeChoice={handleMakeChoice}
-            onShowTooltip={showCardTooltip}
-            onHideTooltip={hideCardTooltip}
-          />
         </div>
+      </div>
+
+      {/* Hand */}
+      <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+        <PlayerHand
+          hand={uiState.hand}
+          pendingChoiceType={uiState.pendingChoice?.type}
+          midnightOilPending={effectContext.midnightOilDiscardPending}
+          getCostInfo={getCostInfo}
+          capital={uiState.capital}
+          isMyTurn={isMyTurn}
+          effectContext={effectContext}
+          onPlayCard={handlePlayCard}
+          onMakeChoice={handleMakeChoice}
+          onShowTooltip={showCardTooltip}
+          onHideTooltip={hideCardTooltip}
+        />
       </div>
 
       {/* Debug Panel */}
