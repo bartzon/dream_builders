@@ -25,8 +25,10 @@ export function useCardDiscount(
     
     // Solo Hustler - Product cost reduction
     if (card.type === 'Product') {
-      const productReduction = effectContext.productCostReduction || 0
-      discount += productReduction
+      // Check if this specific card was drawn by Solo Hustler hero power
+      if (card.id && effectContext.soloHustlerDiscountedCard === card.id) {
+        discount += 1
+      }
       
       // DIY Assembly effect - Products cost 1 less
       const diyAssembly = tools.find(t => t.effect === 'diy_assembly')

@@ -115,6 +115,9 @@ export function DebugPanel({ gameState, playerID }: DebugPanelProps) {
       // Product-specific boosts
       productRevenueBoosts: effectContext.productRevenueBoosts,
       
+      // Solo Hustler tracking
+      soloHustlerDiscountedCard: effectContext.soloHustlerDiscountedCard,
+      
       // Quick Learner tracking
       lastActionEffect: effectContext.lastActionEffect,
       lastActionCard: effectContext.lastActionCard ? {

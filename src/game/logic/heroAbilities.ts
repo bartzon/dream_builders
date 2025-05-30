@@ -19,11 +19,14 @@ export const heroAbilityEffects: Record<string, (G: GameState, playerID: string)
     const handSizeBefore = player.hand.length;
     drawCard(player);
     
-    // If we drew a card and it's a Product, reduce its cost
+    // If we drew a card and it's a Product, mark it for discount
     if (player.hand.length > handSizeBefore) {
       const drawnCard = player.hand[player.hand.length - 1];
       if (drawnCard.type === 'Product') {
-        G.effectContext[playerID].productCostReduction = 1;
+        // Track this specific card for a 1 cost discount
+        if (!G.effectContext[playerID].soloHustlerDiscountedCard) {
+          G.effectContext[playerID].soloHustlerDiscountedCard = drawnCard.id;
+        }
       }
     }
     

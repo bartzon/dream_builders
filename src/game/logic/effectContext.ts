@@ -63,6 +63,9 @@ export interface EffectContext {
   
   // Inventory Support tracking
   delayedInventoryBoostTurns?: number;
+  
+  // Cost reductions
+  soloHustlerDiscountedCard?: string; // Track specific card ID for Solo Hustler discount
 }
 
 // Initialize effect context for each player
@@ -102,6 +105,7 @@ export function initEffectContext(): EffectContext {
     lastActionCard: undefined,
     firstCardDiscountUsed: false,
     delayedInventoryBoostTurns: 0,
+    soloHustlerDiscountedCard: undefined,
   };
 }
 
@@ -151,5 +155,6 @@ export function clearTempEffects(G: GameState, playerID: string) {
     ctx.lastActionCard = undefined;
     ctx.firstCardDiscountUsed = false;
     ctx.delayedInventoryBoostTurns = 0;
+    ctx.soloHustlerDiscountedCard = undefined;
   }
 } 

@@ -60,7 +60,7 @@ export function processPassiveEffects(G: GameState, playerID: string) {
   // DIY Assembly - reduce Product costs
   const diyAssembly = player.board.Tools.find(t => t.effect === 'diy_assembly');
   if (diyAssembly && G.effectContext?.[playerID]) {
-    G.effectContext[playerID].productCostReduction = 1;
+    // Removed productCostReduction - now handled per-card
   }
   
   // === INVENTORY SUPPORT EFFECTS ===
@@ -289,8 +289,12 @@ export function getCardDiscount(G: GameState, playerID: string, card: Card): num
   
   // Solo Hustler - Product cost reduction
   if (card.type === 'Product') {
-    const productReduction = G.effectContext?.[playerID]?.productCostReduction || 0;
-    discount += productReduction;
+    // Check if this specific card was drawn by Solo Hustler hero power
+    if (card.id && G.effectContext?.[playerID]?.soloHustlerDiscountedCard === card.id) {
+      discount += 1;
+      // Clear the discount after use since it's being applied
+      G.effectContext[playerID].soloHustlerDiscountedCard = undefined;
+    }
     
     // DIY Assembly effect - Products cost 1 less
     const diyAssembly = player.board.Tools.find(t => t.effect === 'diy_assembly');
@@ -349,8 +353,11 @@ export function getCardCostInfo(G: GameState, playerID: string, card: Card): { o
   
   // Solo Hustler - Product cost reduction
   if (card.type === 'Product') {
-    const productReduction = G.effectContext?.[playerID]?.productCostReduction || 0;
-    discount += productReduction;
+    // Check if this specific card was drawn by Solo Hustler hero power
+    if (card.id && G.effectContext?.[playerID]?.soloHustlerDiscountedCard === card.id) {
+      discount += 1;
+      // Note: Don't clear soloHustlerDiscountedCard here since this is read-only for UI
+    }
     
     // DIY Assembly effect - Products cost 1 less
     const diyAssembly = player.board.Tools.find(t => t.effect === 'diy_assembly');
