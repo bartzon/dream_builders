@@ -139,6 +139,8 @@ export const ProductsSection = React.memo(({
           }}>
             - {pendingChoice?.effect === 'add_inventory_if_empty' 
                 ? 'Click a product with 0 inventory to add +3' 
+                : pendingChoice?.effect === 'multi_product_inventory_boost'
+                ? `Choose up to ${3 - (effectContext.warehouseExpansionCount || 0)} more product${3 - (effectContext.warehouseExpansionCount || 0) === 1 ? '' : 's'} (or End Turn to finish)`
                 : 'Click a product to boost its inventory'}
           </span>
         )}

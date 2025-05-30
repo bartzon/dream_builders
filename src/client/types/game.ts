@@ -69,4 +69,5 @@ export interface EffectContextUI {
   productRevenueBoosts?: Record<string, number>
   delayedInventoryBoostTurns?: number
   soloHustlerDiscountedCard?: string
+  warehouseExpansionCount?: number
 } 

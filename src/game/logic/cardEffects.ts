@@ -508,19 +508,16 @@ export const cardEffects: Record<string, (G: GameState, playerID: string, card: 
     
     if (products.length === 0) return;
     
-    if (products.length <= 3) {
-      // 3 or fewer products, boost them all
-      products.forEach(product => {
-        addInventoryToSpecificProduct(product, 1);
-      });
-    } else {
-      // More than 3 products, create a multi-choice
-      player.pendingChoice = {
-        type: 'choose_card',
-        effect: 'multi_product_inventory_boost',
-        cards: products.map(p => ({ ...p })),
-      };
-    }
+    // Initialize the selection counter
+    const ctx = ensureEffectContext(G, playerID);
+    ctx.warehouseExpansionCount = 0;
+    
+    // Always create a choice, allowing player to select up to 3 products
+    player.pendingChoice = {
+      type: 'choose_card',
+      effect: 'multi_product_inventory_boost',
+      cards: products.map(p => ({ ...p })),
+    };
   },
   
   'inventory_and_sale_boost': (G, playerID) => {

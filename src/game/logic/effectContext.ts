@@ -63,6 +63,9 @@ export interface EffectContext {
   
   // Cost reductions
   soloHustlerDiscountedCard?: string; // Track specific card ID for Solo Hustler discount
+  
+  // Multi-selection tracking
+  warehouseExpansionCount?: number; // Track how many products selected for Warehouse Expansion
 }
 
 // Initialize effect context for each player
@@ -102,6 +105,7 @@ export function initEffectContext(): EffectContext {
     lastActionCard: undefined,
     delayedInventoryBoostTurns: 0,
     soloHustlerDiscountedCard: undefined,
+    warehouseExpansionCount: 0,
   };
 }
 
@@ -151,5 +155,6 @@ export function clearTempEffects(G: GameState, playerID: string) {
     ctx.lastActionCard = undefined;
     ctx.delayedInventoryBoostTurns = 0;
     ctx.soloHustlerDiscountedCard = undefined;
+    ctx.warehouseExpansionCount = 0;
   }
 } 

@@ -360,9 +360,42 @@ export const DreamBuildersGame: Game<GameState> = {
             break;
             
           case 'multi_product_inventory_boost':
-            // For now, handle single selection. UI would need to handle multi-selection
+            // For Warehouse Expansion - allows up to 3 selections
             if (boardProduct.inventory !== undefined) {
               boardProduct.inventory += 1;
+              
+              // Track how many we've selected
+              if (G.effectContext?.[playerID]) {
+                G.effectContext[playerID].warehouseExpansionCount = 
+                  (G.effectContext[playerID].warehouseExpansionCount || 0) + 1;
+                
+                const selectedCount = G.effectContext[playerID].warehouseExpansionCount || 0;
+                
+                // If we haven't selected 3 yet and there are more products to choose
+                if (selectedCount < 3) {
+                  const remainingProducts = player.board.Products.filter(p => 
+                    p.isActive !== false && 
+                    p.id !== boardProduct.id // Exclude the one we just selected
+                  );
+                  
+                  if (remainingProducts.length > 0) {
+                    // Create another choice for the remaining selections
+                    player.pendingChoice = {
+                      type: 'choose_card',
+                      effect: 'multi_product_inventory_boost',
+                      cards: remainingProducts.map(p => ({ ...p })),
+                    };
+                    
+                    if (G.gameLog) {
+                      G.gameLog.push(`Warehouse Expansion: Selected ${boardProduct.name} (${selectedCount}/3). Choose another product or End Turn to finish.`);
+                    }
+                    return; // Don't clear pendingChoice yet
+                  }
+                }
+                
+                // Clear the counter when done
+                G.effectContext[playerID].warehouseExpansionCount = 0;
+              }
             }
             break;
             
