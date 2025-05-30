@@ -13,10 +13,10 @@ import { useGameState } from '../../../hooks/useGameState'
 import { useTooltip } from '../../../hooks/useTooltip'
 import { useCardDiscount } from '../../../hooks/useCardDiscount'
 import { allHeroes } from '../../../../game/data/heroes'
-import { FONT_SIZES, BUTTON_STYLES } from '../../../constants/ui'
 import type { GameState } from '../../../../game/state'
 import type { ClientCard, PendingChoice as ClientPendingChoice, EffectContextUI as ClientEffectContextUI } from '../../../types/game'
 import { HeroDisplay } from './HeroDisplay'
+import { ChoiceModal } from './ChoiceModal'
 
 interface GameScreenProps {
   gameState: unknown
@@ -175,102 +175,36 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
   }, [moves, uiState.hero, uiState.products, heroPowerInfo.name, canUseHeroPower, hideHeroPowerTooltip])
 
   const handleMakeChoice = useCallback((choiceIndex: number) => {
-    if (!isMyTurn || !uiState.pendingChoice) return
-    hideCardTooltip()
+    if (!isMyTurn || !pendingChoice) return;
+    hideCardTooltip(); 
+    hideHeroPowerTooltip();
 
-    if (uiState.pendingChoice.type === 'discard') {
-      const discardedCard = uiState.hand[choiceIndex]
-      setGameLog(prev => [`Discarding ${discardedCard?.name}...`, ...prev.slice(0, 4)])
-    } else if (uiState.pendingChoice.type === 'destroy_product') {
-      const destroyedProduct = uiState.pendingChoice.cards?.[choiceIndex]
-      setGameLog(prev => [`Destroying ${destroyedProduct?.name}...`, ...prev.slice(0, 4)])
-    } else {
-      const chosenCard = uiState.pendingChoice.cards?.[choiceIndex]
-      const effectName = uiState.pendingChoice.effect?.replace(/_/g, ' ') || 'inventory effect'
-      setGameLog(prev => [`Applying ${effectName} to ${chosenCard?.name || 'product'}...`, ...prev.slice(0, 4)])
-    }
-
-    moves.makeChoice?.(choiceIndex)
-  }, [moves, uiState.hand, uiState.pendingChoice, isMyTurn, hideCardTooltip])
-
-  // UI Rendering for 'choose_option' pending choice
-  const renderOptionChoiceModal = () => {
-    if (pendingChoice?.type !== 'choose_option' || !pendingChoice.options) {
-      return null;
-    }
-
-    const { options, effect } = pendingChoice;
-    let title = 'Make a choice';
-
-    // Determine button viability based on effect and game state
-    const getOptionDisabledState = (optionText: string): boolean => {
-      if (effect === 'serial_founder_double_down') {
-        if (optionText.toLowerCase().includes('add 2 inventory') && uiState.products.length === 0) {
-          return true; // Disable if no products to add inventory to
-        }
-        // Add other conditions for other hero powers or 'choose_option' effects here
+    // Log based on choice type and effect before sending move
+    if (pendingChoice.type === 'discard') {
+      const cardToDiscard = uiState.hand[choiceIndex]; 
+      setGameLog(prev => [`Discarding ${cardToDiscard?.name || 'card'}...`, ...prev.slice(0, 4)]);
+    } else if (pendingChoice.type === 'destroy_product') {
+      const productToDestroy = pendingChoice.cards?.[choiceIndex];
+      setGameLog(prev => [`Destroying ${productToDestroy?.name || 'product'}...`, ...prev.slice(0, 4)]);
+    } else if (pendingChoice.type === 'choose_card' && pendingChoice.cards) {
+      const chosenCard = pendingChoice.cards[choiceIndex];
+      const effectName = pendingChoice.effect?.replace(/_/g, ' ') || 'effect';
+      setGameLog(prev => [`Applying ${effectName} to ${chosenCard?.name || 'card'}...`, ...prev.slice(0, 4)]);
+    } else if (pendingChoice.type === 'choose_option' && pendingChoice.options) {
+      // Use choice.options[choiceIndex] for logging the chosen option text
+      setGameLog(prev => [`Chose option: "${pendingChoice.options?.[choiceIndex]}" for ${pendingChoice.effect}`, ...prev.slice(0,4)]);
+    } else if (pendingChoice.type === 'view_deck_and_discard' && pendingChoice.cards) {
+      if (choiceIndex >=0 && choiceIndex < pendingChoice.cards.length) {
+        setGameLog(prev => [`Opted to discard ${pendingChoice.cards?.[choiceIndex]?.name} from deck view.`, ...prev.slice(0,4)]);
+      } else {
+        setGameLog(prev => [`Opted to keep cards from deck view.`, ...prev.slice(0,4)]);
       }
-      return false; // Default to enabled
-    };
-
-    if (effect === 'serial_founder_double_down') {
-      title = 'Double Down: Choose an Effect';
+    } else if (pendingChoice.type === 'choose_from_drawn_to_discard' && pendingChoice.cards) {
+       setGameLog(prev => [`Opted to discard ${pendingChoice.cards?.[choiceIndex]?.name} from A/B Test draw.`, ...prev.slice(0,4)]);
     }
-
-    return (
-      <div style={{
-        position: 'fixed',
-        top: '50%',
-        left: '50%',
-        transform: 'translate(-50%, -50%)',
-        backgroundColor: 'rgba(30, 41, 59, 0.95)',
-        padding: '30px',
-        borderRadius: '12px',
-        border: '2px solid #4f46e5',
-        boxShadow: '0 10px 25px rgba(0,0,0,0.5)',
-        zIndex: 2000,
-        textAlign: 'center',
-        color: 'white',
-        minWidth: '350px',
-        maxWidth: '500px'
-      }}>
-        <h3 style={{ marginTop: 0, marginBottom: '25px', fontSize: FONT_SIZES.heading }}>{title}</h3>
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-around',
-          gap: '20px'
-        }}>
-          {options.map((option: string, index: number) => {
-            const isDisabled = getOptionDisabledState(option);
-            return (
-              <button
-                key={index}
-                onClick={() => !isDisabled && handleMakeChoice(index)}
-                disabled={isDisabled}
-                style={{
-                  ...BUTTON_STYLES,
-                  background: isDisabled ? '#4b5563' : '#4f46e5', // Gray if disabled
-                  color: 'white',
-                  padding: '15px 25px',
-                  fontSize: FONT_SIZES.medium,
-                  minWidth: '150px',
-                  border: 'none',
-                  boxShadow: '0 4px 6px rgba(0,0,0,0.2)',
-                  transition: 'background-color 0.2s ease',
-                  cursor: isDisabled ? 'not-allowed' : 'pointer',
-                  opacity: isDisabled ? 0.7 : 1,
-                }}
-                onMouseEnter={(e) => !isDisabled && (e.currentTarget.style.background = '#6366f1')}
-                onMouseLeave={(e) => !isDisabled && (e.currentTarget.style.background = '#4f46e5')}
-              >
-                {option}
-              </button>
-            );
-          })}
-        </div>
-      </div>
-    );
-  };
+    
+    moves.makeChoice?.(choiceIndex);
+  }, [moves, uiState.hand, pendingChoice, isMyTurn, hideCardTooltip, hideHeroPowerTooltip]);
 
   return (
     <div style={{
@@ -394,7 +328,11 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
         <div style={{ width: '250px' }} />
       </div>
 
-      {renderOptionChoiceModal()} {/* Render the modal if choice is active */}
+      <ChoiceModal 
+        pendingChoice={pendingChoice} 
+        onMakeChoice={handleMakeChoice} 
+        currentProductsCount={uiState.products.length} 
+      />
 
       {/* Debug Panel */}
       <DebugPanel gameState={G as GameState} playerID={playerID} />
