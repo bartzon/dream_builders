@@ -255,7 +255,6 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
           gameLog={gameLog}
           soldProductThisTurn={effectContext.soldProductThisTurn}
           itemsSoldThisTurn={effectContext.itemsSoldThisTurn}
-          onEndTurn={handleEndTurn}
         />
         </div>
 
@@ -336,6 +335,27 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
 
       {/* Debug Panel */}
       <DebugPanel gameState={G as GameState} playerID={playerID} />
+
+      {/* End Turn Button - Bottom Right */}
+      {isMyTurn && (
+        <button
+          onClick={handleEndTurn}
+          style={{
+            position: 'fixed',
+            bottom: '30px',
+            right: '30px',
+            ...BUTTON_STYLES,
+            backgroundColor: '#059669',
+            color: 'white',
+            padding: '12px 24px',
+            fontSize: FONT_SIZES.large, // Or an appropriate size
+            zIndex: 1500, // Ensure it's above most other elements
+            boxShadow: '0 4px 10px rgba(0,0,0,0.3)'
+          }}
+        >
+          End Turn
+        </button>
+      )}
     </div>
   )
 }
