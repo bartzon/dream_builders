@@ -52,9 +52,6 @@ This file tracks unimplemented features, card effects, and mechanics.
 - **Mentorship Circle (Tool)**
     - **Text**: "Your teammates may draw 1 extra card at the start of their turn."
     - **Status**: `passiveEffect`. Requires multiplayer support.
-- **Community Manager (Employee)**
-    - **Text**: "Your Tools and Actions cost 1 less."
-    - **Status**: `passiveEffect`. Cost reduction logic for Tools and Actions needs to be added to `getCardDiscount` based on this card being in play.
 
 ### Serial Founder
 - **Advisory Board (Tool)**

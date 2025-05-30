@@ -69,4 +69,14 @@ export function getShoestringBudgetDiscount(G: GameState, playerID: string, play
     // The cardsPlayedThisTurn check inherently handles the "first card" logic now.
   }
   return discount;
+}
+
+// Discount source: Community Manager (Employee)
+// Your Tools and Actions cost 1 less.
+export function getCommunityManagerDiscount(player: PlayerState, cardToPlay: Card): number {
+  const communityManager = player.board.Employees.find(e => e.effect === 'community_manager');
+  if (communityManager && (cardToPlay.type === 'Tool' || cardToPlay.type === 'Action')) {
+    return 1;
+  }
+  return 0;
 } 

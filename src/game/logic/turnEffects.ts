@@ -18,7 +18,8 @@ import {
   getProductSynergyDiscount,
   getMemeMagicDiscount,
   getQualityMaterialsCostIncrease,
-  getShoestringBudgetDiscount
+  getShoestringBudgetDiscount,
+  getCommunityManagerDiscount
 } from './effects/discount-sources';
 
 // Process passive effects at start of turn
@@ -143,6 +144,7 @@ export function getCardDiscount(G: GameState, playerID: string, card: Card): num
   totalDiscount += getMemeMagicDiscount(G, playerID, card);
   totalDiscount += getQualityMaterialsCostIncrease(player, card); // This will be negative
   totalDiscount += getShoestringBudgetDiscount(G, playerID, player);
+  totalDiscount += getCommunityManagerDiscount(player, card);
   
   return Math.min(Math.max(0, totalDiscount), card.cost); // Ensure discount isn't negative or more than card cost
 }
@@ -158,6 +160,7 @@ export function getCardCostInfo(G: GameState, playerID: string, card: Card): { o
   totalDiscount += getMemeMagicDiscount(G, playerID, card);
   totalDiscount += getQualityMaterialsCostIncrease(player, card);
   totalDiscount += getShoestringBudgetDiscount(G, playerID, player);
+  totalDiscount += getCommunityManagerDiscount(player, card);
 
   const effectiveDiscount = Math.min(Math.max(0, totalDiscount), card.cost);
   const finalCost = Math.max(0, card.cost - effectiveDiscount);
