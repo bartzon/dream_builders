@@ -13,11 +13,11 @@ import { useGameState } from '../../../hooks/useGameState'
 import { useTooltip } from '../../../hooks/useTooltip'
 import { useCardDiscount } from '../../../hooks/useCardDiscount'
 import { allHeroes } from '../../../../game/data/heroes'
-import { FONT_SIZES, BUTTON_STYLES } from '../../../constants/ui'
 import type { GameState } from '../../../../game/state'
 import type { ClientCard, PendingChoice as ClientPendingChoice, EffectContextUI as ClientEffectContextUI } from '../../../types/game'
 import { HeroDisplay } from './HeroDisplay'
 import { ChoiceModal } from './ChoiceModal'
+import { BUTTON_STYLES, FONT_SIZES } from "../../../constants/ui"
 
 interface GameScreenProps {
   gameState: unknown
@@ -177,12 +177,12 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
 
   const handleMakeChoice = useCallback((choiceIndex: number) => {
     if (!isMyTurn || !pendingChoice) return;
-    hideCardTooltip(); 
+    hideCardTooltip();
     hideHeroPowerTooltip();
 
     // Log based on choice type and effect before sending move
     if (pendingChoice.type === 'discard') {
-      const cardToDiscard = uiState.hand[choiceIndex]; 
+      const cardToDiscard = uiState.hand[choiceIndex];
       setGameLog(prev => [`Discarding ${cardToDiscard?.name || 'card'}...`, ...prev.slice(0, 4)]);
     } else if (pendingChoice.type === 'destroy_product') {
       const productToDestroy = pendingChoice.cards?.[choiceIndex];
@@ -203,7 +203,7 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
     } else if (pendingChoice.type === 'choose_from_drawn_to_discard' && pendingChoice.cards) {
        setGameLog(prev => [`Opted to discard ${pendingChoice.cards?.[choiceIndex]?.name} from A/B Test draw.`, ...prev.slice(0,4)]);
     }
-    
+
     moves.makeChoice?.(choiceIndex);
   }, [moves, uiState.hand, pendingChoice, isMyTurn, hideCardTooltip, hideHeroPowerTooltip]);
 
@@ -328,9 +328,9 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
         <div style={{ width: '250px' }} />
       </div>
 
-      <ChoiceModal 
-        pendingChoice={pendingChoice} 
-        onMakeChoice={handleMakeChoice} 
+      <ChoiceModal
+        pendingChoice={pendingChoice}
+        onMakeChoice={handleMakeChoice}
         uiState={uiState}
       />
 
