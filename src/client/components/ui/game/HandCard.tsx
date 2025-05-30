@@ -30,6 +30,7 @@ export const HandCard = React.memo(({
   onMouseMoveCard,
 }: HandCardProps) => {
   const canInteract = isDiscardMode || canPlay
+  const showPlayableBorder = canPlay && !isDiscardMode
 
   return (
     <div style={{ position: 'relative' }}>
@@ -37,6 +38,7 @@ export const HandCard = React.memo(({
         card={card}
         displayMode={'hand' as CardDisplayMode}
         isClickable={canInteract}
+        showPlayableBorder={showPlayableBorder}
         onClick={canInteract ? onCardClick : undefined}
         isSelected={isDiscardMode}
         isAffected={isAffected}

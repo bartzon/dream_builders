@@ -10,11 +10,11 @@ interface UniversalCardProps {
   displayMode?: CardDisplayMode;
   onClick?: () => void;
   isClickable?: boolean;
-  isSelected?: boolean; // For multi-selection UIs or specific highlights
-  isAffected?: boolean; // For temporary glow effect
+  showPlayableBorder?: boolean;
+  isSelected?: boolean;
+  isAffected?: boolean;
   costInfo?: { originalCost: number; discount: number; finalCost: number };
   showBonuses?: boolean;
-  // Add specific mouse handlers if they need to be passed down
   onMouseEnterCard?: (e: React.MouseEvent) => void;
   onMouseLeaveCard?: (e: React.MouseEvent) => void;
   onMouseMoveCard?: (e: React.MouseEvent) => void;
@@ -25,10 +25,11 @@ export const UniversalCard: React.FC<UniversalCardProps> = React.memo(({
   displayMode = 'board',
   onClick,
   isClickable = false,
+  showPlayableBorder = false,
   isSelected = false,
   isAffected = false,
   costInfo,
-  showBonuses = true, // Show by default, can be turned off for very compact views
+  showBonuses = true,
   onMouseEnterCard,
   onMouseLeaveCard,
   onMouseMoveCard,
@@ -41,34 +42,33 @@ export const UniversalCard: React.FC<UniversalCardProps> = React.memo(({
 
   const containerStyle: React.CSSProperties = {
     ...CARD_STYLES,
-    width: isCompact ? '130px' : (displayMode === 'hand' ? '160px' : '170px'), // Increased width
-    minHeight: isCompact ? '100px' : (displayMode === 'hand' ? '220px' : '240px'), // Increased height for art
-    padding: '0', // Padding will be handled by inner elements
-    background: COLORS.bgDark, // Darker background for the card base
-    border: `3px solid ${isSelected ? COLORS.warning : (isAffected ? COLORS.warningLight : COLORS.bgLight)}`,
-    borderRadius: '10px', // Rounded corners
+    width: isCompact ? '130px' : (displayMode === 'hand' ? '160px' : '170px'),
+    minHeight: isCompact ? '100px' : (displayMode === 'hand' ? '220px' : '240px'),
+    padding: '0',
+    background: COLORS.bgDark,
+    border: `3px solid ${showPlayableBorder ? COLORS.success : (isSelected ? COLORS.warning : (isAffected ? COLORS.warningLight : COLORS.bgLight))}`,
+    borderRadius: '10px',
     color: COLORS.white,
-    textAlign: 'center', // Center text for some elements
+    textAlign: 'center',
     cursor: isClickable && onClick ? 'pointer' : 'default',
     boxShadow: isAffected ? `0 0 15px 5px ${COLORS.warningLight}` : (isSelected ? `0 0 12px 4px ${COLORS.warning}` : defaultBoxShadow),
     display: 'flex',
     flexDirection: 'column',
-    // justifyContent: 'space-between', // Removed to allow more manual control
     transition: CARD_STYLES.transition + ', box-shadow 0.2s ease-in-out, border-color 0.2s ease-in-out, transform 0.2s ease-in-out',
-    transform: isSelected || isAffected ? 'scale(1.05)' : 'scale(1)', // Slightly more pronounced scale
-    overflow: 'hidden', // Ensure inner elements respect border radius
+    transform: isSelected || isAffected ? 'scale(1.05)' : 'scale(1)',
+    overflow: 'hidden',
   };
 
   const nameBannerStyle: React.CSSProperties = {
     background: `linear-gradient(to right, ${cardTypeColor}, ${COLORS.bgMedium})`,
     padding: '8px 10px',
     fontWeight: 'bold',
-    fontSize: isCompact ? FONT_SIZES.small : FONT_SIZES.large, // Larger font for name
-    color: COLORS.textLight, // Lighter text for contrast
+    fontSize: isCompact ? FONT_SIZES.small : FONT_SIZES.large,
+    color: COLORS.textLight,
     borderBottom: `2px solid ${COLORS.bgLight}`,
     textAlign: 'center',
-    position: 'relative', // For cost display positioning
-    minHeight: '40px', // Ensure banner has some height
+    position: 'relative',
+    minHeight: '40px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -80,7 +80,7 @@ export const UniversalCard: React.FC<UniversalCardProps> = React.memo(({
     left: '-5px',
     background: COLORS.primary,
     color: COLORS.white,
-    width: isCompact ? '28px' : '36px', // Size of the cost circle
+    width: isCompact ? '28px' : '36px',
     height: isCompact ? '28px' : '36px',
     borderRadius: '50%',
     display: 'flex',
@@ -94,7 +94,7 @@ export const UniversalCard: React.FC<UniversalCardProps> = React.memo(({
 
   const artPlaceholderStyle: React.CSSProperties = {
     height: isCompact ? '50px' : (displayMode === 'hand' ? '80px' : '100px'),
-    background: COLORS.bgMedium, // Placeholder color
+    background: COLORS.bgMedium,
     margin: '10px',
     borderRadius: '6px',
     display: 'flex',
@@ -111,9 +111,9 @@ export const UniversalCard: React.FC<UniversalCardProps> = React.memo(({
     color: COLORS.textLight,
     lineHeight: '1.4',
     textAlign: 'center',
-    flexGrow: 1, // Allow description to take available space
-    overflowY: 'auto', // Scroll if text is too long
-    maxHeight: displayMode === 'hand' ? '60px' : (isCompact ? '40px' : '50px'), // Limit height
+    flexGrow: 1,
+    overflowY: 'auto',
+    maxHeight: displayMode === 'hand' ? '60px' : (isCompact ? '40px' : '50px'),
   };
 
   const typeAndKeywordsStyle: React.CSSProperties = {
@@ -129,8 +129,6 @@ export const UniversalCard: React.FC<UniversalCardProps> = React.memo(({
   if (showBonuses && finalCostInfo.discount > 0) {
     bonuses.push({ type: 'cost', value: finalCostInfo.discount });
   }
-  // Add logic here to populate other bonuses if UniversalCard should handle them directly
-  // e.g., from card.activeBonuses or a context passed down.
 
   return (
     <div
@@ -140,7 +138,6 @@ export const UniversalCard: React.FC<UniversalCardProps> = React.memo(({
       onMouseLeave={onMouseLeaveCard}
       onMouseMove={onMouseMoveCard}
     >
-      {/* Name Banner with Cost */}
       <div style={nameBannerStyle}>
         {card.name}
         {finalCostInfo && (
@@ -150,21 +147,18 @@ export const UniversalCard: React.FC<UniversalCardProps> = React.memo(({
         )}
       </div>
 
-      {/* Card Art Placeholder */}
       {!isCompact && (
         <div style={artPlaceholderStyle}>
           Card Art
         </div>
       )}
 
-      {/* Card Text/Description */}
       {card.text && (
         <div style={descriptionStyle}>
           {card.text}
         </div>
       )}
 
-      {/* Type and Keywords */}
       {(!isCompact || (card.keywords && card.keywords.length > 0)) && (
         <div style={typeAndKeywordsStyle}>
           {card.type}
@@ -183,17 +177,6 @@ export const UniversalCard: React.FC<UniversalCardProps> = React.memo(({
           )}
         </div>
       )}
-
-      {/* Original Bonus Indicator (optional, if needed elsewhere) */}
-      {/* {showBonuses && <BonusIndicator bonuses={bonuses} position="top-right" />} */}
-
-      {/* Remove old layout elements if they are fully replaced */}
-      {/* For example, if CostDisplay is now part of nameBannerStyle, remove its original placement */}
-      {/* <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: isCompact ? '2px' : '4px' }}>
-        <CostDisplay originalCost={finalCostInfo.originalCost} discount={finalCostInfo.discount} size={isCompact ? 'small' : 'small'} className='text-white' />
-        <span style={{ fontSize: isCompact ? '10px' : FONT_SIZES.small, color: COLORS.textMuted }}>{card.type}</span>
-      </div> */}
-      {/* Old name and keywords divs are replaced by the new structure */}
 
     </div>
   );
