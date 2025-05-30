@@ -1,234 +1,144 @@
-# Dream Builders - Cooperative Entrepreneurship Card Game
+# Dream Builders - Entrepreneurship Card Game
 
-A cooperative digital card game where players work together as entrepreneurs to build a successful business and reach $1,000,000 in team revenue within ~8-10 turns.
+A strategic digital card game where players take on the roles of entrepreneurs, building their startup to achieve a revenue goal.
 
 ## 🎮 Game Overview
 
-Dream Builders is a strategic entrepreneurship card game where 1-4 players choose different business roles and work together to grow their startup. Each player manages their own deck and board while contributing to the shared revenue goal.
+Dream Builders is a card game for 1 player (currently) where you choose a hero with a unique playstyle and deck, then attempt to build your business to reach **$500,000 in revenue**.
 
 ### Core Features
-- **4 Hero Classes**: Marketer, Developer, Operator, and Visionary
-- **Product-Based Economy**: Sell products with inventory management
-- **Revenue Progression**: Designed to reach $1M in 8-10 turns with coordinated play
-- **Complex Card Interactions**: Synergies, overhead costs, and passive effects
-- **Modern UI**: Responsive design with horizontal scrolling and visual feedback
+- **5 Unique Heroes**: Each with distinct abilities and a 10-card starter deck that forms the basis of a 40-card drafted play deck.
+- **Product-Based Economy**: Play Product cards, manage their inventory, and generate revenue through automatic sales and card effects.
+- **Dynamic Card Effects**: Utilize Actions, deploy Tools for ongoing benefits, and hire Employees with unique skills.
+- **Cost and Discount System**: Manage your Capital to play cards, and leverage effects that provide temporary or ongoing cost reductions.
+- **Turn-Based Strategy**: Each turn presents new opportunities to draw cards, play your hand, and activate your hero power.
 
 ## 🚀 Getting Started
 
 ### Prerequisites
 - Node.js (v16 or higher)
-- npm
+- npm (or yarn/pnpm)
 
 ### Installation
 
 1. Clone the repository:
-```bash
-git clone <repository-url>
-cd cardgame
-```
-
+   ```bash
+   git clone <your-repository-url>
+   cd cardgame
+   ```
 2. Install dependencies:
-```bash
-npm install
-```
-
+   ```bash
+   npm install
+   ```
 3. Start the development server:
-```bash
-npm run dev
-```
-
-4. Open your browser and navigate to the provided localhost URL
+   ```bash
+   npm run dev
+   ```
+4. Open your browser and navigate to the localhost URL provided (usually `http://localhost:5173` or the next available port).
 
 ## 🎯 How to Play
 
 ### Objective
-Work together to reach **$1,000,000 in team revenue** before all players exhaust their options.
+Reach **$500,000 in revenue**.
 
-### Turn Structure
-1. **Capital Gain**: Set capital to current turn number (max 10)
-2. **Overhead Payment**: Pay overhead costs or disable products
-3. **Draw Phase**: Draw 1 card
-4. **Main Phase**: Play cards, sell products, use hero abilities
-5. **End Phase**: Process automatic sales and recurring effects
+### Game Flow
+- **Hero Selection**: Choose one of the 5 available heroes at the start of the game.
+- **Turn Structure**:
+  1.  **Start of Turn**:
+      *   Automatic sales from Products with inventory occur.
+      *   Overhead costs for active Products are paid.
+      *   Capital is gained (base amount increases with game turn, max 10).
+      *   Passive effects from cards in play trigger.
+      *   Draw 1 card (or as modified by effects).
+      *   Hero ability is refreshed if used previously.
+  2.  **Main Phase**: Play cards from your hand, use your hero power (once per turn).
+  3.  **End of Turn**: Temporary effects expire.
+- **Winning/Losing**: 
+    - Win by reaching $500,000 revenue.
+    - Lose if you cannot make any valid plays (no cards in deck, no playable cards in hand, and no products with inventory to sell).
 
 ### Card Types
+- **🟢 Products**: Generate revenue. Have inventory that depletes with sales. Some have overhead costs.
+- **🔵 Actions**: One-time effects; discarded after play.
+- **🟣 Tools**: Provide ongoing passive or triggered benefits while in play.
+- **🟠 Employees**: Similar to Tools, provide ongoing benefits or abilities.
 
-#### 🟢 Products
-Revenue-generating cards with inventory that can be sold for money:
-- **Inventory**: Number of items available to sell
-- **Revenue per Sale**: Money earned per item sold
-- **Overhead Cost**: Some products require capital payment each turn
-- **Status**: Can be active/inactive
+## 🛠️ Heroes & Abilities
 
-#### 🔵 Actions  
-One-time effects that resolve immediately and are discarded.
+1.  **The Solo Hustler**
+    *   **Playstyle**: Fast and scrappy, card draw, and cost reduction.
+    *   **Hero Power (Grind - Cost 1)**: Draw 1 card. If it's a Product, its cost is reduced by 1 this turn.
+    *   **Key Cards**: Hustle Hard, Bootstrap Capital, DIY Assembly, Fast Pivot, Shoestring Budget.
 
-#### 🟣 Tools
-Passive effects that remain on the board and provide ongoing benefits.
+2.  **The Brand Builder**
+    *   **Playstyle**: Synergy-focused, building brand presence (Audience mechanic largely unimplemented).
+    *   **Hero Power (Engage - Cost 2)**: Give a Product +1 Appeal this turn (currently boosts global appeal due to choice UI not implemented).
+    *   **Key Cards**: Brand Vision, Influencer Collab, Content Calendar, Personal Branding.
 
-#### 🟠 Employees
-Ongoing helpers that provide passive bonuses or triggered abilities.
+3.  **The Automation Architect**
+    *   **Playstyle**: Builds an engine of passive income and efficiency over time.
+    *   **Hero Power (Deploy Script - Cost 2)**: Gain 1 recurring Capital next turn.
+    *   **Key Cards**: Auto Fulfill, Email Automation, Zap Everything, Technical Cofounder.
 
-### Selling System
-- Click "Sell" buttons under Products to generate revenue
-- Revenue is modified by various cards and effects
-- Some cards provide automatic sales each turn
-- Inventory decreases with each sale
+4.  **The Community Leader**
+    *   **Playstyle**: High variance, explosive combo turns (Audience mechanic largely unimplemented).
+    *   **Hero Power (Go Viral - Cost 1)**: If you played 2+ cards this turn, add +1 inventory to a random Product.
+    *   **Key Cards**: Town Hall, Mutual Aid, Fanbase, Merch Drop.
 
-## 👥 Hero Classes
+5.  **The Serial Founder**
+    *   **Playstyle**: Balanced and flexible with powerful mid-game options.
+    *   **Hero Power (Double Down - Cost 2)**: Choose one: draw a card OR refresh 1 used Product (currently auto-chooses based on board state).
+    *   **Key Cards**: Legacy Playbook, Advisory Board, High-Profile Exit, Incubator Resources.
 
-### 🔴 Marketer
-**Focus**: Marketing campaigns, sales boosts, viral growth
-- **Hero Power**: "Marketing Blitz" (2 capital)
-  - Gain 2 capital, draw 1 card, all Products +$10k this turn
-- **Playstyle**: High revenue per sale, marketing synergies
-- **Key Cards**: Flash Sale Frenzy, Pop-up Shop, Viral Campaign
+## 🎮 Key Implemented Mechanics
 
-### 🔵 Developer  
-**Focus**: Technical efficiency, automation, scaling
-- **Hero Power**: "Code Sprint" (1 capital)
-  - Next card costs 2 less, draw 1 card
-- **Playstyle**: Cost reduction, revenue multipliers, automation
-- **Key Cards**: Scaling Algorithm, SaaS Platform, AI Optimization
+*   **Core Game Loop**: Turn progression, capital gain, card draw.
+*   **Card Play**: Playing Actions, Tools, Employees, and Products.
+*   **Resource Management**: Capital for playing cards, Revenue as the win condition.
+*   **Product System**: Products have inventory, generate revenue via automatic sales and card effects. Overhead costs are processed.
+*   **Cost Discounts**: Various cards and hero powers provide temporary or specific cost reductions (e.g., Shoestring Budget, Resourceful Solutions, Solo Hustler's hero power).
+*   **Delayed Effects**: Some effects trigger over subsequent turns (e.g., Fulfillment App Integration, Automation Architect's hero power).
+*   **Basic Passive Effects**: Some Tools and Employees provide simple recurring benefits (e.g., gain capital).
+*   **Player Choices**: Basic choice system for effects like discarding cards (Midnight Oil), destroying products (Fast Pivot), or choosing a product for an effect (most Inventory Support cards).
+*   **UI Bonus Indicators**: Visual cues on cards for active discounts, revenue bonuses, and delayed effect counters.
 
-### 🟢 Operator
-**Focus**: Operations, logistics, steady growth
-- **Hero Power**: "Operational Excellence" (2 capital)
-  - Gain 1 capital, all cards +$20k revenue this turn
-- **Playstyle**: Consistent revenue, inventory management
-- **Key Cards**: Fulfillment Center, Global Supply Network, Warehouse Manager
+## 🚧 Known Missing Features / TODOs
 
-### 🟣 Visionary
-**Focus**: High-risk strategies, funding, innovation
-- **Hero Power**: "Visionary Insight" (1 capital)
-  - Draw 3 cards, discard 1, gain $50k
-- **Playstyle**: Big swings, funding rounds, risky investments
-- **Key Cards**: Series A Funding, Moonshot R&D, Global Launch Event
+*   **Audience Mechanic**: This is a major planned mechanic, especially for Brand Builder and Community Leader, but is not yet implemented. Many card texts refer to gaining or using Audience.
+*   **Complex Card Effects**: Several cards have placeholder or simplified effects:
+    *   **Quick Learner**: Does not currently copy last Action.
+    *   **Analytics Dashboard**: Does not yet offer a choice to view/discard cards from deck.
+    *   **Scale Systems**: Does not yet repeat the first recurring effect.
+    *   **Custom App**: Cannot yet be played as an Action to copy a Tool effect.
+    *   **Zap Everything**: Triggers some simple recurring effects, but not all or choice-based ones.
+    *   Many hero powers have simplified targeting or choice-making (e.g., Brand Builder, Serial Founder).
+*   **Advanced UI for Choices**: UI for more complex choices (e.g., choose from multiple options for Incubator Resources, multi-select for Warehouse Expansion beyond 3) needs to be developed.
+*   **Multiplayer**: Currently single-player only. BoardGame.io supports multiplayer, but UI and some game logic (e.g., "teammate" effects) would need adaptation.
+*   **Comprehensive Card Balance & Testing**.
 
-## 🎮 Game Mechanics
+## 🛠️ Technical Overview
 
-### Capital System
-- Start each turn with capital equal to turn number (max 10)
-- Spend capital to play cards
-- Various effects can modify capital gain
-
-### Revenue Modifiers
-Cards can boost sales revenue through:
-- **Flash Sale**: +$50k per sale this turn
-- **Scaling Algorithm**: Double all revenue
-- **Social Media Ads**: +$10k passive bonus
-- **Global Supply Network**: +$20k per item
-
-### Overhead Management
-Some high-value products require maintenance:
-- Pay the overhead cost each turn or the product becomes inactive
-- **Load Balancer** and **Patent Portfolio** reduce overhead costs
-- **Security Patch** prevents products from being disabled
-
-### Passive Effects
-Many cards provide ongoing benefits:
-- **Warehouse Manager**: +1 inventory on all products each turn
-- **AI Salesbot**: Automatically sell 1 item each turn  
-- **Venture Capitalist**: +2 capital each turn
-
-## 🛠️ Technical Implementation
-
-### Project Structure
-```
-src/
-├── client/                 # React UI components
-│   ├── components/        # Card, PlayerBoard, GameStatus, etc.
-│   └── utils/            # Formatting utilities
-├── game/                 # Core game logic
-│   ├── data/            # Card definitions and hero data
-│   │   ├── decks.ts     # All 60 cards (15 per hero)
-│   │   └── heroes.ts    # Hero definitions and powers
-│   ├── logic/           # Game mechanics
-│   │   ├── cardEffects.ts     # Card effect implementations
-│   │   ├── heroAbilities.ts   # Hero power effects
-│   │   ├── turnEffects.ts     # Turn processing
-│   │   └── effectContext.ts   # State management
-│   ├── game.ts          # Main game definition
-│   ├── state.ts         # Game state types
-│   └── constants.ts     # Configuration values
-```
-
-### Key Technologies
-- **React** + **TypeScript**: Frontend
-- **boardgame.io**: Game state management and turn structure
-- **Tailwind CSS**: Styling with custom scrollbars
-- **Framer Motion**: Card animations
-- **Vite**: Build tool and dev server
-
-### Card Effect System
-Each card effect is implemented as a function:
-```typescript
-'flash_sale_frenzy': (G, playerID, card) => {
-  if (G.effectContext?.[playerID]) {
-    G.effectContext[playerID].flashSaleActive = true;
-  }
-}
-```
-
-## 🎨 UI Features
-
-### Responsive Design
-- **Mobile-friendly**: Cards scroll horizontally on narrow screens
-- **Visual Feedback**: Hover effects and disabled states
-- **Type-specific Borders**: Each card type has colored borders
-- **Scrollable Areas**: Handle many cards gracefully
-
-### Game Status Panel
-- Revenue progress bar toward $1M goal
-- Turn counter and current player indicator
-- Active effects display
-- Player revenue summaries
-
-### Sell System UI
-- Dedicated sell buttons under each product
-- Shows revenue amount in button text
-- Automatically disabled when no inventory
-- Visual indicators for inactive products
-
-## 🎯 Game Balance
-
-The game is tuned for coordinated teams to reach $1M in 8-10 turns:
-- **Early Game** (Turns 1-3): Low capital, focus on playing cheap cards
-- **Mid Game** (Turns 4-7): Scaling revenue with synergies and tools  
-- **Late Game** (Turns 8-10): High capital enabling expensive power plays
-
-Revenue progression typically follows:
-- Turn 1-2: $0-50k total
-- Turn 3-5: $100k-300k total  
-- Turn 6-8: $400k-700k total
-- Turn 9-10: $800k-1M+ total
-
-## 🐛 Debug Features
-
-- Console logging for capital changes and turn progression
-- Effect context tracking for temporary bonuses
-- Game state inspection via browser dev tools
-
-## 📝 Adding New Content
-
-### Adding a New Card
-1. Add definition to appropriate deck in `src/game/data/decks.ts`
-2. Implement effect in `src/game/logic/cardEffects.ts`
-3. Test interactions with existing cards
-
-### Modifying Game Balance
-- Adjust revenue values in card definitions
-- Modify `REVENUE_GOAL` in constants
-- Tune capital costs and starting resources
+- **Frontend**: React with TypeScript, Vite
+- **Game Engine**: boardgame.io
+- **Styling**: Inline styles (opportunity for Tailwind CSS or CSS Modules)
+- **Project Structure**:
+  ```
+  src/
+  ├── client/         # React UI components & hooks
+  ├── game/           # Core game logic, card data, type definitions
+  │   ├── data/       # Hero/card definitions (heroes in subfolder)
+  │   ├── logic/      # Game rules, effects, turn phases (utils & effects in subfolders)
+  │   └── ...         # state.ts, types.ts, constants.ts, game.ts
+  └── ...             # main.tsx, App.tsx, etc.
+  ```
 
 ## 🤝 Contributing
 
-Contributions welcome! Areas for improvement:
-- Additional card effects and synergies
-- UI/UX enhancements
-- Game balance tuning
-- Performance optimizations
+This project is a work in progress. Contributions are welcome, especially in areas like:
+- Implementing missing card effects and the Audience mechanic.
+- Enhancing UI/UX, especially for player choices.
+- Game balancing and adding more diverse card interactions.
 
 ## 📄 License
 
-MIT License - feel free to use and modify!
+MIT License.
