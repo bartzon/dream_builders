@@ -54,9 +54,7 @@ This file tracks unimplemented features, card effects, and mechanics.
     - **Status**: `passiveEffect`. Requires multiplayer support.
 
 ### Serial Founder
-- **Incubator Resources (Tool)**
-    - **Text**: "At the start of your turn, gain 1 capital or draw 1."
-    - **Status**: `passiveEffect`. Needs logic in `processPassiveEffects` to offer this choice to the player.
+- **Black Friday Blitz (Action)**
 
 ## III. UI & UX Enhancements
 
