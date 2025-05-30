@@ -211,6 +211,7 @@ export function handleCardPlayEffects(G: GameState, playerID: string, card: Card
     
     if (card.type === 'Product') {
       ctx.firstProductPlayed = true;
+      ctx.productCardsPlayedThisTurn = (ctx.productCardsPlayedThisTurn || 0) + 1;
       
       // Apply Appeal bonuses for Brand Builder mechanics
       if (card.appeal !== undefined) {

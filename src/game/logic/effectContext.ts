@@ -32,6 +32,7 @@ export interface EffectContext {
   soldProductLastTurn?: boolean;
   itemsSoldThisTurn?: number;
   cardsPlayedThisTurn?: number;
+  productCardsPlayedThisTurn?: number; // Tracks number of Product-type cards played
   
   // Appeal system (Brand Builder)
   tempAppealBoosts?: Record<string, number>; // product ID -> appeal bonus
@@ -93,6 +94,7 @@ export function initEffectContext(): EffectContext {
     soldProductLastTurn: false,
     itemsSoldThisTurn: 0,
     cardsPlayedThisTurn: 0,
+    productCardsPlayedThisTurn: 0,
     tempAppealBoosts: {},
     globalAppealBoost: 0,
     productCostReduction: 0,
@@ -145,6 +147,7 @@ export function clearTempEffects(G: GameState, playerID: string) {
     ctx.soldProductThisTurn = false;
     ctx.itemsSoldThisTurn = 0;
     ctx.cardsPlayedThisTurn = 0;
+    ctx.productCardsPlayedThisTurn = 0;
     ctx.tempAppealBoosts = {};
     ctx.globalAppealBoost = 0;
     ctx.productCostReduction = 0;

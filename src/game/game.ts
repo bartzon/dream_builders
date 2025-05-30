@@ -391,6 +391,26 @@ export const DreamBuildersGame: Game<GameState> = {
             if (G.gameLog) G.gameLog.push(`Serial Founder (Double Down): Error - product not found or inventory undefined.`);
           }
           player.pendingChoice = undefined;
+        } else if (choice.effect === 'black_friday_blitz_sell_product') {
+          if (!choice.cards || choiceIndex < 0 || choiceIndex >= choice.cards.length) return INVALID_MOVE;
+          const chosenProductInfo = choice.cards[choiceIndex];
+          const boardProduct = player.board.Products.find(p => p.id === chosenProductInfo.id);
+
+          if (boardProduct && boardProduct.inventory && boardProduct.inventory > 0) {
+            sellProduct(G, playerID, boardProduct, 1); // Sell 1 unit
+            if (G.gameLog) G.gameLog.push(`Black Friday Blitz: Sold ${boardProduct.name}.`);
+            if (G.effectContext?.[playerID]) {
+              G.effectContext[playerID].recentlyAffectedCardIds?.push(boardProduct.id);
+              // Check for bonus: if this was the 3rd Product card played this turn
+              if ((G.effectContext[playerID].productCardsPlayedThisTurn || 0) >= 3) { // Or just === 3 if it should be *exactly* the third
+                gainCapital(G, playerID, 3);
+                if (G.gameLog) G.gameLog.push(`Black Friday Blitz: Bonus! +3 Capital for 3rd Product played this turn.`);
+              }
+            }
+          } else {
+            if (G.gameLog) G.gameLog.push(`Black Friday Blitz: Error - selected product ${chosenProductInfo.name} has no inventory or not found.`);
+          }
+          player.pendingChoice = undefined;
         } else {
           // Existing generic inventory/product choice logic
           if (!choice.cards || choiceIndex < 0 || choiceIndex >= choice.cards.length) return INVALID_MOVE;

@@ -7,7 +7,6 @@ import {
 } from '../utils/effect-helpers';
 import {
   sellProduct,
-  sellFirstAvailableProduct,
 } from '../utils/sales-helpers';
 
 const passiveEffect = () => {};
@@ -48,5 +47,19 @@ export const serialFounderCardEffects: Record<string, (G: GameState, playerID: s
   // Board of Directors: Recurring: Gain 2 capital.
   'board_of_directors': passiveEffect, // Handled in processPassiveEffects if implemented
   // Black Friday Blitz: Sell a Product. If it's your third Product this turn, gain 3 extra capital.
-  'black_friday_blitz': (G, playerID) => sellFirstAvailableProduct(G, playerID), // Conditional capital not implemented
+  'black_friday_blitz': (G, playerID, card) => { // card is Black Friday Blitz itself
+    const player = G.players[playerID];
+    const sellableProducts = player.board.Products.filter(p => p.isActive !== false && p.inventory && p.inventory > 0);
+
+    if (sellableProducts.length > 0) {
+      player.pendingChoice = {
+        type: 'choose_card',
+        effect: 'black_friday_blitz_sell_product',
+        cards: sellableProducts.map(p => ({ ...p })),
+        sourceCard: card ? { ...card } : undefined,
+      };
+    } else {
+      if (G.gameLog) G.gameLog.push('Black Friday Blitz: No products available to sell.');
+    }
+  },
 }; 

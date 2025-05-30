@@ -116,6 +116,7 @@ export function DebugPanel({ gameState, playerID }: DebugPanelProps) {
       
       // Solo Hustler tracking
       soloHustlerDiscountedCard: effectContext.soloHustlerDiscountedCard,
+      productCardsPlayedThisTurn: effectContext.productCardsPlayedThisTurn,
       
       // Quick Learner tracking
       lastActionEffect: effectContext.lastActionEffect,
