@@ -26,6 +26,7 @@ export interface EffectContext {
   // Turn tracking
   firstProductPlayed?: boolean;
   playedActionThisTurn?: boolean;
+  playedActionLastTurn?: boolean;
   playedToolThisTurn?: boolean;
   playedActionsThisTurn?: number;
   soldProductThisTurn?: boolean;
@@ -88,6 +89,7 @@ export function initEffectContext(): EffectContext {
     recurringCapitalNextTurn: 0,
     firstProductPlayed: false,
     playedActionThisTurn: false,
+    playedActionLastTurn: false,
     playedToolThisTurn: false,
     playedActionsThisTurn: 0,
     soldProductThisTurn: false,
@@ -122,6 +124,7 @@ export function clearTempEffects(G: GameState, playerID: string) {
     
     // Move current turn data to last turn
     ctx.soldProductLastTurn = ctx.soldProductThisTurn || false;
+    ctx.playedActionLastTurn = ctx.playedActionThisTurn || false;
     
     // Apply recurring capital if any
     if (ctx.recurringCapitalNextTurn && ctx.recurringCapitalNextTurn > 0) {

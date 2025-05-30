@@ -59,6 +59,21 @@ export function getQualityMaterialsCostIncrease(player: PlayerState, card: Card)
   return 0;
 }
 
+// Cost Reduction: Visual Identity (Brand Builder card)
+export function getVisualIdentityDiscount(player: PlayerState, card: Card): number {
+  if (card.type === 'Product') {
+    const visualIdentity = player.board.Tools.find(t => t.effect === 'visual_identity');
+    if (visualIdentity) {
+      // Check if player controls another Tool (besides Visual Identity itself)
+      const otherTools = player.board.Tools.filter(t => t.id !== visualIdentity.id);
+      if (otherTools.length > 0) {
+        return 1; // Products cost 1 less
+      }
+    }
+  }
+  return 0;
+}
+
 // Discount source: Shoestring Budget (Solo Hustler Tool)
 export function getShoestringBudgetDiscount(G: GameState, playerID: string, player: PlayerState): number {
   let discount = 0;

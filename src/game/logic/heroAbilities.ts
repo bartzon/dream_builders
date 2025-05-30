@@ -34,7 +34,7 @@ export const heroAbilityEffects: Record<string, (G: GameState, playerID: string)
   },
   
   // Brand Builder Hero Power: Engage
-  // Give a Product +1 Appeal this turn.
+  // Add 2 Inventory to a Product.
   'brand_builder_engage': (G, playerID) => {
     const player = G.players[playerID];
     
@@ -42,9 +42,27 @@ export const heroAbilityEffects: Record<string, (G: GameState, playerID: string)
     if (!G.effectContext) G.effectContext = {};
     if (!G.effectContext[playerID]) G.effectContext[playerID] = initEffectContext();
     
-    // For now, give all Products +1 Appeal this turn
-    // In a full implementation, player would choose which Product
-    G.effectContext[playerID].globalAppealBoost = 1;
+    // Find a Product to add inventory to
+    // In full implementation, player would choose which Product
+    // For now, add to a random Product
+    const productsWithInventory = player.board.Products.filter(p => p.inventory !== undefined);
+    if (productsWithInventory.length > 0) {
+      const randomIndex = Math.floor(Math.random() * productsWithInventory.length);
+      const selectedProduct = productsWithInventory[randomIndex];
+      if (selectedProduct.inventory !== undefined) {
+        selectedProduct.inventory += 2;
+        
+        // Track affected card for UI highlighting
+        if (!G.effectContext[playerID].recentlyAffectedCardIds) {
+          G.effectContext[playerID].recentlyAffectedCardIds = [];
+        }
+        G.effectContext[playerID].recentlyAffectedCardIds.push(selectedProduct.id);
+        
+        if (G.gameLog) {
+          G.gameLog.push(`Engage: Added +2 inventory to ${selectedProduct.name}.`);
+        }
+      }
+    }
     
     player.heroAbilityUsed = true;
   },

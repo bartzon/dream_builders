@@ -12,12 +12,6 @@ This file tracks unimplemented features, card effects, and mechanics.
     - Implement game logic for gaining, spending, and checking Audience thresholds.
     - Update UI to display Audience.
 - **Cards Affected (Examples - see full list in card data)**:
-    - **Influencer Collab (Brand Builder)**: "Add 3 Audience. Gain 2 capital."
-    - **Content Calendar (Brand Builder)**: "Recurring: Add 1 Audience at the start of your turn."
-    - **Viral Post (Brand Builder)**: "Add 5 Audience. If you've gained Audience this turn, gain 2 capital."
-    - **Email List (Brand Builder)**: "Recurring: If you have 5+ Audience, gain 1 capital."
-    - **UGC Explosion (Brand Builder)**: "Double your Audience if you control a Product."
-    - **Personal Branding (Brand Builder)**: "Whenever you play a Brand card, gain 1 Audience."
     - **Live AMA (Community Leader)**: "Draw 2 cards. Add 2 Audience."
     - **Merch Drop (Community Leader)**: "Costs 1 less if you have 5+ Audience. Sells for 3."
     - **Grassroots Launch (Community Leader)**: "Add 5 Audience. You may sell a Product."
@@ -29,11 +23,20 @@ This file tracks unimplemented features, card effects, and mechanics.
 
 ### Brand Builder
 - **Hero Power: Engage**
-    - **Text**: "Give a Product +1 Appeal this turn."
-    - **Status**: Currently boosts global appeal. Needs UI for player to choose a specific Product.
+    - **Text**: "Add 2 Inventory to a Product."
+    - **Status**: Currently not properly implemented. The effect `brand_builder_engage` in heroAbilities.ts still gives global appeal boost instead of adding inventory to a chosen Product. Needs UI for player to choose a specific Product.
+- **Content Calendar (Tool)**
+    - **Text**: "Recurring: Add 1 inventory to your lowest-inventory Product."
+    - **Status**: Marked as `passiveEffect`. Needs implementation in processPassiveEffects to find and add inventory to the lowest-inventory Product each turn.
+- **Email List (Tool)**
+    - **Text**: "Recurring: If you control 2 or more Products, gain 1 capital."
+    - **Status**: Marked as `passiveEffect`. Needs implementation in processPassiveEffects to check Product count and gain capital.
 - **Visual Identity (Tool)**
-    - **Text**: "Your Products cost 1 less if you have a Brand Effect."
-    - **Status**: Marked as `passiveEffect`. Actual cost reduction needs to be implemented in `getCardDiscount` by checking if any card with the "Brand" keyword (or a new "Brand Effect" keyword/property) is in play.
+    - **Text**: "Your Products cost 1 less if you control another Tool."
+    - **Status**: Marked as `passiveEffect`. Actual cost reduction needs to be implemented in `getCardDiscount` by checking if the player controls any other Tool cards.
+- **Personal Branding (Tool)**
+    - **Text**: "Recurring: Draw 1 card if you played an Action last turn."
+    - **Status**: Marked as `passiveEffect`. Needs implementation in processPassiveEffects with tracking of Action cards played in previous turn.
 
 ### Automation Architect
 - **Scale Systems (Tool)**

@@ -10,6 +10,7 @@ import { handleCommunityManager } from './passive-effects/community-manager-pass
 import { handleSerialFounderChoicePassives } from './passive-effects/serial-founder-passives';
 import { handleContentCreator } from './passive-effects/content-creator-passive';
 import { handleLegacyPassiveEffects } from './passive-effects/legacy-passive-effects';
+import { handleBrandBuilderPassives } from './passive-effects/brand-builder-passives';
 
 // Import discount source handlers
 import {
@@ -19,7 +20,8 @@ import {
   getMemeMagicDiscount,
   getQualityMaterialsCostIncrease,
   getShoestringBudgetDiscount,
-  getCommunityManagerDiscount
+  getCommunityManagerDiscount,
+  getVisualIdentityDiscount
 } from './effects/discount-sources';
 
 // Process passive effects at start of turn
@@ -30,6 +32,7 @@ export function processPassiveEffects(G: GameState, playerID: string) {
   handleCommunityManager(G, playerID);
   handleSerialFounderChoicePassives(G, playerID);
   handleContentCreator(G, playerID);
+  handleBrandBuilderPassives(G, playerID);
 
   // Note: DIY Assembly's productCostReduction was part of Solo Hustler logic.
   // It was correctly removed from here as it's handled by getCardDiscount mechanisms.
@@ -145,6 +148,7 @@ export function getCardDiscount(G: GameState, playerID: string, card: Card): num
   totalDiscount += getQualityMaterialsCostIncrease(player, card); // This will be negative
   totalDiscount += getShoestringBudgetDiscount(G, playerID, player);
   totalDiscount += getCommunityManagerDiscount(player, card);
+  totalDiscount += getVisualIdentityDiscount(player, card);
   
   return Math.min(Math.max(0, totalDiscount), card.cost); // Ensure discount isn't negative or more than card cost
 }
@@ -161,6 +165,7 @@ export function getCardCostInfo(G: GameState, playerID: string, card: Card): { o
   totalDiscount += getQualityMaterialsCostIncrease(player, card);
   totalDiscount += getShoestringBudgetDiscount(G, playerID, player);
   totalDiscount += getCommunityManagerDiscount(player, card);
+  totalDiscount += getVisualIdentityDiscount(player, card);
 
   const effectiveDiscount = Math.min(Math.max(0, totalDiscount), card.cost);
   const finalCost = Math.max(0, card.cost - effectiveDiscount);
