@@ -288,9 +288,7 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
           {/* Products */}
           <ProductsSection
             products={uiState.products}
-            pendingChoice={pendingChoice}
             effectContext={effectContext}
-            onMakeChoice={handleMakeChoice}
             onShowTooltip={showCardTooltip}
             onHideTooltip={hideCardTooltip}
             affectedCardIds={affectedCardIds}
@@ -323,7 +321,6 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
         <div style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
         <PlayerHand
           hand={uiState.hand}
-          pendingChoiceType={pendingChoice?.type}
           midnightOilPending={effectContext.midnightOilDiscardPending}
           getCostInfo={getCostInfo}
           capital={uiState.capital}
@@ -331,7 +328,6 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
           effectContext={effectContext}
           affectedCardIds={affectedCardIds}
           onPlayCard={handlePlayCard}
-          onMakeChoice={handleMakeChoice}
           onShowTooltip={showCardTooltip}
           onHideTooltip={hideCardTooltip}
         />

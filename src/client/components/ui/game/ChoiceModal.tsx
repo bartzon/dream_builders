@@ -30,12 +30,110 @@ export const ChoiceModal: React.FC<ChoiceModalProps> = React.memo(({
   };
 
   switch (type) {
+    case 'discard':
+      title = effect === 'midnight_oil' ? 'Midnight Oil: Discard 1 Card' : 'Discard a Card';
+      content = (
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px' }}>
+          <p style={{ fontSize: FONT_SIZES.body, margin: '0 0 10px 0' }}>
+            Choose a card from your hand to discard:
+          </p>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', flexWrap: 'wrap' }}>
+            {uiState.hand.map((card: ClientCard, index: number) => (
+              <UniversalCard
+                key={card.id || index}
+                card={card}
+                displayMode={'choiceModal' as CardDisplayMode}
+                isClickable={true}
+                onClick={() => onMakeChoice(index)}
+              />
+            ))}
+          </div>
+        </div>
+      );
+      break;
+
+    case 'destroy_product':
+      title = 'Fast Pivot: Destroy a Product';
+      if (!cards || cards.length === 0) return null;
+      content = (
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px' }}>
+          <p style={{ fontSize: FONT_SIZES.body, margin: '0 0 10px 0' }}>
+            Choose a product to destroy. You'll draw 2 cards and your next Product costs 2 less.
+          </p>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', flexWrap: 'wrap' }}>
+            {cards.map((card: ClientCard, index: number) => (
+              <UniversalCard
+                key={card.id || index}
+                card={card}
+                displayMode={'choiceModal' as CardDisplayMode}
+                isClickable={true}
+                onClick={() => onMakeChoice(index)}
+              />
+            ))}
+          </div>
+        </div>
+      );
+      break;
+
+    case 'choose_card':
+      if (!cards || cards.length === 0) return null;
+      
+      // Set title based on effect
+      if (effect === 'serial_founder_double_down_add_inventory') {
+        title = 'Double Down: Add Inventory';
+      } else if (effect === 'brand_builder_engage_add_inventory') {
+        title = 'Engage: Choose Product';
+      } else if (effect === 'black_friday_blitz_sell_product') {
+        title = 'Black Friday Blitz: Sell Product';
+      } else if (effect === 'multi_product_inventory_boost') {
+        title = 'Warehouse Expansion: Choose Products';
+      } else if (effect === 'add_inventory_if_empty') {
+        title = 'Reorder: Choose Empty Product';
+      } else {
+        title = 'Choose a Product';
+      }
+
+      content = (
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px' }}>
+          <p style={{ fontSize: FONT_SIZES.body, margin: '0 0 10px 0' }}>
+            {effect === 'serial_founder_double_down_add_inventory' && 'Choose a product to add +2 inventory'}
+            {effect === 'brand_builder_engage_add_inventory' && 'Choose a product to add +2 inventory'}
+            {effect === 'black_friday_blitz_sell_product' && 'Choose a product with inventory to sell'}
+            {effect === 'add_inventory_if_empty' && 'Choose a product with 0 inventory to restock (+3)'}
+            {effect === 'multi_product_inventory_boost' && 'Choose products to add +1 inventory each (or End Turn to finish)'}
+            {!['serial_founder_double_down_add_inventory', 'brand_builder_engage_add_inventory', 'black_friday_blitz_sell_product', 'add_inventory_if_empty', 'multi_product_inventory_boost'].includes(effect || '') && 'Choose a product to boost'}
+          </p>
+          <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', flexWrap: 'wrap' }}>
+            {cards.map((card: ClientCard, index: number) => {
+              // Check if card meets criteria for selection
+              const isDisabled = effect === 'add_inventory_if_empty' && card.inventory !== 0;
+              const isSelectable = effect === 'black_friday_blitz_sell_product' ? ((card.inventory || 0) > 0) : true;
+              
+              return (
+                <div key={card.id || index} style={{ opacity: (isDisabled || !isSelectable) ? 0.5 : 1 }}>
+                  <UniversalCard
+                    card={card}
+                    displayMode={'choiceModal' as CardDisplayMode}
+                    isClickable={!isDisabled && isSelectable}
+                    onClick={() => !isDisabled && isSelectable && onMakeChoice(index)}
+                  />
+                  {effect === 'add_inventory_if_empty' && card.inventory === 0 && (
+                    <div style={{ textAlign: 'center', marginTop: '5px', color: COLORS.success, fontWeight: 'bold' }}>
+                      +3 Stock
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      );
+      break;
+
     case 'choose_option':
       if (!options) return null;
       if (effect === 'serial_founder_double_down') title = 'Double Down: Choose an Effect';
       else if (effect === 'incubator_resources_choice') title = 'Incubator Resources: Choose Bonus';
-      // Add more titles for other 'choose_option' effects here
-      // else if (effect === 'incubator_resources_choice') title = 'Incubator: Choose Resource';
       
       content = (
         <div style={{ display: 'flex', justifyContent: 'space-around', gap: '15px', flexWrap: 'wrap' }}>

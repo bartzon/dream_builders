@@ -5,7 +5,6 @@ import type { ClientCard, EffectContextUI } from '../../../types/game'
 
 interface PlayerHandProps {
   hand: ClientCard[]
-  pendingChoiceType?: string
   midnightOilPending: boolean
   getCostInfo: (card: ClientCard) => { originalCost: number; discount: number; finalCost: number }
   capital: number
@@ -13,7 +12,6 @@ interface PlayerHandProps {
   effectContext: EffectContextUI
   affectedCardIds: Set<string>
   onPlayCard: (index: number) => void
-  onMakeChoice: (index: number) => void
   onShowTooltip: (card: ClientCard, e: React.MouseEvent) => void
   onHideTooltip: () => void
 }
@@ -26,7 +24,6 @@ const HOVER_SCALE = 1.15 // Scale factor on hover
 
 export const PlayerHand = React.memo(({
   hand,
-  pendingChoiceType,
   midnightOilPending,
   getCostInfo,
   capital,
@@ -34,11 +31,9 @@ export const PlayerHand = React.memo(({
   effectContext,
   affectedCardIds,
   onPlayCard,
-  onMakeChoice,
   onShowTooltip,
   onHideTooltip
 }: PlayerHandProps) => {
-  const isDiscardMode = pendingChoiceType === 'discard'
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null) // Added state for hovered card
 
   const handleMouseEnterCard = (index: number, card: ClientCard, e: React.MouseEvent) => {
@@ -90,10 +85,10 @@ export const PlayerHand = React.memo(({
           key={`${card.id || 'card'}-${index}`}
           card={card}
           canPlay={canPlay}
-          isDiscardMode={isDiscardMode}
+          isDiscardMode={false}
           isAffected={isAffected}
           costInfo={costInfo}
-          onCardClick={() => isDiscardMode ? onMakeChoice(index) : (canPlay ? onPlayCard(index) : () => {}) }
+          onCardClick={() => canPlay ? onPlayCard(index) : () => {} }
          // Remove individual card mouse enter/leave/move, handled by the div wrapper now
         />
       </div>
@@ -104,15 +99,6 @@ export const PlayerHand = React.memo(({
     <div>
       <h4 style={{ fontSize: FONT_SIZES.subheading }}>
         Your Hand ({hand.length})
-        {isDiscardMode && (
-          <span style={{
-            color: '#ef4444',
-            marginLeft: '10px',
-            fontSize: FONT_SIZES.body
-          }}>
-            - Click a card to discard it
-          </span>
-        )}
         {midnightOilPending && (
           <span style={{
             color: '#10b981',
