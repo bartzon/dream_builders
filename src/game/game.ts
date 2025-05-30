@@ -392,6 +392,69 @@ export const DreamBuildersGame: Game<GameState> = {
         if (G.gameLog) {
           G.gameLog.push(`Player ${playerID} chose ${chosenCard.name} for ${choice.effect}.`);
         }
+      } else if (choice.type === 'choose_from_drawn_to_discard' && choice.effect === 'ab_test_discard') {
+        if (!choice.cards || choiceIndex < 0 || choiceIndex >= choice.cards.length) {
+          // Invalid choice index or no cards presented for choice (shouldn't happen if effect sets up correctly)
+          return INVALID_MOVE;
+        }
+        const cardToDiscard = choice.cards[choiceIndex];
+        
+        // Find and remove the actual card from hand by its ID
+        const handCardIndex = player.hand.findIndex(c => c.id === cardToDiscard.id);
+        if (handCardIndex !== -1) {
+          player.hand.splice(handCardIndex, 1);
+          if (G.gameLog) {
+            G.gameLog.push(`A/B Test: Player ${playerID} discarded ${cardToDiscard.name}.`);
+          }
+        } else {
+          // This case should ideally not be reached if drawnCards were correctly identified
+          if (G.gameLog) {
+            G.gameLog.push(`A/B Test: Error - card to discard not found in hand.`);
+          }
+          // Potentially return INVALID_MOVE or handle error, but for now, just log and clear choice
+        }
+        player.pendingChoice = undefined;
+      } else if (choice.type === 'view_deck_and_discard' && choice.effect === 'analytics_dashboard_discard') {
+        if (!choice.cards || !choice.count) return INVALID_MOVE; // Should have cards and count from effect
+
+        // choiceIndex: 0 to discard choice.cards[0], 1 to discard choice.cards[1]
+        // -1 (or choice.cards.length) can signify "discard none"
+        if (choiceIndex >= 0 && choiceIndex < choice.count) {
+          const cardToDiscardFromDeck = choice.cards[choiceIndex]; // This is a copy
+          
+          // Find the actual card on top of the deck. 
+          // choice.cards are reversed: choice.cards[0] is player.deck[player.deck.length - 1]
+          // choice.cards[1] (if exists) is player.deck[player.deck.length - 2]
+          let deckCardIndexToRemove = -1;
+          if (choice.count === 1 && choiceIndex === 0 && player.deck.length > 0 && player.deck[player.deck.length - 1].id === cardToDiscardFromDeck.id) {
+            deckCardIndexToRemove = player.deck.length - 1;
+          } else if (choice.count === 2) {
+            if (choiceIndex === 0 && player.deck.length > 0 && player.deck[player.deck.length - 1].id === cardToDiscardFromDeck.id) {
+              deckCardIndexToRemove = player.deck.length - 1;
+            } else if (choiceIndex === 1 && player.deck.length > 1 && player.deck[player.deck.length - 2].id === cardToDiscardFromDeck.id) {
+              deckCardIndexToRemove = player.deck.length - 2;
+            }
+          }
+
+          if (deckCardIndexToRemove !== -1) {
+            const discardedCard = player.deck.splice(deckCardIndexToRemove, 1)[0];
+            if (G.gameLog) {
+              G.gameLog.push(`Analytics Dashboard: Player ${playerID} discarded ${discardedCard.name} from top of deck.`);
+            }
+            // If one card was discarded, the other (if presented) remains on top.
+          } else {
+            // Card ID mismatch or invalid index, should not happen if UI presents choices correctly based on pendingChoice.cards
+            if (G.gameLog) {
+              G.gameLog.push(`Analytics Dashboard: Error - card to discard from deck not found or mismatch.`);
+            }
+          }
+        } else {
+          // Player chose not to discard (e.g., choiceIndex === -1 or choice.cards.length)
+          if (G.gameLog) {
+            G.gameLog.push(`Analytics Dashboard: Player ${playerID} viewed top cards, no discard.`);
+          }
+        }
+        player.pendingChoice = undefined;
       }
       // Add more choice types here as needed
     },

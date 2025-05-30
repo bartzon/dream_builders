@@ -38,10 +38,10 @@ This file tracks unimplemented features, card effects, and mechanics.
 ### Automation Architect
 - **Analytics Dashboard (Tool)**
     - **Text**: "Recurring: Look at the top 2 cards of your deck. You may discard one."
-    - **Status**: `passiveEffect`. Recurring logic in `processPassiveEffects` creates a `view_deck_and_discard` pending choice, but `makeChoice` in `game.ts` does not yet handle this choice type.
+    - **Status**: ✅ **Implemented** (Logic for choice creation and handling in place. UI for specific card presentation for this choice type is a separate enhancement - see UI section).
 - **A/B Test (Action)**
     - **Text**: "Draw 2 cards. Discard 1."
-    - **Status**: Draws 2 cards. Needs to trigger a discard choice for 1 card from hand.
+    - **Status**: ✅ **Implemented** (Logic for drawing and choice to discard one of the drawn cards is in place. UI for specifically highlighting only the two drawn cards for this choice is a separate enhancement - see UI section).
 - **Scale Systems (Tool)**
     - **Text**: "At the end of your turn, repeat the first Recurring effect you triggered this turn."
     - **Status**: `passiveEffect`. Logic for tracking and repeating the first recurring effect is missing from `processPassiveEffects` or end-of-turn phase.
@@ -80,6 +80,7 @@ This file tracks unimplemented features, card effects, and mechanics.
 
 - **Advanced Player Choice UI**: Implement UI for more complex choices:
     - Choosing from a list of cards/options (e.g., Analytics Dashboard, Serial Founder hero power, Custom App).
+    - Specifically highlighting only the 2 drawn cards for A/B Test discard choice.
     - Multi-selection (e.g., Warehouse Expansion - current implementation is sequential single picks).
 - **Tooltips**: Review all tooltips for clarity and completeness, especially for cards with complex or unimplemented effects.
 - **Visual Feedback**: Enhance visual feedback for various game states or effects (e.g., when a choice is pending).

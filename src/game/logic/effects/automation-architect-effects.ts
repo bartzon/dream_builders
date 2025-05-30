@@ -19,9 +19,29 @@ export const automationArchitectCardEffects: Record<string, (G: GameState, playe
   'analytics_dashboard': passiveEffect,
   // Email Automation: Recurring: Gain 1 capital.
   'email_automation': passiveEffect,
-  // A/B Test: Draw 2 cards. Discard 1.
+  // A/B Test: Draw 2 cards. Discard 1 (one of the two drawn).
   'ab_test': (G, playerID) => {
-    drawCards(G, playerID, 2); // Discard choice missing
+    const player = G.players[playerID];
+    const handSizeBeforeDraw = player.hand.length;
+    drawCards(G, playerID, 2);
+    const cardsDrawnCount = player.hand.length - handSizeBeforeDraw;
+
+    if (cardsDrawnCount > 0) {
+      // Get references to the actual cards drawn (last N cards in hand)
+      const drawnCards = player.hand.slice(-cardsDrawnCount);
+      
+      if (drawnCards.length > 0) {
+        player.pendingChoice = {
+          type: 'choose_from_drawn_to_discard',
+          effect: 'ab_test_discard',
+          cards: drawnCards.map(c => ({ ...c })), // Pass copies of the drawn cards for the choice
+          count: 1, // Player needs to discard 1
+        };
+      }
+    } else {
+      // No cards were drawn (deck empty), so no discard possible.
+      if(G.gameLog) G.gameLog.push('A/B Test: Drew no cards, no discard necessary.');
+    }
   },
   // Scale Systems: At the end of your turn, repeat the first Recurring effect you triggered this turn.
   'scale_systems': passiveEffect,
