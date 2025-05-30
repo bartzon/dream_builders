@@ -1,5 +1,6 @@
 import React from 'react'
-import { FONT_SIZES, REVENUE_GOAL } from '../../../constants/ui'
+import { FONT_SIZES } from '../../../constants/ui'
+import { GAME_CONFIG } from '../../../../game/constants'
 import type { EffectContextUI } from '../../../types/game'
 
 interface GameHeaderProps {
@@ -21,7 +22,7 @@ export const GameHeader = React.memo(({
   effectContext,
   hasShoestringBudget
 }: GameHeaderProps) => {
-  const revenueProgress = (revenue / REVENUE_GOAL) * 100;
+  const revenueProgress = (revenue / GAME_CONFIG.REVENUE_GOAL) * 100;
   
   return (
     <div style={{ 
@@ -113,7 +114,7 @@ const RevenueProgress = ({ revenue, progress }: { revenue: number; progress: num
         }} />
       </div>
       <div style={{ fontSize: FONT_SIZES.small, color: '#6ee7b7', marginTop: '2px' }}>
-        Goal: ${REVENUE_GOAL.toLocaleString()} ({progress.toFixed(1)}%)
+        Goal: ${GAME_CONFIG.REVENUE_GOAL.toLocaleString()} ({progress.toFixed(1)}%)
       </div>
     </div>
   </div>

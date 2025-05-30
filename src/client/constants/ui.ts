@@ -72,9 +72,6 @@ export const COLORS = {
   white: '#fff'
 } as const 
 
-// Game constants
-export const REVENUE_GOAL = 1_000_000
-
 // Card type color mapping
 export const CARD_TYPE_COLORS: Record<string, string> = {
   product: COLORS.product,

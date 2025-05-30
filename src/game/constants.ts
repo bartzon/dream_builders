@@ -1,29 +1,18 @@
 // Game configuration constants
 export const GAME_CONFIG = {
   // Win/Loss conditions
-  REVENUE_GOAL: 1_000_000,
+  REVENUE_GOAL: 500_000,
   
   // Capital
   MAX_CAPITAL: 10,
   CAPITAL_PER_TURN: 1,
   
   // Cards
-  STARTING_HAND_SIZE: 3,
+  STARTING_HAND_SIZE: 5,
   CARDS_DRAWN_PER_TURN: 1,
   
   // Hero abilities
   HERO_ABILITY_COSTS: {
-    // Legacy heroes (old format)
-    marketer: 2,
-    developer: 1,
-    operator: 2,
-    visionary: 1,
-    // Legacy heroes (keeping original names for compatibility)
-    Marketer: 2,
-    Developer: 1,
-    Operator: 2,
-    Visionary: 1,
-    // New heroes
     solo_hustler: 1,
     brand_builder: 2,
     automation_architect: 2,
