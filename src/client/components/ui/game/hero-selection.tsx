@@ -2,6 +2,8 @@
 
 import { useState } from "react"
 import { allHeroes } from "../../../../game/data/heroes"
+import { Credits } from "../Credits"
+import { COLORS, BUTTON_STYLES } from "../../../constants/ui"
 
 // Font size constants (matching game-screen)
 const FONT_SIZES = {
@@ -20,6 +22,7 @@ interface HeroSelectionProps {
 
 export default function HeroSelection({ onHeroSelected }: HeroSelectionProps) {
   const [selectedHero, setSelectedHero] = useState<string | null>(null)
+  const [showCredits, setShowCredits] = useState(false)
 
   const getHeroColor = (color: string) => {
     switch (color) {
@@ -53,6 +56,9 @@ export default function HeroSelection({ onHeroSelected }: HeroSelectionProps) {
       justifyContent: 'space-between',
       fontFamily: 'Arial, sans-serif'
     }}>
+      {/* Credits Modal */}
+      <Credits isOpen={showCredits} onClose={() => setShowCredits(false)} />
+
       {/* Header Text - Might need adjustment or removal later */}
       <div style={{
         textAlign: 'center',
@@ -320,6 +326,36 @@ export default function HeroSelection({ onHeroSelected }: HeroSelectionProps) {
             Select a hero to begin your entrepreneurial journey
           </p>
         )}
+        
+        {/* Credits Button */}
+        <div style={{ marginTop: '30px' }}>
+          <button
+            onClick={() => setShowCredits(true)}
+            style={{
+              ...BUTTON_STYLES,
+              backgroundColor: 'transparent',
+              color: COLORS.textPurple,
+              border: `1px solid ${COLORS.textPurple}`,
+              padding: '8px 16px',
+              fontSize: FONT_SIZES.small,
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+              opacity: 0.8,
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = COLORS.textPurple
+              e.currentTarget.style.color = COLORS.white
+              e.currentTarget.style.opacity = '1'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'transparent'
+              e.currentTarget.style.color = COLORS.textPurple
+              e.currentTarget.style.opacity = '0.8'
+            }}
+          >
+            Credits
+          </button>
+        </div>
       </div>
     </div>
   )

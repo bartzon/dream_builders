@@ -2,18 +2,6 @@
 
 This file tracks unimplemented features, card effects, and mechanics.
 
-## I. Major Missing Mechanics
-
-### 1. Audience Mechanic
-- **Status**: Not Implemented
-- **Description**: A core resource/threshold mechanic, especially for Brand Builder and Community Leader heroes.
-- **Required Changes**:
-    - Add `audience: number` to `PlayerState`.
-    - Implement game logic for gaining, spending, and checking Audience thresholds.
-    - Update UI to display Audience.
-- **Cards Affected (Examples - see full list in card data)**:
-    - None in current Community Leader deck (removed from latest version)
-    - Previously affected Serial Founder cards have been removed
 
 ## II. Incomplete Card Effects & Hero Powers
 

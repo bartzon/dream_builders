@@ -1,5 +1,5 @@
 import React from 'react'
-import { FONT_SIZES } from '../../../constants/ui'
+import { FONT_SIZES, COLORS, BUTTON_STYLES } from '../../../constants/ui'
 import { GAME_CONFIG } from '../../../../game/constants'
 import type { EffectContextUI } from '../../../types/game'
 
@@ -11,6 +11,7 @@ interface GameHeaderProps {
   revenue: number
   effectContext?: EffectContextUI
   hasShoestringBudget?: boolean
+  onCreditsClick?: () => void
 }
 
 export const GameHeader = React.memo(({
@@ -20,7 +21,8 @@ export const GameHeader = React.memo(({
   deckSize,
   revenue,
   effectContext,
-  hasShoestringBudget
+  hasShoestringBudget,
+  onCreditsClick
 }: GameHeaderProps) => {
   const revenueProgress = (revenue / GAME_CONFIG.REVENUE_GOAL) * 100;
   
@@ -36,12 +38,39 @@ export const GameHeader = React.memo(({
     }}>
       {/* Title and Hero */}
       <div>
-        <h2 style={{ 
-          fontSize: FONT_SIZES.heading, 
-          marginBottom: '5px' 
-        }}>
-          Dream Builders
-        </h2>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '5px' }}>
+          <h2 style={{ 
+            fontSize: FONT_SIZES.heading, 
+            margin: 0
+          }}>
+            Dream Builders
+          </h2>
+          {onCreditsClick && (
+            <button
+              onClick={onCreditsClick}
+              style={{
+                ...BUTTON_STYLES,
+                backgroundColor: 'transparent',
+                color: COLORS.textPurple,
+                border: `1px solid ${COLORS.textPurple}`,
+                padding: '4px 12px',
+                fontSize: FONT_SIZES.small,
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.backgroundColor = COLORS.textPurple
+                e.currentTarget.style.color = COLORS.white
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.backgroundColor = 'transparent'
+                e.currentTarget.style.color = COLORS.textPurple
+              }}
+            >
+              Credits
+            </button>
+          )}
+        </div>
         <div style={{ fontSize: FONT_SIZES.body }}>
           Hero: <span style={{ color: '#60a5fa', fontWeight: 'bold' }}>
             {heroName.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
