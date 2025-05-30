@@ -78,7 +78,9 @@ export const ProductsSection = React.memo(({
           <ActionLabel text="DESTROY" color={COLORS.danger} />
         )}
         {isChooseMode && canChoose && !isReorderNotification && (
-          <ActionLabel text="BOOST" color={COLORS.success} textColor={COLORS.white} />
+          <ActionLabel text={
+            pendingChoice?.effect === 'brand_builder_engage_add_inventory' ? "ENGAGE +2" : "BOOST"
+          } color={COLORS.success} textColor={COLORS.white} />
         )}
         {isReorderNotification && meetsReorderCriteria && (
           <ActionLabel text="RESTOCK +3" color={COLORS.success} textColor={COLORS.white} />
@@ -111,6 +113,8 @@ export const ProductsSection = React.memo(({
                 ? 'Click a product with 0 inventory to add +3' 
                 : pendingChoice?.effect === 'multi_product_inventory_boost'
                 ? `Choose up to ${3 - (effectContext.warehouseExpansionCount || 0)} more product${3 - (effectContext.warehouseExpansionCount || 0) === 1 ? '' : 's'} (or End Turn to finish)`
+                : pendingChoice?.effect === 'brand_builder_engage_add_inventory'
+                ? 'Click a product to add +2 inventory'
                 : 'Click a product to boost its inventory'}
           </span>
         )}

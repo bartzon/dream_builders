@@ -391,7 +391,25 @@ export const DreamBuildersGame: Game<GameState> = {
             if (G.gameLog) G.gameLog.push(`Serial Founder (Double Down): Error - product not found or inventory undefined.`);
           }
           player.pendingChoice = undefined;
-        } else if (choice.effect === 'black_friday_blitz_sell_product') {
+        }
+        else if (choice.effect === 'brand_builder_engage_add_inventory') {
+          if (!choice.cards || choiceIndex < 0 || choiceIndex >= choice.cards.length) return INVALID_MOVE;
+          const chosenProductInfo = choice.cards[choiceIndex];
+          const boardProduct = player.board.Products.find(p => p.id === chosenProductInfo.id);
+          if (boardProduct && boardProduct.inventory !== undefined) {
+            boardProduct.inventory += 2;
+            // Ensure effect context exists
+            if (!G.effectContext) G.effectContext = {};
+            if (!G.effectContext[playerID]) G.effectContext[playerID] = { recentlyAffectedCardIds: [] };
+            if (!G.effectContext[playerID].recentlyAffectedCardIds) G.effectContext[playerID].recentlyAffectedCardIds = [];
+            G.effectContext[playerID].recentlyAffectedCardIds.push(boardProduct.id);
+            if (G.gameLog) G.gameLog.push(`Engage: Added +2 inventory to ${boardProduct.name}.`);
+          } else {
+            if (G.gameLog) G.gameLog.push(`Engage: Error - product not found or inventory undefined.`);
+          }
+          player.pendingChoice = undefined;
+        }
+        else if (choice.effect === 'black_friday_blitz_sell_product') {
           if (!choice.cards || choiceIndex < 0 || choiceIndex >= choice.cards.length) return INVALID_MOVE;
           const chosenProductInfo = choice.cards[choiceIndex];
           const boardProduct = player.board.Products.find(p => p.id === chosenProductInfo.id);

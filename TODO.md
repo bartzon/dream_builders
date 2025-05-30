@@ -24,19 +24,19 @@ This file tracks unimplemented features, card effects, and mechanics.
 ### Brand Builder
 - **Hero Power: Engage**
     - **Text**: "Add 2 Inventory to a Product."
-    - **Status**: Currently not properly implemented. The effect `brand_builder_engage` in heroAbilities.ts still gives global appeal boost instead of adding inventory to a chosen Product. Needs UI for player to choose a specific Product.
+    - **Status**: ✅ Implemented. Player can now choose which Product to add inventory to via the choice UI.
 - **Content Calendar (Tool)**
     - **Text**: "Recurring: Add 1 inventory to your lowest-inventory Product."
-    - **Status**: Marked as `passiveEffect`. Needs implementation in processPassiveEffects to find and add inventory to the lowest-inventory Product each turn.
+    - **Status**: ✅ Implemented in `brand-builder-passives.ts`. Automatically adds inventory to the lowest-inventory Product each turn.
 - **Email List (Tool)**
     - **Text**: "Recurring: If you control 2 or more Products, gain 1 capital."
-    - **Status**: Marked as `passiveEffect`. Needs implementation in processPassiveEffects to check Product count and gain capital.
+    - **Status**: ✅ Implemented in `brand-builder-passives.ts`. Checks Product count and gains capital each turn.
 - **Visual Identity (Tool)**
     - **Text**: "Your Products cost 1 less if you control another Tool."
-    - **Status**: Marked as `passiveEffect`. Actual cost reduction needs to be implemented in `getCardDiscount` by checking if the player controls any other Tool cards.
+    - **Status**: ✅ Implemented. Cost reduction added to `getVisualIdentityDiscount` in `discount-sources.ts`.
 - **Personal Branding (Tool)**
     - **Text**: "Recurring: Draw 1 card if you played an Action last turn."
-    - **Status**: Marked as `passiveEffect`. Needs implementation in processPassiveEffects with tracking of Action cards played in previous turn.
+    - **Status**: ✅ Implemented in `brand-builder-passives.ts`. Tracks Action cards played and draws a card next turn.
 
 ### Automation Architect
 - **Scale Systems (Tool)**

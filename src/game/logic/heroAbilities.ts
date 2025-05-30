@@ -38,29 +38,20 @@ export const heroAbilityEffects: Record<string, (G: GameState, playerID: string)
   'brand_builder_engage': (G, playerID) => {
     const player = G.players[playerID];
     
-    // Set up effect context if needed
-    if (!G.effectContext) G.effectContext = {};
-    if (!G.effectContext[playerID]) G.effectContext[playerID] = initEffectContext();
+    // Find all Products on the board
+    const products = player.board.Products.filter(p => p.isActive !== false && p.inventory !== undefined);
     
-    // Find a Product to add inventory to
-    // In full implementation, player would choose which Product
-    // For now, add to a random Product
-    const productsWithInventory = player.board.Products.filter(p => p.inventory !== undefined);
-    if (productsWithInventory.length > 0) {
-      const randomIndex = Math.floor(Math.random() * productsWithInventory.length);
-      const selectedProduct = productsWithInventory[randomIndex];
-      if (selectedProduct.inventory !== undefined) {
-        selectedProduct.inventory += 2;
-        
-        // Track affected card for UI highlighting
-        if (!G.effectContext[playerID].recentlyAffectedCardIds) {
-          G.effectContext[playerID].recentlyAffectedCardIds = [];
-        }
-        G.effectContext[playerID].recentlyAffectedCardIds.push(selectedProduct.id);
-        
-        if (G.gameLog) {
-          G.gameLog.push(`Engage: Added +2 inventory to ${selectedProduct.name}.`);
-        }
+    if (products.length > 0) {
+      // Create a choice for the player to select which Product
+      player.pendingChoice = {
+        type: 'choose_card',
+        effect: 'brand_builder_engage_add_inventory',
+        cards: products.map(p => ({ ...p })), // Send copies to client
+      };
+    } else {
+      // No products to add inventory to
+      if (G.gameLog) {
+        G.gameLog.push('Engage: No products available to add inventory to.');
       }
     }
     
