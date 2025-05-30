@@ -17,14 +17,7 @@ export const serialFounderCardEffects: Record<string, (G: GameState, playerID: s
   // Legacy Playbook: Draw 1 extra card at the start of your turn.
   'legacy_playbook': passiveEffect, // Handled in processPassiveEffects if implemented
   // Advisory Board: Whenever you play a Product, draw 1 card.
-  'advisory_board': (G, playerID) => {
-    const player = G.players[playerID];
-    let cardsToDraw = 0;
-    if (player.board.Tools.length > 0) cardsToDraw++;
-    if (player.board.Products.length > 0) cardsToDraw++;
-    if (player.board.Employees.length > 0) cardsToDraw++;
-    drawCards(G, playerID, cardsToDraw);
-  },
+  'advisory_board': passiveEffect, // Logic will be a trigger in handleCardPlayEffects
   // Spin-Off: Costs 1 less for each Product you control. Sells for 4.
   'spin_off': passiveEffect, // Cost reduction handled in getCardDiscount if implemented
   // High-Profile Exit: Sell all your Products. Gain 2 extra capital per Product.

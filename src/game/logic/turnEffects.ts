@@ -239,7 +239,35 @@ export function handleCardPlayEffects(G: GameState, playerID: string, card: Card
       // Venture Network effect - draw card when playing Products
       const ventureNetwork = player.board.Tools.find(t => t.effect === 'venture_network');
       if (ventureNetwork) {
+        // Storing hand size before to identify the new card for potential highlight
+        const handSizeBeforeVentureDraw = player.hand.length;
         drawCard(player);
+        if (player.hand.length > handSizeBeforeVentureDraw && G.effectContext?.[playerID]) {
+          const drawnCardFromVenture = player.hand[player.hand.length - 1];
+          if (drawnCardFromVenture?.id) {
+            if (!G.effectContext[playerID].recentlyAffectedCardIds) G.effectContext[playerID].recentlyAffectedCardIds = [];
+            G.effectContext[playerID].recentlyAffectedCardIds?.push(drawnCardFromVenture.id);
+            if(G.gameLog) G.gameLog.push(`Venture Network drew ${drawnCardFromVenture.name}.`);
+          }
+        }
+      }
+
+      // Advisory Board effect - draw card when playing Products
+      const advisoryBoard = player.board.Tools.find(t => t.effect === 'advisory_board');
+      if (advisoryBoard) {
+        const handSizeBeforeAdvisoryDraw = player.hand.length;
+        drawCard(player);
+        if (player.hand.length > handSizeBeforeAdvisoryDraw && G.effectContext?.[playerID]) {
+          const drawnCardFromAdvisory = player.hand[player.hand.length - 1];
+          if (drawnCardFromAdvisory?.id) {
+            // Ensure the array exists
+            if (!G.effectContext[playerID].recentlyAffectedCardIds) {
+              G.effectContext[playerID].recentlyAffectedCardIds = [];
+            }
+            G.effectContext[playerID].recentlyAffectedCardIds?.push(drawnCardFromAdvisory.id);
+            if(G.gameLog) G.gameLog.push(`Advisory Board (due to ${card.name} play) drew ${drawnCardFromAdvisory.name}.`);
+          }
+        }
       }
     }
     
