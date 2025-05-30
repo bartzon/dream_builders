@@ -6,6 +6,7 @@ import type { ClientCard, EffectContextUI } from '../../../types/game'
 interface ToolsAndEmployeesProps {
   cards: ClientCard[]
   effectContext: EffectContextUI
+  affectedCardIds: Set<string>
   onShowTooltip: (card: ClientCard, e: React.MouseEvent) => void
   onHideTooltip: () => void
 }
@@ -13,6 +14,7 @@ interface ToolsAndEmployeesProps {
 export const ToolsAndEmployees = React.memo(({
   cards,
   effectContext,
+  affectedCardIds,
   onShowTooltip,
   onHideTooltip
 }: ToolsAndEmployeesProps) => {
@@ -25,16 +27,20 @@ export const ToolsAndEmployees = React.memo(({
         {cards.length === 0 ? (
           <EmptyState message="No tools or employees" />
         ) : (
-          cards.map((card, i) => (
-            <ToolEmployeeCard
-              key={`${card.id || 'tool-employee'}-${i}`}
-              card={card}
-              effectContext={effectContext}
-              onMouseEnter={(e) => onShowTooltip(card, e)}
-              onMouseLeave={onHideTooltip}
-              onMouseMove={(e) => onShowTooltip(card, e)}
-            />
-          ))
+          cards.map((card, i) => {
+            const isAffected = card.id ? affectedCardIds.has(card.id) : false;
+            return (
+              <ToolEmployeeCard
+                key={`${card.id || 'tool-employee'}-${i}`}
+                card={card}
+                effectContext={effectContext}
+                isAffected={isAffected}
+                onMouseEnter={(e) => onShowTooltip(card, e)}
+                onMouseLeave={onHideTooltip}
+                onMouseMove={(e) => onShowTooltip(card, e)}
+              />
+            )
+          })
         )}
       </div>
     </div>
@@ -45,12 +51,14 @@ export const ToolsAndEmployees = React.memo(({
 const ToolEmployeeCard = ({ 
   card, 
   effectContext, 
+  isAffected,
   onMouseEnter, 
   onMouseLeave, 
   onMouseMove 
 }: {
   card: ClientCard
   effectContext: EffectContextUI
+  isAffected: boolean
   onMouseEnter: (e: React.MouseEvent) => void
   onMouseLeave: () => void
   onMouseMove: (e: React.MouseEvent) => void
@@ -76,13 +84,23 @@ const ToolEmployeeCard = ({
     })
   }
 
+  const baseStyle: React.CSSProperties = {
+    ...CARD_STYLES,
+    position: 'relative',
+    transition: 'transform 0.2s, box-shadow 0.3s ease-out',
+  };
+
+  const affectedStyle: React.CSSProperties = isAffected 
+    ? { boxShadow: '0 0 12px 4px rgba(129, 230, 217, 0.8)' }
+    : {};
+
   return (
     <div 
       style={{
-        ...CARD_STYLES,
+        ...baseStyle,
         background: card.type === 'Employee' ? '#2563eb' : '#7c3aed',
         border: card.type === 'Employee' ? '1px solid #3b82f6' : '1px solid #8b5cf6',
-        position: 'relative'
+        ...affectedStyle
       }}
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}

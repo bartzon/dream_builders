@@ -9,6 +9,7 @@ interface HandCardProps {
   index: number
   canPlay: boolean
   isDiscardMode: boolean
+  isAffected: boolean
   costInfo: {
     originalCost: number
     discount: number
@@ -25,6 +26,7 @@ export const HandCard = React.memo(({
   index,
   canPlay,
   isDiscardMode,
+  isAffected,
   costInfo,
   onCardClick,
   onMouseEnter,
@@ -33,41 +35,6 @@ export const HandCard = React.memo(({
 }: HandCardProps) => {
   const canInteract = isDiscardMode || canPlay
 
-  // Base styles for the card
-  const baseCardStyle: React.CSSProperties = {
-    ...CARD_STYLES,
-    width: '150px', // Adjusted width
-    height: '220px', // Adjusted height
-    borderRadius: '10px', // More rounded corners
-    display: 'flex',
-    flexDirection: 'column',
-    justifyContent: 'space-between',
-    padding: '10px', // Adjusted padding
-    boxSizing: 'border-box',
-    position: 'relative',
-    color: 'white',
-    fontFamily: '"Arial", sans-serif', // A more modern, clean font
-  }
-
-  // Styles for different card states
-  const interactiveStyle: React.CSSProperties = {
-    ...baseCardStyle,
-    background: isDiscardMode ? 'linear-gradient(145deg, #ef4444, #dc2626)' : 'linear-gradient(145deg, #3b82f6, #1d4ed8)',
-    border: isDiscardMode ? '2px solid #f87171' : '2px solid #60a5fa',
-    cursor: 'pointer',
-    boxShadow: '0 4px 8px rgba(0,0,0,0.2)',
-  }
-
-  const disabledStyle: React.CSSProperties = {
-    ...baseCardStyle,
-    background: 'linear-gradient(145deg, #718096, #4a5568)', // Darker, desaturated gradient
-    color: '#a0aec0', // Muted text color
-    border: '2px solid #718096',
-    cursor: 'not-allowed',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-  }
-
-  // Check for cost discounts to display
   const bonuses: BonusInfo[] = []
   if (costInfo.discount > 0) {
     bonuses.push({
@@ -76,7 +43,26 @@ export const HandCard = React.memo(({
     })
   }
 
-  // Wrap disabled cards in a div to handle tooltip events
+  const baseStyle: React.CSSProperties = {
+    ...CARD_STYLES,
+    width: '150px',
+    height: '220px',
+    borderRadius: '10px',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    padding: '10px',
+    boxSizing: 'border-box',
+    position: 'relative',
+    color: 'white',
+    fontFamily: '"Arial", sans-serif',
+    transition: 'transform 0.2s, box-shadow 0.3s ease-out',
+  }
+
+  const affectedStyle: React.CSSProperties = isAffected
+    ? { boxShadow: '0 0 12px 4px rgba(129, 230, 217, 0.8)' }
+    : {}
+
   if (!canInteract) {
     return (
       <div
@@ -88,12 +74,17 @@ export const HandCard = React.memo(({
       >
         <button
           disabled={true}
-          style={disabledStyle}
+          style={{
+            ...baseStyle,
+            background: '#666',
+            border: 'none',
+            cursor: 'not-allowed',
+            ...affectedStyle
+          }}
         >
           <BonusIndicator bonuses={bonuses} position="top-right" />
           <div style={{ textAlign: 'center', fontWeight: 'bold', fontSize: FONT_SIZES.medium, marginBottom: '5px' }}>{card.name || 'Card'}</div>
 
-          {/* Placeholder for image/icon - Shopify/Ecommerce themed */}
           <div style={{
             flexGrow: 1,
             display: 'flex',
@@ -102,10 +93,9 @@ export const HandCard = React.memo(({
             background: 'rgba(255,255,255,0.1)',
             borderRadius: '5px',
             margin: '5px 0',
-            minHeight: '60px', // Ensure space for potential image
+            minHeight: '60px',
           }}>
-             {/* <img src="/path/to/ecommerce-icon.svg" alt={card.name} style={{width: '80%', height: '80%', objectFit: 'contain'}} /> */}
-             <span style={{fontSize: FONT_SIZES.small, color: '#cbd5e0'}}>Ecommerce Icon</span>
+            <span style={{fontSize: FONT_SIZES.small, color: '#cbd5e0'}}>Ecommerce Icon</span>
           </div>
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '5px' }}>
@@ -114,7 +104,7 @@ export const HandCard = React.memo(({
               originalCost={costInfo.originalCost}
               discount={costInfo.discount}
               size="small"
-              className="text-gray-300" // Adjusted for disabled state
+              className="text-white"
             />
           </div>
         </button>
@@ -122,7 +112,6 @@ export const HandCard = React.memo(({
     )
   }
 
-  // For interactive cards (playable or discardable)
   return (
     <button
       key={`${card.id || 'card'}-${index}`}
@@ -130,12 +119,17 @@ export const HandCard = React.memo(({
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
       onMouseMove={onMouseMove}
-      style={interactiveStyle}
+      style={{
+        ...baseStyle,
+        background: isDiscardMode ? '#dc2626' : '#1d4ed8',
+        border: isDiscardMode ? '2px solid #ef4444' : 'none',
+        cursor: 'pointer',
+        ...affectedStyle
+      }}
     >
       <BonusIndicator bonuses={bonuses} position="top-right" />
       <div style={{ textAlign: 'center', fontWeight: 'bold', fontSize: FONT_SIZES.medium, marginBottom: '5px' }}>{card.name || 'Card'}</div>
 
-      {/* Placeholder for image/icon - Shopify/Ecommerce themed */}
       <div style={{
         flexGrow: 1,
         display: 'flex',
@@ -144,9 +138,8 @@ export const HandCard = React.memo(({
         background: 'rgba(255,255,255,0.15)',
         borderRadius: '5px',
         margin: '5px 0',
-        minHeight: '60px', // Ensure space for potential image
+        minHeight: '60px',
       }}>
-        {/* <img src="/path/to/ecommerce-icon.svg" alt={card.name} style={{width: '80%', height: '80%', objectFit: 'contain'}} /> */}
         <span style={{fontSize: FONT_SIZES.small, color: 'white'}}>Ecommerce Icon</span>
       </div>
 
@@ -163,16 +156,15 @@ export const HandCard = React.memo(({
       {isDiscardMode && (
         <div style={{
           position: 'absolute',
-          bottom: '10px', // Adjusted position
+          bottom: '10px',
           left: '50%',
           transform: 'translateX(-50%)',
-          background: '#facc15', // Brighter yellow for discard
-          color: '#1f2937', // Darker text for contrast
-          padding: '3px 8px',
-          borderRadius: '5px',
-          fontSize: '14px', // Slightly larger
-          fontWeight: 'bold',
-          boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+          background: '#fbbf24',
+          color: '#000',
+          padding: '2px 6px',
+          borderRadius: '3px',
+          fontSize: '12px',
+          fontWeight: 'bold'
         }}>
           DISCARD
         </div>

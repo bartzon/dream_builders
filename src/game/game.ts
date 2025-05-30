@@ -274,13 +274,21 @@ export const DreamBuildersGame: Game<GameState> = {
     },
     makeChoice: ({ G, ctx, playerID }, choiceIndex: number) => {
       if (playerID !== ctx.currentPlayer) return INVALID_MOVE;
-      
       const player = G.players[playerID];
-      
       if (!player.pendingChoice) return INVALID_MOVE;
-      
       const choice = player.pendingChoice;
-      
+
+      // Initialize or clear recentlyAffectedCardIds for this choice resolution path
+      if (G.effectContext?.[playerID]) {
+        // For a new choice sequence (not a continuation of multi_product_inventory_boost)
+        if (choice.effect !== 'multi_product_inventory_boost' || G.effectContext[playerID].warehouseExpansionCount === 0) {
+          G.effectContext[playerID].recentlyAffectedCardIds = [];
+        }
+      } else { // Should not happen if ensureEffectContext is used properly
+        if (G.effectContext) G.effectContext[playerID] = { recentlyAffectedCardIds: [] }; 
+        else G.effectContext = { [playerID]: { recentlyAffectedCardIds: [] } };
+      }
+
       if (choice.type === 'discard') {
         if (choiceIndex < 0 || choiceIndex >= player.hand.length) return INVALID_MOVE;
         player.hand.splice(choiceIndex, 1);
@@ -308,82 +316,62 @@ export const DreamBuildersGame: Game<GameState> = {
           case 'add_inventory_to_product':
             if (boardProduct.inventory !== undefined) {
               boardProduct.inventory += 2;
+              if (G.effectContext?.[playerID]) G.effectContext[playerID].recentlyAffectedCardIds?.push(boardProduct.id);
             }
             break;
-            
           case 'add_inventory_if_empty':
             if (boardProduct.inventory === 0) {
               boardProduct.inventory = 3;
+              if (G.effectContext?.[playerID]) G.effectContext[playerID].recentlyAffectedCardIds?.push(boardProduct.id);
             }
             break;
-            
           case 'multi_product_inventory_boost':
-            // For Warehouse Expansion - allows up to 3 selections
             if (boardProduct.inventory !== undefined) {
               boardProduct.inventory += 1;
-              
-              // Track how many we've selected
               if (G.effectContext?.[playerID]) {
-                G.effectContext[playerID].warehouseExpansionCount = 
-                  (G.effectContext[playerID].warehouseExpansionCount || 0) + 1;
-                
+                G.effectContext[playerID].recentlyAffectedCardIds?.push(boardProduct.id);
+                G.effectContext[playerID].warehouseExpansionCount = (G.effectContext[playerID].warehouseExpansionCount || 0) + 1;
                 const selectedCount = G.effectContext[playerID].warehouseExpansionCount || 0;
-                
-                // If we haven't selected 3 yet and there are more products to choose
                 if (selectedCount < 3) {
-                  const remainingProducts = player.board.Products.filter(p => 
-                    p.isActive !== false && 
-                    p.id !== boardProduct.id // Exclude the one we just selected
-                  );
-                  
+                  const remainingProducts = player.board.Products.filter(p => p.isActive !== false && p.id !== boardProduct.id);
                   if (remainingProducts.length > 0) {
-                    // Create another choice for the remaining selections
                     player.pendingChoice = {
                       type: 'choose_card',
                       effect: 'multi_product_inventory_boost',
                       cards: remainingProducts.map(p => ({ ...p })),
                     };
-                    
-                    if (G.gameLog) {
-                      G.gameLog.push(`Warehouse Expansion: Selected ${boardProduct.name} (${selectedCount}/3). Choose another product or End Turn to finish.`);
-                    }
-                    return; // Don't clear pendingChoice yet
+                    if (G.gameLog) G.gameLog.push(`Warehouse Expansion: Selected ${boardProduct.name} (${selectedCount}/3). Choose another product.`);
+                    return; 
                   }
                 }
-                
-                // Clear the counter when done
-                G.effectContext[playerID].warehouseExpansionCount = 0;
+                G.effectContext[playerID].warehouseExpansionCount = 0; 
               }
             }
             break;
-            
           case 'inventory_and_sale_boost':
             if (boardProduct.inventory !== undefined) {
               boardProduct.inventory += 1;
-              // Immediately sell 1 if possible
+              if (G.effectContext?.[playerID]) G.effectContext[playerID].recentlyAffectedCardIds?.push(boardProduct.id);
               if (boardProduct.inventory > 0) {
                 sellProduct(G, playerID, boardProduct, 1);
               }
             }
             break;
-            
           case 'inventory_boost_plus_revenue':
             if (boardProduct.inventory !== undefined) {
               boardProduct.inventory += 2;
-              // Mark this product for revenue boost
               if (!G.effectContext?.[playerID]) break;
               const ctx = G.effectContext[playerID];
-              if (!ctx.productRevenueBoosts) {
-                ctx.productRevenueBoosts = {};
-              }
+              if (!ctx.productRevenueBoosts) ctx.productRevenueBoosts = {};
               ctx.productRevenueBoosts[boardProduct.id] = 1000;
+              ctx.recentlyAffectedCardIds?.push(boardProduct.id);
             }
             break;
-            
           case 'draw_and_inventory':
           case 'simple_inventory_boost':
             if (boardProduct.inventory !== undefined) {
               boardProduct.inventory += 1;
+              if (G.effectContext?.[playerID]) G.effectContext[playerID].recentlyAffectedCardIds?.push(boardProduct.id);
             }
             break;
         }

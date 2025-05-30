@@ -70,4 +70,5 @@ export interface EffectContextUI {
   delayedInventoryBoostTurns?: number
   soloHustlerDiscountedCard?: string
   warehouseExpansionCount?: number
+  recentlyAffectedCardIds?: string[]
 } 

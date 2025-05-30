@@ -37,6 +37,7 @@ export function useGameState(
     delayedInventoryBoostTurns: effectContextRaw.delayedInventoryBoostTurns as number | undefined,
     soloHustlerDiscountedCard: effectContextRaw.soloHustlerDiscountedCard as string | undefined,
     warehouseExpansionCount: effectContextRaw.warehouseExpansionCount as number | undefined,
+    recentlyAffectedCardIds: effectContextRaw.recentlyAffectedCardIds as string[] | undefined,
   }
   
   // Extract pending choice

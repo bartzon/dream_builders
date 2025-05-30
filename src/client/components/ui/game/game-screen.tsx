@@ -28,6 +28,7 @@ interface GameScreenProps {
 export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, events }: GameScreenProps) {
   const [gameLog, setGameLog] = useState<string[]>([])
   const [lastPlayerRevenue, setLastPlayerRevenue] = useState(0)
+  const [affectedCardIds, setAffectedCardIds] = useState<Set<string>>(new Set());
 
   // Use custom hooks
   const { uiState, effectContext, toolsAndEmployees } = useGameState(G, playerID)
@@ -88,6 +89,41 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
       setGameLog(prev => [`Choose a Product to destroy...`, ...prev.slice(0, 4)])
     }
   }, [effectContext.fastPivotProductDestroyPending, isMyTurn, moves])
+
+  useEffect(() => {
+    // console.log('[GameScreen] useEffect for recentlyAffectedCardIds triggered. Current effectContext.recentlyAffectedCardIds:', effectContext.recentlyAffectedCardIds);
+    // console.log('[GameScreen] Current local affectedCardIds (before processing):', Array.from(affectedCardIds));
+
+    if (effectContext.recentlyAffectedCardIds && effectContext.recentlyAffectedCardIds.length > 0) {
+      const newAffected = new Set(affectedCardIds);
+      let newIdsAdded = false;
+      effectContext.recentlyAffectedCardIds.forEach(id => {
+        if (id && !newAffected.has(id)) { // Ensure id is not null/undefined
+          newAffected.add(id);
+          newIdsAdded = true;
+          // console.log(`[GameScreen] Adding ${id} to local affectedCardIds. Setting timeout.`);
+          setTimeout(() => {
+            setAffectedCardIds(prev => {
+              const updated = new Set(prev);
+              updated.delete(id);
+              // console.log(`[GameScreen] Timeout: Removed ${id} from local affectedCardIds. Now:`, Array.from(updated));
+              return updated;
+            });
+          }, 1500); 
+        }
+      });
+      if (newIdsAdded) {
+        // console.log('[GameScreen] Setting updated local affectedCardIds:', Array.from(newAffected));
+        setAffectedCardIds(newAffected);
+      }
+      // Clear the game state's recentlyAffectedCardIds after processing to prevent re-triggering on unrelated re-renders
+      // This needs a game move or a different pattern to be truly clean.
+      // For now, this effect will re-run if the object reference changes but content is same.
+      // A more robust solution might be for the game logic to set it to null after one read, or use a version counter.
+    } else {
+      // console.log('[GameScreen] useEffect for recentlyAffectedCardIds: No new IDs or empty list.');
+    }
+  }, [effectContext.recentlyAffectedCardIds, affectedCardIds]); // Added affectedCardIds to dependency to re-evaluate if it changes externally (though it shouldn't much)
 
   // Game action handlers
   const handlePlayCard = useCallback((cardIndex: number) => {
@@ -225,6 +261,7 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
             effectContext={effectContext}
             onShowTooltip={showCardTooltip}
             onHideTooltip={hideCardTooltip}
+            affectedCardIds={affectedCardIds}
           />
 
           {/* Products */}
@@ -235,6 +272,7 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
             onMakeChoice={handleMakeChoice}
             onShowTooltip={showCardTooltip}
             onHideTooltip={hideCardTooltip}
+            affectedCardIds={affectedCardIds}
           />
         </div>
       </div>

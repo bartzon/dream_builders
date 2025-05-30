@@ -7,6 +7,7 @@ interface ProductsSectionProps {
   products: ClientCard[]
   pendingChoice?: PendingChoice
   effectContext: EffectContextUI
+  affectedCardIds: Set<string>
   onMakeChoice: (index: number) => void
   onShowTooltip: (card: ClientCard, e: React.MouseEvent) => void
   onHideTooltip: () => void
@@ -16,6 +17,7 @@ export const ProductsSection = React.memo(({
   products,
   pendingChoice,
   effectContext,
+  affectedCardIds,
   onMakeChoice,
   onShowTooltip,
   onHideTooltip
@@ -31,8 +33,8 @@ export const ProductsSection = React.memo(({
     const isReorderNotification = pendingChoice?.effect === 'add_inventory_if_empty'
     const meetsReorderCriteria = product.inventory === 0
     
-    const isClickable = canDestroy || canChoose
-    const isDimmed = (isChooseMode && !canChoose) || (isReorderNotification && !meetsReorderCriteria)
+    const isClickable = canDestroy || (canChoose && (!isReorderNotification || meetsReorderCriteria))
+    const isDimmed = (isChooseMode && !canChoose) || (isReorderNotification && !meetsReorderCriteria && !canChoose) || (isDestroyMode && !canDestroy)
     
     const handleClick = () => {
       if (isClickable && pendingChoice?.cards) {
@@ -52,6 +54,11 @@ export const ProductsSection = React.memo(({
       })
     }
     
+    const isAffected = product.id ? affectedCardIds.has(product.id) : false;
+    const affectedStyle: React.CSSProperties = isAffected 
+      ? { boxShadow: '0 0 12px 4px rgba(129, 230, 217, 0.8)', transition: 'box-shadow 0.3s ease-out' } 
+      : { transition: 'box-shadow 0.3s ease-out' };
+
     return (
       <div 
         key={`${product.id || 'product'}-${index}`}
@@ -59,17 +66,18 @@ export const ProductsSection = React.memo(({
           ...CARD_STYLES,
           background: 
             (isDestroyMode && canDestroy) ? '#dc2626' : 
-            (isChooseMode && canChoose) ? '#059669' :
+            (isChooseMode && canChoose && (!isReorderNotification || meetsReorderCriteria)) ? '#059669' :
             isDimmed ? '#4b5563' :
             '#065f46',
           border: 
             (isDestroyMode && canDestroy) ? '2px solid #ef4444' : 
-            (isChooseMode && canChoose) ? '2px solid #10b981' :
+            (isChooseMode && canChoose && (!isReorderNotification || meetsReorderCriteria)) ? '2px solid #10b981' :
             isDimmed ? '1px solid #6b7280' :
             '1px solid #059669',
           cursor: isClickable ? 'pointer' : 'default',
           position: 'relative',
-          opacity: isDimmed ? 0.6 : 1
+          opacity: isDimmed ? 0.6 : 1,
+          ...affectedStyle
         }}
         onMouseEnter={(e) => onShowTooltip(product, e)}
         onMouseLeave={onHideTooltip}
