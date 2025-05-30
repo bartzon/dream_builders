@@ -5,7 +5,6 @@ import {
   drawCards,
   applyTemporaryBonus
 } from '../utils/effect-helpers';
-import { drawCard as drawSingleCard } from '../utils/deck-helpers';
 
 const passiveEffect = () => {};
 
@@ -41,43 +40,35 @@ export const automationArchitectCardEffects: Record<string, (G: GameState, playe
       if(G.gameLog) G.gameLog.push('A/B Test: Drew no cards, no discard necessary.');
     }
   },
-  // Scale Systems: At the end of your turn, repeat the first Recurring effect you triggered this turn.
+  // Scale Systems: Recurring: Gain 1 capital.
   'scale_systems': passiveEffect,
   // Optimize Workflow: Your next card costs 2 less.
   'optimize_workflow': (G, playerID) => {
     applyTemporaryBonus(G, playerID, 'nextCardDiscount', 2);
   },
-  // Custom App: You may play this as an Action to copy a Tool's effect this turn.
-  'custom_app': passiveEffect,
-  // Zap Everything: Trigger all your Tools' Recurring effects.
+  // Custom App: When played: draw 1 card. Recurring: Gain 1 capital.
+  'custom_app': (G, playerID) => {
+    // Immediate effect: draw 1 card
+    drawCards(G, playerID, 1);
+    // The recurring effect (gain 1 capital) is handled by passive-effects.ts
+  },
+  // Zap Everything: Gain 2 capital. If you control 3+ Tools, gain 1 more.
   'zap_everything': (G, playerID) => {
     const player = G.players[playerID];
-    const gameLog = G.gameLog || [];
-    gameLog.push(`Player ${playerID} plays Zap Everything!`);
-    player.board.Tools.forEach((tool: Card) => {
-      let triggered = false;
-      switch (tool.effect) {
-        case 'auto_fulfill':
-          if (G.effectContext?.[playerID]?.soldProductLastTurn) {
-            gainCapital(G, playerID, 1);
-            triggered = true;
-          }
-          break;
-        case 'email_automation': gainCapital(G, playerID, 1); triggered = true; break;
-        case 'basic_script': gainCapital(G, playerID, 1); triggered = true; break;
-        case 'ml_model': { 
-          const toolCount = player.board.Tools.length;
-          gainCapital(G, playerID, toolCount);
-          triggered = true;
-          break;
-        }
-        case 'legacy_playbook': drawSingleCard(player); triggered = true; break;
-        case 'board_of_directors': gainCapital(G, playerID, 2); triggered = true; break;
-        case 'shoestring_budget': gameLog.push(`${tool.name} recurring effect noted (normally applies to next card play).`); break;
+    const toolCount = player.board.Tools.length;
+    
+    // Gain 2 capital base
+    gainCapital(G, playerID, 2);
+    
+    // If 3 or more Tools, gain 1 additional capital
+    if (toolCount >= 3) {
+      gainCapital(G, playerID, 1);
+      if (G.gameLog) {
+        G.gameLog.push(`Zap Everything: Gained 3 capital total (bonus for having ${toolCount} Tools)`);
       }
-      if (triggered) gameLog.push(`Zapped ${tool.name}: its recurring effect was triggered.`);
-    });
-    G.gameLog = gameLog;
+    } else if (G.gameLog) {
+      G.gameLog.push(`Zap Everything: Gained 2 capital`);
+    }
   },
   // Technical Cofounder: Your Tools cost 1 less.
   'technical_cofounder': passiveEffect,

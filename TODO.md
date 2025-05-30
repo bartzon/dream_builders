@@ -2,19 +2,6 @@
 
 This file tracks unimplemented features, card effects, and mechanics.
 
-
-## II. Incomplete Card Effects & Hero Powers
-
-### Automation Architect
-- **Scale Systems (Tool)**
-    - **Text**: "At the end of your turn, repeat the first Recurring effect you triggered this turn."
-    - **Status**: `passiveEffect`. Logic for tracking and repeating the first recurring effect is missing from `processPassiveEffects` or end-of-turn phase.
-- **Custom App (Tool)**
-    - **Text**: "You may play this as an Action to copy a Tool's effect this turn."
-    - **Status**: `passiveEffect`. Needs modal play implementation: choice to play as Action, then choice of a Tool on board to copy its effect.
-- **Zap Everything (Action)**
-    - **Status**: Partially implemented. Triggers some simple recurring Tool effects. Needs review to ensure all intended recurring effects are covered and correctly triggered (e.g., `auto_fulfill` condition, `shoestring_budget` interaction).
-
 ## III. UI & UX Enhancements
 
 - **Advanced Player Choice UI**: 

@@ -4,6 +4,12 @@ import type { Card } from '../../types'; // Card type will be needed for player.
 export function handleAutomationArchitectPassives(G: GameState, playerID: string): void {
   const player = G.players[playerID];
 
+  // Auto Fulfill - gain 1 capital if you sold a Product last turn
+  const autoFulfill = player.board.Tools.find(t => t.effect === 'auto_fulfill');
+  if (autoFulfill && G.effectContext?.[playerID]?.soldProductLastTurn) {
+    player.capital = Math.min(10, player.capital + 1);
+  }
+
   // Basic Script - gain 1 capital each turn
   const basicScript = player.board.Tools.find(t => t.effect === 'basic_script');
   if (basicScript) {
@@ -13,6 +19,18 @@ export function handleAutomationArchitectPassives(G: GameState, playerID: string
   // Email Automation - gain 1 capital each turn
   const emailAutomation = player.board.Tools.find(t => t.effect === 'email_automation');
   if (emailAutomation) {
+    player.capital = Math.min(10, player.capital + 1);
+  }
+  
+  // Scale Systems - gain 1 capital each turn
+  const scaleSystems = player.board.Tools.find(t => t.effect === 'scale_systems');
+  if (scaleSystems) {
+    player.capital = Math.min(10, player.capital + 1);
+  }
+  
+  // Custom App - gain 1 capital each turn (recurring effect)
+  const customApp = player.board.Tools.find(t => t.effect === 'custom_app');
+  if (customApp) {
     player.capital = Math.min(10, player.capital + 1);
   }
   
