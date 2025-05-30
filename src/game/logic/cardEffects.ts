@@ -311,11 +311,70 @@ export const cardEffects: Record<string, (G: GameState, playerID: string, card: 
   'custom_app': passiveEffect, // Modal card handled specially
 
   'zap_everything': (G, playerID) => {
-    // Would trigger all Tool recurring effects in full implementation
     const player = G.players[playerID];
-    player.board.Tools.forEach(() => {
-      // Trigger recurring effects
+    const gameLog = G.gameLog || [];
+
+    gameLog.push(`Player ${playerID} plays Zap Everything!`);
+
+    player.board.Tools.forEach(tool => {
+      let triggered = false;
+      switch (tool.effect) {
+        case 'auto_fulfill':
+          if (G.effectContext?.[playerID]?.soldProductLastTurn) {
+            player.capital = Math.min(10, player.capital + 1);
+            triggered = true;
+          }
+          break;
+        case 'email_automation':
+          player.capital = Math.min(10, player.capital + 1);
+          triggered = true;
+          break;
+        case 'basic_script': // Assuming basic_script is another AA tool
+          player.capital = Math.min(10, player.capital + 1);
+          triggered = true;
+          break;
+        case 'ml_model': { // Assuming ml_model is another AA tool
+          const toolCount = player.board.Tools.length;
+          player.capital = Math.min(10, player.capital + toolCount);
+          triggered = true;
+          break;
+        }
+        // Add other simple recurring Tool effects here if they should be triggered
+        // Example from Brand Builder (if it were a Tool with simple recurring)
+        // case 'content_calendar': 
+        //   // Audience mechanic not implemented yet
+        //   // gameLog.push(`${tool.name} would add Audience.`);
+        //   triggered = true; 
+        //   break;
+        // Example from Serial Founder
+        case 'legacy_playbook':
+          drawCard(player); // drawCard is from './utils'
+          triggered = true;
+          break;
+        case 'board_of_directors':
+          player.capital = Math.min(10, player.capital + 2);
+          triggered = true;
+          break;
+        // Solo Hustler
+        case 'shoestring_budget':
+          // This normally applies to the *next card played*.
+          // Triggering it via Zap Everything might be complex or have unintended side effects.
+          // For now, let's say it doesn't get a direct bonus here, or a simplified one.
+          // player.capital = Math.min(10, player.capital + 1); // Simplified: just give 1 capital
+          // triggered = true;
+          gameLog.push(`${tool.name} recurring effect noted (normally applies to next card play).`);
+          break;
+        // Effects that require choices or are complex end-of-turn are skipped for now
+        // case 'analytics_dashboard':
+        // case 'scale_systems':
+        // case 'incubator_resources': 
+        //   break;
+      }
+      if (triggered) {
+        gameLog.push(`Zapped ${tool.name}: its recurring effect was triggered.`);
+      }
     });
+    G.gameLog = gameLog;
   },
 
   'technical_cofounder': passiveEffect, // Cost reduction handled in getCardDiscount
