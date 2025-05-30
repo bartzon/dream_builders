@@ -7,20 +7,26 @@ import type { Card } from './types';
 import { INVALID_MOVE } from 'boardgame.io/core';
 import { GAME_CONFIG } from './constants';
 
-// Logic Imports from their respective files
-import { cardEffects, resolveFastPivotEffect, sellProduct } from './logic/cardEffects';
-import { heroAbilityEffects } from './logic/heroAbilities';
+// Logic Imports from their respective files - now mostly via index.ts or specific utils
 import {
+  cardEffects,
+  resolveFastPivotEffect,
+  heroAbilityEffects,
   processPassiveEffects,
   processOverheadCosts,
   processAutomaticSales,
-  processRecurringRevenue,
   getCardDiscount,
-} from './logic/turnEffects';
-import { initEffectContext, clearTempEffects } from './logic/effectContext';
-import { drawCard, initializePlayer, checkGameEnd, handleCardPlayEffects } from './logic/index'; // Assuming index.ts exports these
+  initEffectContext,
+  clearTempEffects,
+  handleCardPlayEffects,
+  // Utilities that were in main utils.ts, now re-exported from index or direct from new paths
+  drawCard, 
+  initializePlayer, 
+  checkGameEnd,
+  sellProduct // Specifically import sellProduct if needed directly, though often used via other effects
+} from './logic/index';
 
-// Helper function to shuffle an array
+// Helper function to shuffle an array (remains local or could be a general game util)
 function shuffleArray<T>(array: T[]): T[] {
   const shuffled = [...array];
   for (let i = shuffled.length - 1; i > 0; i--) {
@@ -30,7 +36,7 @@ function shuffleArray<T>(array: T[]): T[] {
   return shuffled;
 }
 
-// Helper function to select random cards from an array
+// Helper function to select random cards from an array (remains local or could be a general game util)
 function selectRandomCards<T>(cards: T[], count: number): T[] {
   const shuffled = shuffleArray(cards);
   return shuffled.slice(0, Math.min(count, shuffled.length));
@@ -38,64 +44,33 @@ function selectRandomCards<T>(cards: T[], count: number): T[] {
 
 // New drafting function that creates a 40-card deck
 function createDraftedDeck(heroStarterDeck: Card[]): Card[] {
-  // GUARANTEED CARDS (20 total - 50% of deck):
-  // 1. All 10 unique hero cards (no duplicates)
   const heroCards = [...heroStarterDeck];
-  
-  // 2. 10 additional hero cards (allows for duplicates of key cards)
   const additionalHeroCards = selectRandomCards(heroStarterDeck, 10);
-  
-  // INVENTORY SUPPORT (7 cards - 17.5% of deck):
-  // 3. 7 random inventory support cards
   const inventoryCards = selectRandomCards(inventorySupportCards, 7);
-  
-  // PRODUCTS (13 cards - 32.5% of deck):
-  // 4. 13 random products from shared pool
   const productCards = selectRandomCards(sharedProductPool, 13);
-  
-  // Combine all cards and shuffle
   const combinedDeck = [
-    ...heroCards,           // 10 cards - hero identity (guaranteed uniques)
-    ...additionalHeroCards, // 10 cards - hero synergy reinforcement
-    ...inventoryCards,      // 7 cards - inventory management
-    ...productCards         // 13 cards - revenue generation
+    ...heroCards,          
+    ...additionalHeroCards, 
+    ...inventoryCards,     
+    ...productCards         
   ];
-  
   return shuffleArray(combinedDeck);
 }
 
 export const DreamBuildersGame: Game<GameState> = {
   name: 'dream-builders',
-  
   setup: ({ ctx }) => {
     const players: Record<string, PlayerState> = {};
-    
-    // Get selected hero from localStorage
     const selectedHeroId = typeof window !== 'undefined' ? localStorage.getItem('selectedHero') : null;
-    
-    // Initialize each player with a hero
     for (let i = 0; i < ctx.numPlayers; i++) {
       const playerID = i.toString();
-      let hero;
-      
-      if (ctx.numPlayers === 1 && selectedHeroId) {
-        // Use selected hero for single player
-        hero = allHeroes.find(h => h.id === selectedHeroId) || allHeroes[0];
-      } else {
-        // Default behavior for multiplayer
-        hero = allHeroes[i % allHeroes.length];
-      }
-      
-      // Create a 40-card deck from the hero's 10-card starter deck
+      const hero = (ctx.numPlayers === 1 && selectedHeroId) 
+        ? allHeroes.find(h => h.id === selectedHeroId) || allHeroes[0]
+        : allHeroes[i % allHeroes.length];
       const fullDeck = createDraftedDeck(hero.starterDeck);
-      
-      // Use the hero ID directly (no capitalization needed)
       players[playerID] = initializePlayer(hero.id as PlayerState['hero'], fullDeck);
-      
-      // Set initial capital to turn 1 value
       players[playerID].capital = 1;
     }
-
     return {
       players,
       currentPlayer: '0',
@@ -106,60 +81,33 @@ export const DreamBuildersGame: Game<GameState> = {
       gameLog: [],
     };
   },
-  
   turn: {
     onBegin: ({ G, ctx }) => {
       const playerID = ctx.currentPlayer;
       const player = G.players[playerID];
-      
-      // Initialize effect context for this player if needed
       if (!G.effectContext) G.effectContext = {};
       if (!G.effectContext[playerID]) G.effectContext[playerID] = initEffectContext();
-      
-      // 1. Automatic sales phase - SELL ALL PRODUCTS AUTOMATICALLY
       processAutomaticSales(G, playerID);
-      
-      // 2. Capital gain phase
       const baseCapital = Math.min(G.turn, GAME_CONFIG.MAX_CAPITAL);
-      
-      // Apply any capital modifications from effect context
-      const newCapital = G.effectContext[playerID].doubleCapitalGain ? Math.min(GAME_CONFIG.MAX_CAPITAL, baseCapital * 2) : baseCapital;
-      player.capital = newCapital;
-      
-      // 3. Process overhead costs (must pay or disable products)
+      player.capital = G.effectContext[playerID].doubleCapitalGain ? Math.min(GAME_CONFIG.MAX_CAPITAL, baseCapital * 2) : baseCapital;
       processOverheadCosts(G, playerID);
-      
-      // 4. Draw card(s)
       for (let i = 0; i < GAME_CONFIG.CARDS_DRAWN_PER_TURN; i++) {
-        drawCard(player);
+        drawCard(player); // Uses imported drawCard
       }
-      
-      // 5. Process passive effects (additional capital, card draw, inventory increases)
       processPassiveEffects(G, playerID);
-      
-      // Reset hero ability usage
       player.heroAbilityUsed = false;
     },
-    
     onEnd: ({ G, ctx }) => {
       const playerID = ctx.currentPlayer;
       
-      // Process recurring revenue (legacy)
-      processRecurringRevenue(G, playerID);
-      
-      // Clear temporary effects
       clearTempEffects(G, playerID);
-      
-      // Check for game end
       checkGameEnd(G);
       
-      // Advance turn counter when all players have played
       if (ctx.playOrderPos === ctx.numPlayers - 1) {
         G.turn++;
       }
     },
   },
-  
   moves: {
     playCard: ({ G, ctx, playerID }, cardIndex: number) => {
       if (playerID !== ctx.currentPlayer) return INVALID_MOVE;
@@ -242,7 +190,6 @@ export const DreamBuildersGame: Game<GameState> = {
         G.effectContext[playerID].extraCardPlays = (G.effectContext[playerID].extraCardPlays || 0) - 1;
       }
     },
-    
     useHeroAbility: ({ G, ctx, playerID }) => {
       if (playerID !== ctx.currentPlayer) return INVALID_MOVE;
       
@@ -267,7 +214,6 @@ export const DreamBuildersGame: Game<GameState> = {
         heroAbilityEffects[effectName](G, playerID);
       }
     },
-
     triggerMidnightOilDiscard: ({ G, ctx, playerID }) => {
       if (playerID !== ctx.currentPlayer) return INVALID_MOVE;
       
@@ -289,7 +235,6 @@ export const DreamBuildersGame: Game<GameState> = {
         }
       }
     },
-
     triggerFastPivotDestroyChoice: ({ G, ctx, playerID }) => {
       if (playerID !== ctx.currentPlayer) return INVALID_MOVE;
       const player = G.players[playerID];
@@ -313,7 +258,6 @@ export const DreamBuildersGame: Game<GameState> = {
         }
       }
     },
-
     makeChoice: ({ G, ctx, playerID }, choiceIndex: number) => {
       if (playerID !== ctx.currentPlayer) return INVALID_MOVE;
       
@@ -438,13 +382,11 @@ export const DreamBuildersGame: Game<GameState> = {
       // Add more choice types here as needed
     },
   },
-  
   endIf: ({ G }) => {
     if (G.gameOver) {
       return { winner: G.winner ? 'victory' : 'defeat' };
     }
   },
-  
   minPlayers: 1,
   maxPlayers: 1,
 }; 

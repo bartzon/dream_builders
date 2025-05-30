@@ -1,166 +1,37 @@
 import type { GameState } from '../state';
 import type { Card } from '../types';
-import { drawCard } from './utils';
-import { sellProduct } from './cardEffects';
+import { sellProduct } from './utils/sales-helpers';
+import { drawCard } from './utils/deck-helpers';
+
+// Import individual passive effect handlers
+import { handleFulfillmentAppIntegration } from './passive-effects/fulfillment-app-integration';
+import { handleAutomationArchitectPassives } from './passive-effects/automation-architect-passives';
+import { handleCommunityManager } from './passive-effects/community-manager-passive';
+import { handleSerialFounderChoicePassives } from './passive-effects/serial-founder-passives';
+import { handleContentCreator } from './passive-effects/content-creator-passive';
+import { handleLegacyPassiveEffects } from './passive-effects/legacy-passive-effects';
+
+// Import discount source handlers
+import {
+  getNextCardDiscount,
+  getActionCardSynergyDiscount,
+  getProductSynergyDiscount,
+  getMemeMagicDiscount,
+  getQualityMaterialsCostIncrease,
+  getShoestringBudgetDiscount
+} from './effects/discount-sources';
 
 // Process passive effects at start of turn
 export function processPassiveEffects(G: GameState, playerID: string) {
-  const player = G.players[playerID];
-  
-  // === LEGACY EFFECTS ===
-  
-  // Ad Budget Boost effect - extra capital per turn
-  const adBudgetBoost = player.board.Tools.find(t => t.effect === 'ad_budget_boost');
-  if (adBudgetBoost) {
-    player.capital = Math.min(10, player.capital + 1);
-  }
-  
-  // Inventory Forecast effect - capital per product
-  const inventoryForecast = player.board.Tools.find(t => t.effect === 'inventory_forecast');
-  if (inventoryForecast) {
-    const productCount = player.board.Products.length;
-    player.capital = Math.min(10, player.capital + productCount);
-  }
-  
-  // Beta Tester Squad effect - gain capital if sold product last turn
-  const betaTesterSquad = player.board.Employees.find(e => e.effect === 'beta_tester_squad');
-  if (betaTesterSquad && G.effectContext?.[playerID]?.soldProductLastTurn) {
-    player.capital = Math.min(10, player.capital + 1);
-  }
-  
-  // Venture Capitalist effect - gain 2 capital each turn
-  const ventureCapitalist = player.board.Employees.find(e => e.effect === 'venture_capitalist');
-  if (ventureCapitalist) {
-    player.capital = Math.min(10, player.capital + 2);
-  }
-  
-  // Influencer Partnership effect - increase inventory
-  const influencerPartnership = player.board.Employees.find(e => e.effect === 'influencer_partnership');
-  if (influencerPartnership) {
-    // In full implementation, player would choose
-    const product = player.board.Products.find(p => p.inventory !== undefined);
-    if (product && product.inventory !== undefined) {
-      product.inventory += 1;
-    }
-  }
-  
-  // Warehouse Manager effect - increase all inventories
-  const warehouseManager = player.board.Employees.find(e => e.effect === 'warehouse_manager');
-  if (warehouseManager) {
-    player.board.Products.forEach(product => {
-      if (product.inventory !== undefined) {
-        product.inventory += 1;
-      }
-    });
-  }
-  
-  // === NEW HERO EFFECTS ===
-  
-  // Solo Hustler Effects
-  // DIY Assembly - reduce Product costs
-  const diyAssembly = player.board.Tools.find(t => t.effect === 'diy_assembly');
-  if (diyAssembly && G.effectContext?.[playerID]) {
-    // Removed productCostReduction - now handled per-card
-  }
-  
-  // === INVENTORY SUPPORT EFFECTS ===
-  
-  // Fulfillment App Integration - delayed inventory boost
-  if (G.effectContext?.[playerID]?.delayedInventoryBoostTurns && G.effectContext[playerID].delayedInventoryBoostTurns > 0) {
-    const activeProducts = player.board.Products.filter(p => p.isActive !== false && p.inventory !== undefined);
-    if (activeProducts.length > 0) {
-      // Choose a random product
-      const randomIndex = Math.floor(Math.random() * activeProducts.length);
-      const randomProduct = activeProducts[randomIndex];
-      if (randomProduct.inventory !== undefined) {
-        randomProduct.inventory += 1;
-        // Add to game log
-        if (G.gameLog) {
-          G.gameLog.push(`Fulfillment App Integration: Added +1 inventory to ${randomProduct.name}`);
-        }
-      }
-    }
-    // Decrement the counter
-    G.effectContext[playerID].delayedInventoryBoostTurns--;
-  }
-  
-  // Automation Architect Effects
-  // Basic Script - gain 1 capital each turn
-  const basicScript = player.board.Tools.find(t => t.effect === 'basic_script');
-  if (basicScript) {
-    player.capital = Math.min(10, player.capital + 1);
-  }
-  
-  // Email Automation - gain 1 capital each turn
-  const emailAutomation = player.board.Tools.find(t => t.effect === 'email_automation');
-  if (emailAutomation) {
-    player.capital = Math.min(10, player.capital + 1);
-  }
-  
-  // Machine Learning Model - gain capital equal to number of Tools
-  const mlModel = player.board.Tools.find(t => t.effect === 'ml_model');
-  if (mlModel) {
-    const toolCount = player.board.Tools.length;
-    player.capital = Math.min(10, player.capital + toolCount);
-  }
-  
-  // Server Farm - generates passive income
-  const serverFarm = player.board.Products.find(p => p.effect === 'server_farm');
-  if (serverFarm) {
-    player.revenue += 10000;
-  }
-  
-  // Brand Builder Effects
-  // Community Manager - Products with Appeal generate bonus revenue
-  const communityManager = player.board.Employees.find(e => e.effect === 'community_manager');
-  if (communityManager) {
-    player.board.Products.forEach(product => {
-      if (product.appeal && product.appeal > 0) {
-        const bonus = product.appeal * 5000;
-        player.revenue += bonus;
-      }
-    });
-  }
-  
-  // Serial Founder Effects
-  // Growth Hacking - choose bonus each turn
-  const growthHacking = player.board.Tools.find(t => t.effect === 'growth_hacking');
-  if (growthHacking) {
-    // Simple rotation: capital, cards, revenue
-    const turn = G.turn % 3;
-    if (turn === 0) {
-      player.capital = Math.min(10, player.capital + 1);
-    } else if (turn === 1) {
-      drawCard(player);
-    } else {
-      player.revenue += 20000;
-    }
-  }
-  
-  // Business Development - choose different bonus each turn
-  const businessDev = player.board.Employees.find(e => e.effect === 'business_development');
-  if (businessDev) {
-    // Similar rotation
-    const turn = G.turn % 3;
-    if (turn === 1) {
-      player.capital = Math.min(10, player.capital + 1);
-    } else if (turn === 2) {
-      drawCard(player);
-    } else {
-      player.revenue += 25000;
-    }
-  }
-  
-  // Community Leader Effects
-  // Content Creator - if played 3+ cards last turn, gain $50k
-  const contentCreator = player.board.Employees.find(e => e.effect === 'content_creator');
-  if (contentCreator && G.effectContext?.[playerID]) {
-    // This would need to track from previous turn in a full implementation
-    // For now, just check if they have many cards in hand (active player)
-    if (player.hand.length >= 5) {
-      player.revenue += 50000;
-    }
-  }
+  handleLegacyPassiveEffects(G, playerID);
+  handleFulfillmentAppIntegration(G, playerID);
+  handleAutomationArchitectPassives(G, playerID);
+  handleCommunityManager(G, playerID);
+  handleSerialFounderChoicePassives(G, playerID);
+  handleContentCreator(G, playerID);
+
+  // Note: DIY Assembly's productCostReduction was part of Solo Hustler logic.
+  // It was correctly removed from here as it's handled by getCardDiscount mechanisms.
 }
 
 // Process overhead costs at start of turn
@@ -261,136 +132,34 @@ export function processAutomaticSales(G: GameState, playerID: string) {
   }
 }
 
-// Process recurring revenue effects (deprecated - now handled through sales)
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export function processRecurringRevenue(_G: GameState, _playerID: string) {
-  // Most revenue now comes from actual product sales
-  // This function is kept for compatibility but most effects moved to sales
-}
-
-// Get cost reduction for a card type
+// Get cost reduction for a card type (actual application)
 export function getCardDiscount(G: GameState, playerID: string, card: Card): number {
   const player = G.players[playerID];
-  let discount = 0;
+  let totalDiscount = 0;
+
+  totalDiscount += getNextCardDiscount(G, playerID, true); // true for applying/consuming
+  totalDiscount += getActionCardSynergyDiscount(player, card);
+  totalDiscount += getProductSynergyDiscount(G, playerID, player, card, true); // true for applying/consuming
+  totalDiscount += getMemeMagicDiscount(G, playerID, card);
+  totalDiscount += getQualityMaterialsCostIncrease(player, card); // This will be negative
+  totalDiscount += getShoestringBudgetDiscount(G, playerID, player);
   
-  // Check for next card discount
-  if (G.effectContext?.[playerID]?.nextCardDiscount) {
-    discount += G.effectContext[playerID].nextCardDiscount || 0;
-    // Clear the discount after use
-    G.effectContext[playerID].nextCardDiscount = 0;
-  }
-  
-  // === LEGACY EFFECTS ===
-  
-  // Brand Ambassador effect - Actions cost 1 less
-  if (card.type === 'Action') {
-    const brandAmbassador = player.board.Employees.find(e => e.effect === 'brand_ambassador');
-    if (brandAmbassador) discount += 1;
-    
-    const customerSupport = player.board.Employees.find(e => e.effect === 'customer_support_team');
-    if (customerSupport) discount += 1;
-  }
-  
-  // === NEW HERO EFFECTS ===
-  
-  // Solo Hustler - Product cost reduction
-  if (card.type === 'Product') {
-    // Check if this specific card was drawn by Solo Hustler hero power
-    if (card.id && G.effectContext?.[playerID]?.soloHustlerDiscountedCard === card.id) {
-      discount += 1;
-      // Clear the discount after use since it's being applied
-      G.effectContext[playerID].soloHustlerDiscountedCard = undefined;
-    }
-    
-    // DIY Assembly effect - Products cost 1 less
-    const diyAssembly = player.board.Tools.find(t => t.effect === 'diy_assembly');
-    if (diyAssembly) discount += 1;
-  }
-  
-  // Community Leader - Meme Magic cost reduction
-  if (card.effect === 'meme_magic') {
-    const cardsPlayed = G.effectContext?.[playerID]?.cardsPlayedThisTurn || 0;
-    if (cardsPlayed >= 2) {
-      discount = card.cost; // Make it cost 0
-    }
-  }
-  
-  // Brand Builder - Quality Materials effect (increases cost but handled in card effects)
-  if (card.type === 'Product') {
-    const qualityMaterials = player.board.Tools.find(t => t.effect === 'quality_materials');
-    if (qualityMaterials) {
-      discount -= 1; // Actually increases cost
-    }
-  }
-  
-  // Solo Hustler - Shoestring Budget effect (first card each turn costs 1 less)
-  const shoestringBudget = player.board.Tools.find(t => t.effect === 'shoestring_budget');
-  if (shoestringBudget && G.effectContext?.[playerID] && (!G.effectContext[playerID].cardsPlayedThisTurn || G.effectContext[playerID].cardsPlayedThisTurn === 0)) {
-    discount += 1;
-  }
-  
-  return Math.min(discount, card.cost); // Can't reduce below 0
+  return Math.min(Math.max(0, totalDiscount), card.cost); // Ensure discount isn't negative or more than card cost
 }
 
-// Get cost information for UI display (doesn't modify game state)
+// Get cost information for UI display (read-only, does not consume discounts)
 export function getCardCostInfo(G: GameState, playerID: string, card: Card): { originalCost: number, discount: number, finalCost: number } {
   const player = G.players[playerID];
-  let discount = 0;
-  
-  // Check for next card discount (don't modify the game state)
-  if (G.effectContext?.[playerID]?.nextCardDiscount) {
-    discount += G.effectContext[playerID].nextCardDiscount || 0;
-  }
-  
-  // === LEGACY EFFECTS ===
-  
-  // Brand Ambassador effect - Actions cost 1 less
-  if (card.type === 'Action') {
-    const brandAmbassador = player.board.Employees.find(e => e.effect === 'brand_ambassador');
-    if (brandAmbassador) discount += 1;
-    
-    const customerSupport = player.board.Employees.find(e => e.effect === 'customer_support_team');
-    if (customerSupport) discount += 1;
-  }
-  
-  // === NEW HERO EFFECTS ===
-  
-  // Solo Hustler - Product cost reduction
-  if (card.type === 'Product') {
-    // Check if this specific card was drawn by Solo Hustler hero power
-    if (card.id && G.effectContext?.[playerID]?.soloHustlerDiscountedCard === card.id) {
-      discount += 1;
-      // Note: Don't clear soloHustlerDiscountedCard here since this is read-only for UI
-    }
-    
-    // DIY Assembly effect - Products cost 1 less
-    const diyAssembly = player.board.Tools.find(t => t.effect === 'diy_assembly');
-    if (diyAssembly) discount += 1;
-  }
-  
-  // Community Leader - Meme Magic cost reduction
-  if (card.effect === 'meme_magic') {
-    const cardsPlayed = G.effectContext?.[playerID]?.cardsPlayedThisTurn || 0;
-    if (cardsPlayed >= 2) {
-      discount = card.cost; // Make it cost 0
-    }
-  }
-  
-  // Brand Builder - Quality Materials effect (increases cost but handled in card effects)
-  if (card.type === 'Product') {
-    const qualityMaterials = player.board.Tools.find(t => t.effect === 'quality_materials');
-    if (qualityMaterials) {
-      discount -= 1; // Actually increases cost
-    }
-  }
-  
-  // Solo Hustler - Shoestring Budget effect (first card each turn costs 1 less)
-  const shoestringBudget = player.board.Tools.find(t => t.effect === 'shoestring_budget');
-  if (shoestringBudget && G.effectContext?.[playerID] && (!G.effectContext[playerID].cardsPlayedThisTurn || G.effectContext[playerID].cardsPlayedThisTurn === 0)) {
-    discount += 1;
-  }
-  
-  const effectiveDiscount = Math.min(Math.max(0, discount), card.cost); // Can't reduce below 0 or be negative
+  let totalDiscount = 0;
+
+  totalDiscount += getNextCardDiscount(G, playerID, false); // false for UI display only
+  totalDiscount += getActionCardSynergyDiscount(player, card);
+  totalDiscount += getProductSynergyDiscount(G, playerID, player, card, false); // false for UI display only
+  totalDiscount += getMemeMagicDiscount(G, playerID, card);
+  totalDiscount += getQualityMaterialsCostIncrease(player, card);
+  totalDiscount += getShoestringBudgetDiscount(G, playerID, player);
+
+  const effectiveDiscount = Math.min(Math.max(0, totalDiscount), card.cost);
   const finalCost = Math.max(0, card.cost - effectiveDiscount);
   
   return {

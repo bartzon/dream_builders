@@ -1,5 +1,5 @@
 import type { GameState } from '../state'
-import { gainCapital, gainRevenue, drawCards } from './cardEffects'
+import { gainCapital, gainRevenue, drawCards } from './utils/effect-helpers'
 
 // Effect builder types
 type EffectFunction = (G: GameState, playerID: string) => void

@@ -1,5 +1,5 @@
 import type { GameState } from '../state';
-import { drawCard } from './utils';
+import { drawCard } from './utils/deck-helpers';
 import { initEffectContext } from './effectContext';
 
 // Hero Ability Effects Registry

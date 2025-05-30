@@ -1,5 +1,5 @@
 // Re-export all logic functions
-export { cardEffects, sellProduct } from './cardEffects';
+export { cardEffects, resolveFastPivotEffect } from './cardEffects';
 export { heroAbilityEffects } from './heroAbilities';
 export { 
   initEffectContext, 
@@ -10,9 +10,17 @@ export {
   processPassiveEffects, 
   processOverheadCosts,
   processAutomaticSales,
-  processRecurringRevenue,
   getCardDiscount,
   getCardCostInfo,
   handleCardPlayEffects
 } from './turnEffects';
-export { drawCard, spendCapital, initializePlayer, checkGameEnd } from './utils'; 
+
+// Export from new utils sub-modules
+export { drawCard } from './utils/deck-helpers';
+export { spendCapital } from './utils/player-resource-helpers';
+export { initializePlayer } from './utils/player-helpers';
+export { checkGameEnd } from './utils/game-state-helpers';
+export * from './utils/effect-helpers';
+export * from './utils/inventory-helpers';
+export * from './utils/choice-helpers';
+export * from './utils/sales-helpers'; // This also exports sellProduct and sellFirstAvailableProduct 
