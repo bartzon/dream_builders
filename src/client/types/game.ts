@@ -23,6 +23,8 @@ export interface PendingChoice {
   effect: string
   cards?: ClientCard[]
   cardIndices?: number[]
+  options?: string[]
+  count?: number
 }
 
 // Tooltip state types

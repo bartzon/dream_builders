@@ -114,7 +114,7 @@ export const serialFounderHero: Hero = {
   playstyle: 'Balanced and flexible with a powerful mid-game.',
   heroPower: {
     name: 'Double Down',
-    description: 'Choose one: draw a card OR refresh 1 used Product.',
+    description: 'Choose one: draw a card OR add 2 inventory to a Product.',
     cost: 2,
     effect: 'serial_founder_double_down',
   },

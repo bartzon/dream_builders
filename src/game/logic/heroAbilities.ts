@@ -85,29 +85,17 @@ export const heroAbilityEffects: Record<string, (G: GameState, playerID: string)
   },
   
   // Serial Founder Hero Power: Double Down
-  // Choose one: draw a card OR refresh 1 used Product.
+  // Choose one: draw a card OR add 2 inventory to a Product.
   'serial_founder_double_down': (G, playerID) => {
     const player = G.players[playerID];
-    
-    // For now, choose automatically based on situation
-    // In full implementation, player would choose
-    const hasExhaustedProduct = player.board.Products.some(p => 
-      p.inventory !== undefined && p.inventory === 0
-    );
-    
-    if (hasExhaustedProduct) {
-      // Refresh a product
-      const exhaustedProduct = player.board.Products.find(p => 
-        p.inventory !== undefined && p.inventory === 0
-      );
-      if (exhaustedProduct && exhaustedProduct.inventory !== undefined) {
-        exhaustedProduct.inventory = 3; // Refresh with 3 inventory
-      }
-    } else {
-      // Draw a card
-      drawCard(player);
-    }
-    
-    player.heroAbilityUsed = true;
+    // ensureEffectContext(G, playerID); // Not strictly needed if only setting pendingChoice
+
+    player.pendingChoice = {
+      type: 'choose_option',
+      effect: 'serial_founder_double_down', // The makeChoice will handle sub-effects based on option index
+      options: ['Draw a card', 'Add 2 inventory to a Product'],
+      // sourceCard is not needed as it's a hero power
+    };
+    // player.heroAbilityUsed = true; // This is already set by the useHeroAbility move in game.ts
   },
 }; 

@@ -278,141 +278,45 @@ export const DreamBuildersGame: Game<GameState> = {
       if (!player.pendingChoice) return INVALID_MOVE;
       const choice = player.pendingChoice;
 
-      // Initialize or clear recentlyAffectedCardIds for this choice resolution path
+      // Initialize or clear recentlyAffectedCardIds for new choice sequences
       if (G.effectContext?.[playerID]) {
-        // For a new choice sequence (not a continuation of multi_product_inventory_boost)
         if (choice.effect !== 'multi_product_inventory_boost' || G.effectContext[playerID].warehouseExpansionCount === 0) {
           G.effectContext[playerID].recentlyAffectedCardIds = [];
         }
-      } else { // Should not happen if ensureEffectContext is used properly
-        if (G.effectContext) G.effectContext[playerID] = { recentlyAffectedCardIds: [] }; 
-        else G.effectContext = { [playerID]: { recentlyAffectedCardIds: [] } };
+      } else {
+        G.effectContext = { [playerID]: { recentlyAffectedCardIds: [] } };
       }
 
       if (choice.type === 'discard') {
         if (choiceIndex < 0 || choiceIndex >= player.hand.length) return INVALID_MOVE;
+        const discardedCardName = player.hand[choiceIndex]?.name || 'a card';
         player.hand.splice(choiceIndex, 1);
+        if (G.gameLog) G.gameLog.push(`Player ${playerID} discarded ${discardedCardName}.`);
         player.pendingChoice = undefined;
-        if (G.gameLog) {
-          G.gameLog.push(`Player ${playerID} discarded a card.`);
-        }
-      } else if (choice.type === 'destroy_product' && choice.effect === 'fast_pivot') {
+      } 
+      else if (choice.type === 'destroy_product' && choice.effect === 'fast_pivot') {
         if (!choice.cards || choiceIndex < 0 || choiceIndex >= choice.cards.length) return INVALID_MOVE;
         const productToDestroyId = choice.cards[choiceIndex].id;
         resolveFastPivotEffect(G, playerID, productToDestroyId);
+        if (G.gameLog) G.gameLog.push(`Player ${playerID} used Fast Pivot to destroy ${choice.cards[choiceIndex].name}, draw 2 cards, and discount next Product.`);
         player.pendingChoice = undefined;
-        if (G.gameLog) {
-          G.gameLog.push(`Player ${playerID} used Fast Pivot to destroy ${choice.cards[choiceIndex].name}, draw 2 cards, and discount next Product.`);
-        }
-      } else if (choice.type === 'choose_card') {
+      } 
+      else if (choice.type === 'choose_from_drawn_to_discard' && choice.effect === 'ab_test_discard') {
         if (!choice.cards || choiceIndex < 0 || choiceIndex >= choice.cards.length) return INVALID_MOVE;
-        const chosenCard = choice.cards[choiceIndex];
-        const boardProduct = player.board.Products.find(p => p.id === chosenCard.id);
-        
-        if (!boardProduct) return INVALID_MOVE;
-        
-        // Handle different inventory-related effects
-        switch (choice.effect) {
-          case 'add_inventory_to_product':
-            if (boardProduct.inventory !== undefined) {
-              boardProduct.inventory += 2;
-              if (G.effectContext?.[playerID]) G.effectContext[playerID].recentlyAffectedCardIds?.push(boardProduct.id);
-            }
-            break;
-          case 'add_inventory_if_empty':
-            if (boardProduct.inventory === 0) {
-              boardProduct.inventory = 3;
-              if (G.effectContext?.[playerID]) G.effectContext[playerID].recentlyAffectedCardIds?.push(boardProduct.id);
-            }
-            break;
-          case 'multi_product_inventory_boost':
-            if (boardProduct.inventory !== undefined) {
-              boardProduct.inventory += 1;
-              if (G.effectContext?.[playerID]) {
-                G.effectContext[playerID].recentlyAffectedCardIds?.push(boardProduct.id);
-                G.effectContext[playerID].warehouseExpansionCount = (G.effectContext[playerID].warehouseExpansionCount || 0) + 1;
-                const selectedCount = G.effectContext[playerID].warehouseExpansionCount || 0;
-                if (selectedCount < 3) {
-                  const remainingProducts = player.board.Products.filter(p => p.isActive !== false && p.id !== boardProduct.id);
-                  if (remainingProducts.length > 0) {
-                    player.pendingChoice = {
-                      type: 'choose_card',
-                      effect: 'multi_product_inventory_boost',
-                      cards: remainingProducts.map(p => ({ ...p })),
-                    };
-                    if (G.gameLog) G.gameLog.push(`Warehouse Expansion: Selected ${boardProduct.name} (${selectedCount}/3). Choose another product.`);
-                    return; 
-                  }
-                }
-                G.effectContext[playerID].warehouseExpansionCount = 0; 
-              }
-            }
-            break;
-          case 'inventory_and_sale_boost':
-            if (boardProduct.inventory !== undefined) {
-              boardProduct.inventory += 1;
-              if (G.effectContext?.[playerID]) G.effectContext[playerID].recentlyAffectedCardIds?.push(boardProduct.id);
-              if (boardProduct.inventory > 0) {
-                sellProduct(G, playerID, boardProduct, 1);
-              }
-            }
-            break;
-          case 'inventory_boost_plus_revenue':
-            if (boardProduct.inventory !== undefined) {
-              boardProduct.inventory += 2;
-              if (!G.effectContext?.[playerID]) break;
-              const ctx = G.effectContext[playerID];
-              if (!ctx.productRevenueBoosts) ctx.productRevenueBoosts = {};
-              ctx.productRevenueBoosts[boardProduct.id] = 1000;
-              ctx.recentlyAffectedCardIds?.push(boardProduct.id);
-            }
-            break;
-          case 'draw_and_inventory':
-          case 'simple_inventory_boost':
-            if (boardProduct.inventory !== undefined) {
-              boardProduct.inventory += 1;
-              if (G.effectContext?.[playerID]) G.effectContext[playerID].recentlyAffectedCardIds?.push(boardProduct.id);
-            }
-            break;
-        }
-        
-        player.pendingChoice = undefined;
-        if (G.gameLog) {
-          G.gameLog.push(`Player ${playerID} chose ${chosenCard.name} for ${choice.effect}.`);
-        }
-      } else if (choice.type === 'choose_from_drawn_to_discard' && choice.effect === 'ab_test_discard') {
-        if (!choice.cards || choiceIndex < 0 || choiceIndex >= choice.cards.length) {
-          // Invalid choice index or no cards presented for choice (shouldn't happen if effect sets up correctly)
-          return INVALID_MOVE;
-        }
         const cardToDiscard = choice.cards[choiceIndex];
-        
-        // Find and remove the actual card from hand by its ID
         const handCardIndex = player.hand.findIndex(c => c.id === cardToDiscard.id);
         if (handCardIndex !== -1) {
           player.hand.splice(handCardIndex, 1);
-          if (G.gameLog) {
-            G.gameLog.push(`A/B Test: Player ${playerID} discarded ${cardToDiscard.name}.`);
-          }
+          if (G.gameLog) G.gameLog.push(`A/B Test: Player ${playerID} discarded ${cardToDiscard.name}.`);
         } else {
-          // This case should ideally not be reached if drawnCards were correctly identified
-          if (G.gameLog) {
-            G.gameLog.push(`A/B Test: Error - card to discard not found in hand.`);
-          }
-          // Potentially return INVALID_MOVE or handle error, but for now, just log and clear choice
+          if (G.gameLog) G.gameLog.push(`A/B Test: Error - card to discard not found in hand.`);
         }
         player.pendingChoice = undefined;
-      } else if (choice.type === 'view_deck_and_discard' && choice.effect === 'analytics_dashboard_discard') {
-        if (!choice.cards || !choice.count) return INVALID_MOVE; // Should have cards and count from effect
-
-        // choiceIndex: 0 to discard choice.cards[0], 1 to discard choice.cards[1]
-        // -1 (or choice.cards.length) can signify "discard none"
+      } 
+      else if (choice.type === 'view_deck_and_discard' && choice.effect === 'analytics_dashboard_discard') {
+        if (!choice.cards || !choice.count) return INVALID_MOVE;
         if (choiceIndex >= 0 && choiceIndex < choice.count) {
-          const cardToDiscardFromDeck = choice.cards[choiceIndex]; // This is a copy
-          
-          // Find the actual card on top of the deck. 
-          // choice.cards are reversed: choice.cards[0] is player.deck[player.deck.length - 1]
-          // choice.cards[1] (if exists) is player.deck[player.deck.length - 2]
+          const cardToDiscardFromDeck = choice.cards[choiceIndex];
           let deckCardIndexToRemove = -1;
           if (choice.count === 1 && choiceIndex === 0 && player.deck.length > 0 && player.deck[player.deck.length - 1].id === cardToDiscardFromDeck.id) {
             deckCardIndexToRemove = player.deck.length - 1;
@@ -423,28 +327,126 @@ export const DreamBuildersGame: Game<GameState> = {
               deckCardIndexToRemove = player.deck.length - 2;
             }
           }
-
           if (deckCardIndexToRemove !== -1) {
             const discardedCard = player.deck.splice(deckCardIndexToRemove, 1)[0];
-            if (G.gameLog) {
-              G.gameLog.push(`Analytics Dashboard: Player ${playerID} discarded ${discardedCard.name} from top of deck.`);
-            }
-            // If one card was discarded, the other (if presented) remains on top.
+            if (G.gameLog) G.gameLog.push(`Analytics Dashboard: Player ${playerID} discarded ${discardedCard.name} from top of deck.`);
           } else {
-            // Card ID mismatch or invalid index, should not happen if UI presents choices correctly based on pendingChoice.cards
-            if (G.gameLog) {
-              G.gameLog.push(`Analytics Dashboard: Error - card to discard from deck not found or mismatch.`);
-            }
+            if (G.gameLog) G.gameLog.push(`Analytics Dashboard: Error - card to discard from deck not found.`);
           }
         } else {
-          // Player chose not to discard (e.g., choiceIndex === -1 or choice.cards.length)
-          if (G.gameLog) {
-            G.gameLog.push(`Analytics Dashboard: Player ${playerID} viewed top cards, no discard.`);
-          }
+          if (G.gameLog) G.gameLog.push(`Analytics Dashboard: Player ${playerID} viewed top cards, no discard.`);
         }
         player.pendingChoice = undefined;
+      } 
+      else if (choice.type === 'choose_option' && choice.effect === 'serial_founder_double_down') {
+        if (choiceIndex === 0) { // Option: Draw a card
+          drawCard(player);
+          if (G.gameLog) G.gameLog.push(`Serial Founder (Double Down): Chose to draw a card.`);
+          player.pendingChoice = undefined;
+        } else if (choiceIndex === 1) { // Option: Add 2 inventory to a Product
+          const activeProducts = player.board.Products.filter(p => p.isActive !== false && p.inventory !== undefined);
+          if (activeProducts.length > 0) {
+            player.pendingChoice = {
+              type: 'choose_card',
+              effect: 'serial_founder_double_down_add_inventory', // Specific sub-effect
+              cards: activeProducts.map(p => ({ ...p })),
+            };
+            if (G.gameLog) G.gameLog.push(`Serial Founder (Double Down): Chose to add inventory. Select a product.`);
+          } else {
+            if (G.gameLog) G.gameLog.push(`Serial Founder (Double Down): Chose to add inventory, but no products on board.`);
+            player.pendingChoice = undefined;
+          }
+        } else {
+          return INVALID_MOVE;
+        }
+      } 
+      else if (choice.type === 'choose_card') { // General choose_card handler (must come AFTER specific choose_card effects)
+        if (choice.effect === 'serial_founder_double_down_add_inventory') {
+          if (!choice.cards || choiceIndex < 0 || choiceIndex >= choice.cards.length) return INVALID_MOVE;
+          const chosenProductInfo = choice.cards[choiceIndex];
+          const boardProduct = player.board.Products.find(p => p.id === chosenProductInfo.id);
+          if (boardProduct && boardProduct.inventory !== undefined) {
+            boardProduct.inventory += 2;
+            if (G.effectContext?.[playerID]) G.effectContext[playerID].recentlyAffectedCardIds?.push(boardProduct.id);
+            if (G.gameLog) G.gameLog.push(`Serial Founder (Double Down): Added +2 inventory to ${boardProduct.name}.`);
+          } else {
+            if (G.gameLog) G.gameLog.push(`Serial Founder (Double Down): Error - product not found or inventory undefined.`);
+          }
+          player.pendingChoice = undefined;
+        } else {
+          // Existing generic inventory/product choice logic
+          if (!choice.cards || choiceIndex < 0 || choiceIndex >= choice.cards.length) return INVALID_MOVE;
+          const chosenCard = choice.cards[choiceIndex];
+          const boardProduct = player.board.Products.find(p => p.id === chosenCard.id);
+          if (!boardProduct) return INVALID_MOVE;
+
+          switch (choice.effect) {
+            case 'add_inventory_to_product':
+              if (boardProduct.inventory !== undefined) {
+                boardProduct.inventory += 2;
+                if (G.effectContext?.[playerID]) G.effectContext[playerID].recentlyAffectedCardIds?.push(boardProduct.id);
+              }
+              break;
+            case 'add_inventory_if_empty':
+              if (boardProduct.inventory === 0) {
+                boardProduct.inventory = 3;
+                if (G.effectContext?.[playerID]) G.effectContext[playerID].recentlyAffectedCardIds?.push(boardProduct.id);
+              }
+              break;
+            case 'multi_product_inventory_boost':
+              if (boardProduct.inventory !== undefined) {
+                boardProduct.inventory += 1;
+                if (G.effectContext?.[playerID]) {
+                  G.effectContext[playerID].recentlyAffectedCardIds?.push(boardProduct.id);
+                  G.effectContext[playerID].warehouseExpansionCount = (G.effectContext[playerID].warehouseExpansionCount || 0) + 1;
+                  const selectedCount = G.effectContext[playerID].warehouseExpansionCount || 0;
+                  if (selectedCount < 3) {
+                    const remainingProducts = player.board.Products.filter(p => p.isActive !== false && p.id !== boardProduct.id);
+                    if (remainingProducts.length > 0) {
+                      player.pendingChoice = {
+                        type: 'choose_card',
+                        effect: 'multi_product_inventory_boost',
+                        cards: remainingProducts.map(p => ({ ...p })),
+                      };
+                      if (G.gameLog) G.gameLog.push(`Warehouse Expansion: Selected ${boardProduct.name} (${selectedCount}/3). Choose another product.`);
+                      return; 
+                    }
+                  }
+                  G.effectContext[playerID].warehouseExpansionCount = 0; 
+                }
+              }
+              break;
+            case 'inventory_and_sale_boost':
+              if (boardProduct.inventory !== undefined) {
+                boardProduct.inventory += 1;
+                if (G.effectContext?.[playerID]) G.effectContext[playerID].recentlyAffectedCardIds?.push(boardProduct.id);
+                if (boardProduct.inventory > 0) {
+                  sellProduct(G, playerID, boardProduct, 1);
+                }
+              }
+              break;
+            case 'inventory_boost_plus_revenue':
+              if (boardProduct.inventory !== undefined) {
+                boardProduct.inventory += 2;
+                if (!G.effectContext?.[playerID]) break;
+                const gameCtx = G.effectContext[playerID]; // Renamed to avoid conflict with boardgame.io ctx
+                if (!gameCtx.productRevenueBoosts) gameCtx.productRevenueBoosts = {};
+                gameCtx.productRevenueBoosts[boardProduct.id] = 1000;
+                gameCtx.recentlyAffectedCardIds?.push(boardProduct.id);
+              }
+              break;
+            case 'draw_and_inventory':
+            case 'simple_inventory_boost':
+              if (boardProduct.inventory !== undefined) {
+                boardProduct.inventory += 1;
+                if (G.effectContext?.[playerID]) G.effectContext[playerID].recentlyAffectedCardIds?.push(boardProduct.id);
+              }
+              break;
+          }
+          player.pendingChoice = undefined;
+          if (G.gameLog) G.gameLog.push(`Player ${playerID} chose ${chosenCard.name} for ${choice.effect}.`);
+        }
       }
-      // Add more choice types here as needed
     },
   },
   endIf: ({ G }) => {

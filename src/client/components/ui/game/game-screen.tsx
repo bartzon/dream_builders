@@ -13,7 +13,9 @@ import { useGameState } from '../../../hooks/useGameState'
 import { useTooltip } from '../../../hooks/useTooltip'
 import { useCardDiscount } from '../../../hooks/useCardDiscount'
 import { allHeroes } from '../../../../game/data/heroes'
+import { FONT_SIZES, BUTTON_STYLES } from '../../../constants/ui'
 import type { GameState } from '../../../../game/state'
+import type { ClientCard, PendingChoice as ClientPendingChoice, EffectContextUI as ClientEffectContextUI } from '../../../types/game'
 
 interface GameScreenProps {
   gameState: unknown
@@ -31,7 +33,12 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
   const [affectedCardIds, setAffectedCardIds] = useState<Set<string>>(new Set());
 
   // Use custom hooks
-  const { uiState, effectContext, toolsAndEmployees } = useGameState(G, playerID)
+  const { uiState, effectContext, toolsAndEmployees } = useGameState(G, playerID) as { 
+    uiState: import('../../../types/game').GameUIState; 
+    effectContext: ClientEffectContextUI;  // Use aliased client type
+    toolsAndEmployees: ClientCard[]; 
+  };
+  const pendingChoice = uiState.pendingChoice as ClientPendingChoice | undefined; // Cast to client type
   const {
     cardTooltip,
     heroPowerTooltip,
@@ -185,6 +192,85 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
     moves.makeChoice?.(choiceIndex)
   }, [moves, uiState.hand, uiState.pendingChoice, isMyTurn, hideCardTooltip])
 
+  // UI Rendering for 'choose_option' pending choice
+  const renderOptionChoiceModal = () => {
+    if (pendingChoice?.type !== 'choose_option' || !pendingChoice.options) {
+      return null;
+    }
+
+    const { options, effect } = pendingChoice;
+    let title = 'Make a choice';
+
+    // Determine button viability based on effect and game state
+    const getOptionDisabledState = (optionText: string, index: number): boolean => {
+      if (effect === 'serial_founder_double_down') {
+        if (optionText.toLowerCase().includes('add 2 inventory') && uiState.products.length === 0) {
+          return true; // Disable if no products to add inventory to
+        }
+        // Add other conditions for other hero powers or 'choose_option' effects here
+      }
+      return false; // Default to enabled
+    };
+
+    if (effect === 'serial_founder_double_down') {
+      title = 'Double Down: Choose an Effect';
+    }
+
+    return (
+      <div style={{
+        position: 'fixed',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        backgroundColor: 'rgba(30, 41, 59, 0.95)', 
+        padding: '30px',
+        borderRadius: '12px',
+        border: '2px solid #4f46e5', 
+        boxShadow: '0 10px 25px rgba(0,0,0,0.5)',
+        zIndex: 2000, 
+        textAlign: 'center',
+        color: 'white',
+        minWidth: '350px',
+        maxWidth: '500px'
+      }}>
+        <h3 style={{ marginTop: 0, marginBottom: '25px', fontSize: FONT_SIZES.heading }}>{title}</h3>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-around',
+          gap: '20px'
+        }}>
+          {options.map((option: string, index: number) => {
+            const isDisabled = getOptionDisabledState(option, index);
+            return (
+              <button
+                key={index}
+                onClick={() => !isDisabled && handleMakeChoice(index)}
+                disabled={isDisabled}
+                style={{
+                  ...BUTTON_STYLES,
+                  background: isDisabled ? '#4b5563' : '#4f46e5', // Gray if disabled
+                  color: 'white',
+                  padding: '15px 25px',
+                  fontSize: FONT_SIZES.medium,
+                  minWidth: '150px',
+                  border: 'none',
+                  boxShadow: '0 4px 6px rgba(0,0,0,0.2)',
+                  transition: 'background-color 0.2s ease',
+                  cursor: isDisabled ? 'not-allowed' : 'pointer',
+                  opacity: isDisabled ? 0.7 : 1,
+                }}
+                onMouseEnter={(e) => !isDisabled && (e.currentTarget.style.background = '#6366f1')}
+                onMouseLeave={(e) => !isDisabled && (e.currentTarget.style.background = '#4f46e5')}
+              >
+                {option}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div style={{
       width: '100vw',
@@ -267,7 +353,7 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
           {/* Products */}
           <ProductsSection
             products={uiState.products}
-            pendingChoice={uiState.pendingChoice}
+            pendingChoice={pendingChoice}
             effectContext={effectContext}
             onMakeChoice={handleMakeChoice}
             onShowTooltip={showCardTooltip}
@@ -281,18 +367,21 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
       <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
         <PlayerHand
           hand={uiState.hand}
-          pendingChoiceType={uiState.pendingChoice?.type}
+          pendingChoiceType={pendingChoice?.type}
           midnightOilPending={effectContext.midnightOilDiscardPending}
           getCostInfo={getCostInfo}
           capital={uiState.capital}
           isMyTurn={isMyTurn}
           effectContext={effectContext}
+          affectedCardIds={affectedCardIds}
           onPlayCard={handlePlayCard}
           onMakeChoice={handleMakeChoice}
           onShowTooltip={showCardTooltip}
           onHideTooltip={hideCardTooltip}
         />
       </div>
+
+      {renderOptionChoiceModal()} {/* Render the modal if choice is active */}
 
       {/* Debug Panel */}
       <DebugPanel gameState={G as GameState} playerID={playerID} />

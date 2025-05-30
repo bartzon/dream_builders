@@ -11,6 +11,7 @@ interface PlayerHandProps {
   capital: number
   isMyTurn: boolean
   effectContext: EffectContextUI
+  affectedCardIds: Set<string>
   onPlayCard: (index: number) => void
   onMakeChoice: (index: number) => void
   onShowTooltip: (card: ClientCard, e: React.MouseEvent) => void
@@ -31,6 +32,7 @@ export const PlayerHand = React.memo(({
   capital,
   isMyTurn,
   effectContext,
+  affectedCardIds,
   onPlayCard,
   onMakeChoice,
   onShowTooltip,
@@ -60,6 +62,7 @@ export const PlayerHand = React.memo(({
     const hasPlayedAction = Boolean(lastActionEffect && lastActionCard && lastActionCard.type === 'Action')
 
     const canPlay = isMyTurn && canAffordCard && (!isQuickLearner || hasPlayedAction)
+    const isAffected = card.id ? affectedCardIds.has(card.id) : false
 
     const numCards = hand.length
     const isHovered = hoveredIndex === index
@@ -88,8 +91,9 @@ export const PlayerHand = React.memo(({
           index={index}
           canPlay={canPlay}
           isDiscardMode={isDiscardMode}
+          isAffected={isAffected}
           costInfo={costInfo}
-          onCardClick={() => isDiscardMode ? onMakeChoice(index) : onPlayCard(index)}
+          onCardClick={() => isDiscardMode ? onMakeChoice(index) : (canPlay ? onPlayCard(index) : () => {}) }
          // Remove individual card mouse enter/leave/move, handled by the div wrapper now
         />
       </div>
