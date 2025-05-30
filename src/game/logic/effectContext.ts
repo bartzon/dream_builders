@@ -33,6 +33,7 @@ export interface EffectContext {
   soldProductLastTurn?: boolean;
   itemsSoldThisTurn?: number;
   cardsPlayedThisTurn?: number;
+  cardsPlayedLastTurn?: number;
   productCardsPlayedThisTurn?: number; // Tracks number of Product-type cards played
   
   // Appeal system (Brand Builder)
@@ -96,6 +97,7 @@ export function initEffectContext(): EffectContext {
     soldProductLastTurn: false,
     itemsSoldThisTurn: 0,
     cardsPlayedThisTurn: 0,
+    cardsPlayedLastTurn: 0,
     productCardsPlayedThisTurn: 0,
     tempAppealBoosts: {},
     globalAppealBoost: 0,
@@ -125,6 +127,7 @@ export function clearTempEffects(G: GameState, playerID: string) {
     // Move current turn data to last turn
     ctx.soldProductLastTurn = ctx.soldProductThisTurn || false;
     ctx.playedActionLastTurn = ctx.playedActionThisTurn || false;
+    ctx.cardsPlayedLastTurn = ctx.cardsPlayedThisTurn || 0;
     
     // Apply recurring capital if any
     if (ctx.recurringCapitalNextTurn && ctx.recurringCapitalNextTurn > 0) {

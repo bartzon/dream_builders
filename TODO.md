@@ -12,31 +12,10 @@ This file tracks unimplemented features, card effects, and mechanics.
     - Implement game logic for gaining, spending, and checking Audience thresholds.
     - Update UI to display Audience.
 - **Cards Affected (Examples - see full list in card data)**:
-    - **Live AMA (Community Leader)**: "Draw 2 cards. Add 2 Audience."
-    - **Merch Drop (Community Leader)**: "Costs 1 less if you have 5+ Audience. Sells for 3."
-    - **Grassroots Launch (Community Leader)**: "Add 5 Audience. You may sell a Product."
+    - None in current Community Leader deck (removed from latest version)
     - **Tech Press Feature (Serial Founder)**: "Add 3 Audience. If you control a Product, add 5 instead."
-    - **Hype Train (Community Leader)**: "Your team gets +1 capital whenever you gain Audience."
-    - **Fanbase (Community Leader)**: "Recurring: Gain 1 Audience."
 
 ## II. Incomplete Card Effects & Hero Powers
-
-### Brand Builder
-- **Hero Power: Engage**
-    - **Text**: "Add 2 Inventory to a Product."
-    - **Status**: ✅ Implemented. Player can now choose which Product to add inventory to via the choice UI.
-- **Content Calendar (Tool)**
-    - **Text**: "Recurring: Add 1 inventory to your lowest-inventory Product."
-    - **Status**: ✅ Implemented in `brand-builder-passives.ts`. Automatically adds inventory to the lowest-inventory Product each turn.
-- **Email List (Tool)**
-    - **Text**: "Recurring: If you control 2 or more Products, gain 1 capital."
-    - **Status**: ✅ Implemented in `brand-builder-passives.ts`. Checks Product count and gains capital each turn.
-- **Visual Identity (Tool)**
-    - **Text**: "Your Products cost 1 less if you control another Tool."
-    - **Status**: ✅ Implemented. Cost reduction added to `getVisualIdentityDiscount` in `discount-sources.ts`.
-- **Personal Branding (Tool)**
-    - **Text**: "Recurring: Draw 1 card if you played an Action last turn."
-    - **Status**: ✅ Implemented in `brand-builder-passives.ts`. Tracks Action cards played and draws a card next turn.
 
 ### Automation Architect
 - **Scale Systems (Tool)**
@@ -49,12 +28,18 @@ This file tracks unimplemented features, card effects, and mechanics.
     - **Status**: Partially implemented. Triggers some simple recurring Tool effects. Needs review to ensure all intended recurring effects are covered and correctly triggered (e.g., `auto_fulfill` condition, `shoestring_budget` interaction).
 
 ### Community Leader
-- **Hype Train (Tool)**
-    - **Text**: "Your team gets +1 capital whenever you gain Audience."
-    - **Status**: `passiveEffect`. Requires Audience mechanic and logic for team-based effects (currently single-player).
-- **Mentorship Circle (Tool)**
-    - **Text**: "Your teammates may draw 1 extra card at the start of their turn."
-    - **Status**: `passiveEffect`. Requires multiplayer support.
+- **All card effects are now implemented** with the following notes:
+    - **Town Hall**: ✅ Fully implemented
+    - **Mutual Aid**: ✅ Fully implemented
+    - **Hype Train**: ✅ Implemented (tracks cards played last turn)
+    - **Mentorship Circle**: ✅ Implemented (draws extra card at start of turn)
+    - **Steady Fans**: ✅ Implemented (gains 1 capital every even turn)
+    - **Shared Spotlight**: ✅ Implemented (draw 2 cards, cost reduction if played 2+ cards)
+    - **Community Manager**: ✅ Implemented (cost reduction handled in discount system)
+    - **Live AMA**: ✅ Fully implemented
+    - **Merch Drop**: ✅ Implemented (cost reduction + inventory boost to first product, TODO: product selection UI)
+    - **Grassroots Launch**: ✅ Fully implemented
+    - **Go Viral (Hero Power)**: ✅ Implemented in heroAbilities.ts
 
 ## III. UI & UX Enhancements
 

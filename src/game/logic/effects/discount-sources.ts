@@ -94,4 +94,16 @@ export function getCommunityManagerDiscount(player: PlayerState, cardToPlay: Car
     return 1;
   }
   return 0;
+}
+
+// Discount source: Merch Drop (Community Leader card)
+// Costs 1 less if you played 2+ cards this turn
+export function getMerchDropDiscount(G: GameState, playerID: string, card: Card): number {
+  if (card.effect === 'merch_drop') {
+    const cardsPlayed = G.effectContext?.[playerID]?.cardsPlayedThisTurn || 0;
+    if (cardsPlayed >= 2) {
+      return 1;
+    }
+  }
+  return 0;
 } 

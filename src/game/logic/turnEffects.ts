@@ -11,6 +11,7 @@ import { handleSerialFounderChoicePassives } from './passive-effects/serial-foun
 import { handleContentCreator } from './passive-effects/content-creator-passive';
 import { handleLegacyPassiveEffects } from './passive-effects/legacy-passive-effects';
 import { handleBrandBuilderPassives } from './passive-effects/brand-builder-passives';
+import { handleCommunityLeaderPassives } from './passive-effects/community-leader-passives';
 
 // Import discount source handlers
 import {
@@ -21,7 +22,8 @@ import {
   getQualityMaterialsCostIncrease,
   getShoestringBudgetDiscount,
   getCommunityManagerDiscount,
-  getVisualIdentityDiscount
+  getVisualIdentityDiscount,
+  getMerchDropDiscount
 } from './effects/discount-sources';
 
 // Process passive effects at start of turn
@@ -33,6 +35,7 @@ export function processPassiveEffects(G: GameState, playerID: string) {
   handleSerialFounderChoicePassives(G, playerID);
   handleContentCreator(G, playerID);
   handleBrandBuilderPassives(G, playerID);
+  handleCommunityLeaderPassives(G, playerID);
 
   // Note: DIY Assembly's productCostReduction was part of Solo Hustler logic.
   // It was correctly removed from here as it's handled by getCardDiscount mechanisms.
@@ -149,6 +152,7 @@ export function getCardDiscount(G: GameState, playerID: string, card: Card): num
   totalDiscount += getShoestringBudgetDiscount(G, playerID, player);
   totalDiscount += getCommunityManagerDiscount(player, card);
   totalDiscount += getVisualIdentityDiscount(player, card);
+  totalDiscount += getMerchDropDiscount(G, playerID, card);
   
   return Math.min(Math.max(0, totalDiscount), card.cost); // Ensure discount isn't negative or more than card cost
 }
@@ -166,6 +170,7 @@ export function getCardCostInfo(G: GameState, playerID: string, card: Card): { o
   totalDiscount += getShoestringBudgetDiscount(G, playerID, player);
   totalDiscount += getCommunityManagerDiscount(player, card);
   totalDiscount += getVisualIdentityDiscount(player, card);
+  totalDiscount += getMerchDropDiscount(G, playerID, card);
 
   const effectiveDiscount = Math.min(Math.max(0, totalDiscount), card.cost);
   const finalCost = Math.max(0, card.cost - effectiveDiscount);
