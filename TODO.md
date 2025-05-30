@@ -13,7 +13,7 @@ This file tracks unimplemented features, card effects, and mechanics.
     - Update UI to display Audience.
 - **Cards Affected (Examples - see full list in card data)**:
     - None in current Community Leader deck (removed from latest version)
-    - **Tech Press Feature (Serial Founder)**: "Add 3 Audience. If you control a Product, add 5 instead."
+    - Previously affected Serial Founder cards have been removed
 
 ## II. Incomplete Card Effects & Hero Powers
 
@@ -26,20 +26,6 @@ This file tracks unimplemented features, card effects, and mechanics.
     - **Status**: `passiveEffect`. Needs modal play implementation: choice to play as Action, then choice of a Tool on board to copy its effect.
 - **Zap Everything (Action)**
     - **Status**: Partially implemented. Triggers some simple recurring Tool effects. Needs review to ensure all intended recurring effects are covered and correctly triggered (e.g., `auto_fulfill` condition, `shoestring_budget` interaction).
-
-### Community Leader
-- **All card effects are now implemented** with the following notes:
-    - **Town Hall**: ✅ Fully implemented
-    - **Mutual Aid**: ✅ Fully implemented
-    - **Hype Train**: ✅ Implemented (tracks cards played last turn)
-    - **Mentorship Circle**: ✅ Implemented (draws extra card at start of turn)
-    - **Steady Fans**: ✅ Implemented (gains 1 capital every even turn)
-    - **Shared Spotlight**: ✅ Implemented (draw 2 cards, cost reduction if played 2+ cards)
-    - **Community Manager**: ✅ Implemented (cost reduction handled in discount system)
-    - **Live AMA**: ✅ Fully implemented
-    - **Merch Drop**: ✅ Implemented (cost reduction + inventory boost to first product, TODO: product selection UI)
-    - **Grassroots Launch**: ✅ Fully implemented
-    - **Go Viral (Hero Power)**: ✅ Implemented in heroAbilities.ts
 
 ## III. UI & UX Enhancements
 

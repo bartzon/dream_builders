@@ -106,4 +106,22 @@ export function getMerchDropDiscount(G: GameState, playerID: string, card: Card)
     }
   }
   return 0;
+}
+
+// Discount source: Spin-Off (Serial Founder card)
+// Costs 1 less for each Product you control
+export function getSpinOffDiscount(player: PlayerState, card: Card): number {
+  if (card.effect === 'spin_off') {
+    return player.board.Products.length;
+  }
+  return 0;
+}
+
+// Discount source: Serial Operator (Serial Founder Employee)
+// Your Products cost 1 less
+export function getSerialOperatorDiscount(player: PlayerState, card: Card): number {
+  if (card.type === 'Product' && player.board.Employees.find(e => e.effect === 'serial_operator')) {
+    return 1;
+  }
+  return 0;
 } 

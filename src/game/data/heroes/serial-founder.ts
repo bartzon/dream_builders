@@ -44,12 +44,12 @@ export const serialFounderDeck: Card[] = [
   },
   {
     id: 'sf5',
-    name: 'Tech Press Feature',
+    name: 'Market Surge',
     cost: 2,
     type: 'Action',
-    keywords: ['Brand', 'Audience'],
-    text: 'Add 3 Audience. If you control a Product, add 5 instead.',
-    effect: 'tech_press_feature',
+    keywords: ['Capital', 'Combo'],
+    text: 'If you control a Product, gain 3 capital. Otherwise, draw 2 cards.',
+    effect: 'market_surge',
     flavor: 'Front page. Full inbox.',
   },
   {

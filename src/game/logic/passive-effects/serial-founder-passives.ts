@@ -5,6 +5,20 @@ import { drawCard } from '../utils/deck-helpers'; // Assuming drawCard is what's
 export function handleSerialFounderChoicePassives(G: GameState, playerID: string): void {
   const player = G.players[playerID];
 
+  // Legacy Playbook - draw 1 extra card at the start of your turn
+  const legacyPlaybook = player.board.Tools.find(t => t.effect === 'legacy_playbook');
+  if (legacyPlaybook) {
+    drawCard(player);
+    if(G.gameLog) G.gameLog.push('Legacy Playbook drew an extra card.');
+  }
+
+  // Board of Directors - Recurring: Gain 2 capital
+  const boardOfDirectors = player.board.Tools.find(t => t.effect === 'board_of_directors');
+  if (boardOfDirectors) {
+    player.capital = Math.min(10, player.capital + 2);
+    if(G.gameLog) G.gameLog.push('Board of Directors provided +2 Capital.');
+  }
+
   // Growth Hacking - choose bonus each turn
   const growthHacking = player.board.Tools.find(t => t.effect === 'growth_hacking');
   if (growthHacking && !player.pendingChoice) {

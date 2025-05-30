@@ -23,7 +23,9 @@ import {
   getShoestringBudgetDiscount,
   getCommunityManagerDiscount,
   getVisualIdentityDiscount,
-  getMerchDropDiscount
+  getMerchDropDiscount,
+  getSpinOffDiscount,
+  getSerialOperatorDiscount
 } from './effects/discount-sources';
 
 // Process passive effects at start of turn
@@ -153,6 +155,8 @@ export function getCardDiscount(G: GameState, playerID: string, card: Card): num
   totalDiscount += getCommunityManagerDiscount(player, card);
   totalDiscount += getVisualIdentityDiscount(player, card);
   totalDiscount += getMerchDropDiscount(G, playerID, card);
+  totalDiscount += getSpinOffDiscount(player, card);
+  totalDiscount += getSerialOperatorDiscount(player, card);
   
   return Math.min(Math.max(0, totalDiscount), card.cost); // Ensure discount isn't negative or more than card cost
 }
@@ -171,6 +175,8 @@ export function getCardCostInfo(G: GameState, playerID: string, card: Card): { o
   totalDiscount += getCommunityManagerDiscount(player, card);
   totalDiscount += getVisualIdentityDiscount(player, card);
   totalDiscount += getMerchDropDiscount(G, playerID, card);
+  totalDiscount += getSpinOffDiscount(player, card);
+  totalDiscount += getSerialOperatorDiscount(player, card);
 
   const effectiveDiscount = Math.min(Math.max(0, totalDiscount), card.cost);
   const finalCost = Math.max(0, card.cost - effectiveDiscount);

@@ -31,9 +31,14 @@ export const serialFounderCardEffects: Record<string, (G: GameState, playerID: s
     });
     gainCapital(G, playerID, productCount * 2);
   },
-  // Tech Press Feature: Add 3 Audience. If you control a Product, add 5 instead.
-  'tech_press_feature': (G, playerID) => { // Audience part not implemented
-    drawCards(G, playerID, G.players[playerID].board.Products.length > 0 ? 2 : 1); // Placeholder
+  // Market Surge: If you control a Product, gain 3 capital. Otherwise, draw 2 cards.
+  'market_surge': (G, playerID) => {
+    const player = G.players[playerID];
+    if (player.board.Products.length > 0) {
+      gainCapital(G, playerID, 3);
+    } else {
+      drawCards(G, playerID, 2);
+    }
   },
   // Serial Operator: Your Products cost 1 less.
   'serial_operator': passiveEffect, // Cost reduction handled in getCardDiscount if implemented

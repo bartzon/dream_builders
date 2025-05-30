@@ -19,7 +19,7 @@ export const ChoiceCardDisplay: React.FC<ChoiceCardDisplayProps> = React.memo(({
   isSelected = false,
 }) => {
   const cardTypeColor = CARD_TYPE_COLORS[card.type.toLowerCase()] || COLORS.default;
-  const defaultBoxShadow = CARD_STYLES.boxShadow || '0 2px 4px rgba(0,0,0,0.1)';
+  const defaultBoxShadow = '0 2px 4px rgba(0,0,0,0.1)';
 
   const containerStyle: React.CSSProperties = {
     ...CARD_STYLES,
@@ -69,7 +69,7 @@ export const ChoiceCardDisplay: React.FC<ChoiceCardDisplayProps> = React.memo(({
           {card.name}
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: compact ? '2px' : '4px' }}>
-          <CostDisplay originalCost={card.cost} discount={0} size={compact ? 'tiny' : 'small'} className='text-white' />
+          <CostDisplay originalCost={card.cost} discount={0} size='small' className='text-white' />
           <span style={{ fontSize: compact ? '10px' : FONT_SIZES.small, color: COLORS.textMuted }}>{card.type}</span>
         </div>
         {card.keywords && card.keywords.length > 0 && !compact && (
