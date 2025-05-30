@@ -16,6 +16,7 @@ import { allHeroes } from '../../../../game/data/heroes'
 import { FONT_SIZES, BUTTON_STYLES } from '../../../constants/ui'
 import type { GameState } from '../../../../game/state'
 import type { ClientCard, PendingChoice as ClientPendingChoice, EffectContextUI as ClientEffectContextUI } from '../../../types/game'
+import { HeroDisplay } from './HeroDisplay'
 
 interface GameScreenProps {
   gameState: unknown
@@ -33,10 +34,10 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
   const [affectedCardIds, setAffectedCardIds] = useState<Set<string>>(new Set());
 
   // Use custom hooks
-  const { uiState, effectContext, toolsAndEmployees } = useGameState(G, playerID) as { 
-    uiState: import('../../../types/game').GameUIState; 
+  const { uiState, effectContext, toolsAndEmployees } = useGameState(G, playerID) as {
+    uiState: import('../../../types/game').GameUIState;
     effectContext: ClientEffectContextUI;  // Use aliased client type
-    toolsAndEmployees: ClientCard[]; 
+    toolsAndEmployees: ClientCard[];
   };
   const pendingChoice = uiState.pendingChoice as ClientPendingChoice | undefined; // Cast to client type
   const {
@@ -116,7 +117,7 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
               // console.log(`[GameScreen] Timeout: Removed ${id} from local affectedCardIds. Now:`, Array.from(updated));
               return updated;
             });
-          }, 1500); 
+          }, 1500);
         }
       });
       if (newIdsAdded) {
@@ -202,7 +203,7 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
     let title = 'Make a choice';
 
     // Determine button viability based on effect and game state
-    const getOptionDisabledState = (optionText: string, index: number): boolean => {
+    const getOptionDisabledState = (optionText: string): boolean => {
       if (effect === 'serial_founder_double_down') {
         if (optionText.toLowerCase().includes('add 2 inventory') && uiState.products.length === 0) {
           return true; // Disable if no products to add inventory to
@@ -222,12 +223,12 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
         top: '50%',
         left: '50%',
         transform: 'translate(-50%, -50%)',
-        backgroundColor: 'rgba(30, 41, 59, 0.95)', 
+        backgroundColor: 'rgba(30, 41, 59, 0.95)',
         padding: '30px',
         borderRadius: '12px',
-        border: '2px solid #4f46e5', 
+        border: '2px solid #4f46e5',
         boxShadow: '0 10px 25px rgba(0,0,0,0.5)',
-        zIndex: 2000, 
+        zIndex: 2000,
         textAlign: 'center',
         color: 'white',
         minWidth: '350px',
@@ -240,7 +241,7 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
           gap: '20px'
         }}>
           {options.map((option: string, index: number) => {
-            const isDisabled = getOptionDisabledState(option, index);
+            const isDisabled = getOptionDisabledState(option);
             return (
               <button
                 key={index}
@@ -313,22 +314,16 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
       {/* Main Game Area */}
       <div style={{ display: 'flex', flex: 1, gap: '20px' }}>
 
-        {/* Left - Hero and Controls */}
+        {/* Left - Controls and Game Log */}
+        <div style={{ display: 'flex', flexDirection: 'column', width: '250px', gap: '20px' }}>
         <HeroControls
-          heroName={uiState.hero}
-          heroCost={heroPowerCost}
-          isHeroPowerUsed={uiState.heroAbilityUsed}
-          canUseHeroPower={canUseHeroPower}
           isMyTurn={isMyTurn}
           gameLog={gameLog}
           soldProductThisTurn={effectContext.soldProductThisTurn}
           itemsSoldThisTurn={effectContext.itemsSoldThisTurn}
-          onUseHeroPower={handleUseHeroPower}
           onEndTurn={handleEndTurn}
-          onHeroPowerMouseEnter={showHeroPowerTooltip}
-          onHeroPowerMouseLeave={hideHeroPowerTooltip}
-          onHeroPowerMouseMove={showHeroPowerTooltip}
         />
+        </div>
 
         {/* Center - Game Board */}
         <div style={{
@@ -363,8 +358,22 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
         </div>
       </div>
 
-      {/* Hand */}
-      <div style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+      {/* Bottom Row - Hero Display and Hand */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginTop: '20px' }}>
+        {/* Hero Display - Bottom Left */}
+        <HeroDisplay
+          hero={currentHero}
+          heroCost={heroPowerCost}
+          isHeroPowerUsed={uiState.heroAbilityUsed}
+          canUseHeroPower={canUseHeroPower}
+          onUseHeroPower={handleUseHeroPower}
+          onHeroPowerMouseEnter={showHeroPowerTooltip}
+          onHeroPowerMouseLeave={hideHeroPowerTooltip}
+          onHeroPowerMouseMove={showHeroPowerTooltip}
+        />
+
+        {/* Player Hand - Centered at Bottom */}
+        <div style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
         <PlayerHand
           hand={uiState.hand}
           pendingChoiceType={pendingChoice?.type}
@@ -379,6 +388,10 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
           onShowTooltip={showCardTooltip}
           onHideTooltip={hideCardTooltip}
         />
+        </div>
+
+        {/* Empty div for spacing, to keep hand centered if hero display takes space */}
+        <div style={{ width: '250px' }} />
       </div>
 
       {renderOptionChoiceModal()} {/* Render the modal if choice is active */}

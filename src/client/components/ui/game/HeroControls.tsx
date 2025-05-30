@@ -1,37 +1,21 @@
 import React from 'react'
-import { FONT_SIZES, BUTTON_STYLES } from '../../../constants/ui'
+import { BUTTON_STYLES } from '../../../constants/ui'
 import { GameLog } from './GameLog'
 
 interface HeroControlsProps {
-  heroName: string
-  heroCost: number
-  isHeroPowerUsed: boolean
-  canUseHeroPower: boolean
   isMyTurn: boolean
   gameLog: string[]
   soldProductThisTurn: boolean
   itemsSoldThisTurn: number
-  onUseHeroPower: () => void
   onEndTurn: () => void
-  onHeroPowerMouseEnter: (e: React.MouseEvent) => void
-  onHeroPowerMouseLeave: () => void
-  onHeroPowerMouseMove: (e: React.MouseEvent) => void
 }
 
 export const HeroControls = React.memo(({
-  heroName,
-  heroCost,
-  isHeroPowerUsed,
-  canUseHeroPower,
   isMyTurn,
   gameLog,
   soldProductThisTurn,
   itemsSoldThisTurn,
-  onUseHeroPower,
-  onEndTurn,
-  onHeroPowerMouseEnter,
-  onHeroPowerMouseLeave,
-  onHeroPowerMouseMove
+  onEndTurn
 }: HeroControlsProps) => {
   return (
     <div style={{
@@ -43,24 +27,6 @@ export const HeroControls = React.memo(({
       flexDirection: 'column',
       gap: '10px'
     }}>
-      <h3 style={{ margin: 0, fontSize: FONT_SIZES.subheading }}>Hero: {heroName}</h3>
-      
-      <button
-        onClick={onUseHeroPower}
-        disabled={!canUseHeroPower}
-        onMouseEnter={onHeroPowerMouseEnter}
-        onMouseLeave={onHeroPowerMouseLeave}
-        onMouseMove={onHeroPowerMouseMove}
-        style={{
-          ...BUTTON_STYLES,
-          backgroundColor: canUseHeroPower ? '#4f46e5' : '#666',
-          color: 'white',
-          cursor: canUseHeroPower ? 'pointer' : 'not-allowed'
-        }}
-      >
-        Hero Power ({heroCost}) {isHeroPowerUsed ? '(Used)' : ''}
-      </button>
-
       <button
         onClick={onEndTurn}
         disabled={!isMyTurn}
@@ -74,7 +40,7 @@ export const HeroControls = React.memo(({
         End Turn
       </button>
 
-      <GameLog 
+      <GameLog
         logs={gameLog}
         soldProductThisTurn={soldProductThisTurn}
         itemsSoldThisTurn={itemsSoldThisTurn}
@@ -82,4 +48,4 @@ export const HeroControls = React.memo(({
       />
     </div>
   )
-}) 
+})
