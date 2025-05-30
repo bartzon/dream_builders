@@ -66,7 +66,6 @@ export interface EffectContextUI {
   cardsPlayedThisTurn?: number
   lastActionEffect?: string
   lastActionCard?: ClientCard
-  firstCardDiscountUsed?: boolean
   productRevenueBoosts?: Record<string, number>
   delayedInventoryBoostTurns?: number
   soloHustlerDiscountedCard?: string

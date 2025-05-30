@@ -53,7 +53,7 @@ export function useCardDiscount(
     
     // Solo Hustler - Shoestring Budget effect (first card each turn costs 1 less)
     const shoestringBudget = tools.find(t => t.effect === 'shoestring_budget')
-    if (shoestringBudget && !effectContext.firstCardDiscountUsed) {
+    if (shoestringBudget && (!effectContext.cardsPlayedThisTurn || effectContext.cardsPlayedThisTurn === 0)) {
       discount += 1
     }
     

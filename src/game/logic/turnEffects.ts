@@ -319,10 +319,8 @@ export function getCardDiscount(G: GameState, playerID: string, card: Card): num
   
   // Solo Hustler - Shoestring Budget effect (first card each turn costs 1 less)
   const shoestringBudget = player.board.Tools.find(t => t.effect === 'shoestring_budget');
-  if (shoestringBudget && G.effectContext?.[playerID] && !G.effectContext[playerID].firstCardDiscountUsed) {
+  if (shoestringBudget && G.effectContext?.[playerID] && (!G.effectContext[playerID].cardsPlayedThisTurn || G.effectContext[playerID].cardsPlayedThisTurn === 0)) {
     discount += 1;
-    // Mark that the first card discount has been used this turn
-    G.effectContext[playerID].firstCardDiscountUsed = true;
   }
   
   return Math.min(discount, card.cost); // Can't reduce below 0
@@ -382,9 +380,8 @@ export function getCardCostInfo(G: GameState, playerID: string, card: Card): { o
   
   // Solo Hustler - Shoestring Budget effect (first card each turn costs 1 less)
   const shoestringBudget = player.board.Tools.find(t => t.effect === 'shoestring_budget');
-  if (shoestringBudget && G.effectContext?.[playerID] && !G.effectContext[playerID].firstCardDiscountUsed) {
+  if (shoestringBudget && G.effectContext?.[playerID] && (!G.effectContext[playerID].cardsPlayedThisTurn || G.effectContext[playerID].cardsPlayedThisTurn === 0)) {
     discount += 1;
-    // Note: Don't modify firstCardDiscountUsed here since this is read-only for UI
   }
   
   const effectiveDiscount = Math.min(Math.max(0, discount), card.cost); // Can't reduce below 0 or be negative

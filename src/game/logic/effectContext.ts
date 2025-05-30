@@ -58,9 +58,6 @@ export interface EffectContext {
   lastActionEffect?: string;
   lastActionCard?: Card; // Store the actual card for context
   
-  // Shoestring Budget tracking
-  firstCardDiscountUsed?: boolean;
-  
   // Inventory Support tracking
   delayedInventoryBoostTurns?: number;
   
@@ -103,7 +100,6 @@ export function initEffectContext(): EffectContext {
     fastPivotProductDestroyPending: false,
     lastActionEffect: undefined,
     lastActionCard: undefined,
-    firstCardDiscountUsed: false,
     delayedInventoryBoostTurns: 0,
     soloHustlerDiscountedCard: undefined,
   };
@@ -153,7 +149,6 @@ export function clearTempEffects(G: GameState, playerID: string) {
     ctx.fastPivotProductDestroyPending = false;
     ctx.lastActionEffect = undefined;
     ctx.lastActionCard = undefined;
-    ctx.firstCardDiscountUsed = false;
     ctx.delayedInventoryBoostTurns = 0;
     ctx.soloHustlerDiscountedCard = undefined;
   }

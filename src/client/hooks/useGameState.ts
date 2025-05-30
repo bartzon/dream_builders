@@ -33,7 +33,6 @@ export function useGameState(
     cardsPlayedThisTurn: effectContextRaw.cardsPlayedThisTurn as number | undefined,
     lastActionEffect: effectContextRaw.lastActionEffect as string | undefined,
     lastActionCard: effectContextRaw.lastActionCard as ClientCard | undefined,
-    firstCardDiscountUsed: effectContextRaw.firstCardDiscountUsed as boolean | undefined,
     productRevenueBoosts: effectContextRaw.productRevenueBoosts as Record<string, number> | undefined,
     delayedInventoryBoostTurns: effectContextRaw.delayedInventoryBoostTurns as number | undefined,
     soloHustlerDiscountedCard: effectContextRaw.soloHustlerDiscountedCard as string | undefined,

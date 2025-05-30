@@ -177,6 +177,7 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
         deckSize={uiState.deck.length}
         revenue={uiState.revenue}
         effectContext={effectContext}
+        hasShoestringBudget={toolsAndEmployees.some(card => card.effect === 'shoestring_budget')}
       />
 
       {/* Main Game Area */}

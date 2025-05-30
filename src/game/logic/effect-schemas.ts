@@ -11,7 +11,6 @@ export const BaseEffectContextSchema = z.object({
   // Discounts and modifiers
   nextCardDiscount: z.number().default(0),
   productCostReduction: z.number().default(0),
-  firstCardDiscountUsed: z.boolean().default(false),
   
   // Pending effects
   midnightOilDiscardPending: z.boolean().default(false),
@@ -40,7 +39,6 @@ export function resetTurnEffects(context: EffectContext): EffectContext {
     lastActionCard: undefined,
     nextCardDiscount: 0,
     productCostReduction: 0,
-    firstCardDiscountUsed: false,
     midnightOilDiscardPending: false,
     fastPivotProductDestroyPending: false,
     nextProductDiscount: 0,

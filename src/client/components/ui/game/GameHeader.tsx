@@ -9,6 +9,7 @@ interface GameHeaderProps {
   deckSize: number
   revenue: number
   effectContext?: EffectContextUI
+  hasShoestringBudget?: boolean
 }
 
 export const GameHeader = React.memo(({
@@ -17,7 +18,8 @@ export const GameHeader = React.memo(({
   turn,
   deckSize,
   revenue,
-  effectContext
+  effectContext,
+  hasShoestringBudget
 }: GameHeaderProps) => {
   const revenueProgress = (revenue / REVENUE_GOAL) * 100;
   
@@ -64,6 +66,15 @@ export const GameHeader = React.memo(({
             marginTop: '5px'
           }}>
             📦 +1 inventory in {effectContext.delayedInventoryBoostTurns} turn{effectContext.delayedInventoryBoostTurns > 1 ? 's' : ''}
+          </div>
+        )}
+        {hasShoestringBudget && (!effectContext?.cardsPlayedThisTurn || effectContext.cardsPlayedThisTurn === 0) && (
+          <div style={{ 
+            fontSize: FONT_SIZES.small, 
+            color: '#fbbf24',
+            marginTop: '5px'
+          }}>
+            💰 First card -1 cost
           </div>
         )}
       </div>

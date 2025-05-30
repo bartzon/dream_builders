@@ -87,7 +87,6 @@ export function DebugPanel({ gameState, playerID }: DebugPanelProps) {
       
       // Cost reductions
       nextCardDiscount: effectContext.nextCardDiscount,
-      firstCardDiscountUsed: effectContext.firstCardDiscountUsed,
       productCostReduction: effectContext.productCostReduction,
       
       // Revenue bonuses
