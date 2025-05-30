@@ -108,6 +108,7 @@ export const communityLeaderHero: Hero = {
   id: 'community_leader',
   name: 'The Community Leader',
   color: 'Green',
+  image: 'src/assets/heroes/community_leader.png',
   starterDeck: communityLeaderDeck,
   flavorText: 'Uses social media and content creation to drive engagement.',
   playstyle: 'High variance, explosive combo turns with viral momentum.',
@@ -117,4 +118,4 @@ export const communityLeaderHero: Hero = {
     cost: 1,
     effect: 'community_leader_viral',
   },
-}; 
+};

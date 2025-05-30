@@ -44,13 +44,13 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
   // Get hero data from the single source of truth
   const currentHero = allHeroes.find(h => h.id === uiState.hero)
   const heroPowerCost = currentHero?.heroPower.cost || 2
-  const heroPowerInfo = currentHero?.heroPower || { 
-    name: 'Hero Power', 
-    description: 'Use your hero\'s special ability' 
+  const heroPowerInfo = currentHero?.heroPower || {
+    name: 'Hero Power',
+    description: 'Use your hero\'s special ability'
   }
 
   // Extract derived state
-  const canUseHeroPower = isMyTurn && !uiState.heroAbilityUsed && 
+  const canUseHeroPower = isMyTurn && !uiState.heroAbilityUsed &&
     uiState.capital >= heroPowerCost
 
   // Automatic cha-ching sound when revenue increases
@@ -74,9 +74,9 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
         moves.triggerMidnightOilDiscard?.()
         setGameLog(prev => [`Ready to discard...`, ...prev.slice(0, 4)])
       }, 1500)
-      
+
       setGameLog(prev => [`Drew 3 cards from Midnight Oil!`, ...prev.slice(0, 4)])
-      
+
       return () => clearTimeout(timer)
     }
   }, [effectContext.midnightOilDiscardPending, isMyTurn, moves])
@@ -94,14 +94,14 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
     if (!isMyTurn) return
     hideCardTooltip()
     const card = uiState.hand[cardIndex]
-    
+
     // Add specific messages for cards with delayed effects
     if (card?.effect === 'delayed_inventory_boost') {
       setGameLog(prev => [`Playing ${card?.name} - Will add inventory for 2 turns!`, ...prev.slice(0, 4)])
     } else {
       setGameLog(prev => [`Playing ${card?.name}...`, ...prev.slice(0, 4)])
     }
-    
+
     moves.playCard?.(cardIndex)
   }, [moves, uiState.hand, isMyTurn, hideCardTooltip])
 
@@ -117,11 +117,11 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
   const handleUseHeroPower = useCallback(() => {
     if (!canUseHeroPower) return
     hideHeroPowerTooltip()
-    
+
     const hasProductsToBoost = uiState.hero === 'brand_builder' && uiState.products.length > 0
-    const hasProductsToRefresh = uiState.hero === 'serial_founder' && 
+    const hasProductsToRefresh = uiState.hero === 'serial_founder' &&
       uiState.products.some(p => !p.isActive && p.inventory !== undefined && p.inventory > 0)
-    
+
     if (hasProductsToBoost || hasProductsToRefresh) {
       moves.useHeroAbility?.(uiState.hero)
     } else {
@@ -133,7 +133,7 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
   const handleMakeChoice = useCallback((choiceIndex: number) => {
     if (!isMyTurn || !uiState.pendingChoice) return
     hideCardTooltip()
-    
+
     if (uiState.pendingChoice.type === 'discard') {
       const discardedCard = uiState.hand[choiceIndex]
       setGameLog(prev => [`Discarding ${discardedCard?.name}...`, ...prev.slice(0, 4)])
@@ -145,7 +145,7 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
       const effectName = uiState.pendingChoice.effect?.replace(/_/g, ' ') || 'inventory effect'
       setGameLog(prev => [`Applying ${effectName} to ${chosenCard?.name || 'product'}...`, ...prev.slice(0, 4)])
     }
-    
+
     moves.makeChoice?.(choiceIndex)
   }, [moves, uiState.hand, uiState.pendingChoice, isMyTurn, hideCardTooltip])
 
@@ -153,36 +153,44 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
     <div style={{
       width: '100vw',
       height: '100vh',
-      background: 'linear-gradient(to bottom, #1e293b, #0f172a)',
+      background: 'radial-gradient(ellipse at top, #3b2a4f, #1a1a2e 70%)',
       color: 'white',
       padding: '20px',
       display: 'flex',
       flexDirection: 'column',
-      fontFamily: 'Arial, sans-serif'
+      fontFamily: '"Inter", "ShopifySans", "Helvetica Neue", "sans-serif"'
     }}>
       {/* Tooltips */}
       <CardTooltip {...cardTooltip} />
-      <HeroPowerTooltip 
-        {...heroPowerTooltip} 
+      <HeroPowerTooltip
+        {...heroPowerTooltip}
         heroPowerName={heroPowerInfo.name}
         heroPowerDescription={heroPowerInfo.description}
         cost={heroPowerCost}
       />
 
       {/* Header */}
-      <GameHeader 
-        heroName={uiState.hero}
-        capital={uiState.capital}
-        turn={uiState.turn}
-        deckSize={uiState.deck.length}
-        revenue={uiState.revenue}
-        effectContext={effectContext}
-        hasShoestringBudget={toolsAndEmployees.some(card => card.effect === 'shoestring_budget')}
-      />
+      <div style={{
+        background: 'rgba(0,0,0,0.2)',
+        padding: '15px',
+        borderRadius: '8px',
+        boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+        marginBottom: '20px'
+      }}>
+        <GameHeader
+          heroName={uiState.hero}
+          capital={uiState.capital}
+          turn={uiState.turn}
+          deckSize={uiState.deck.length}
+          revenue={uiState.revenue}
+          effectContext={effectContext}
+          hasShoestringBudget={toolsAndEmployees.some(card => card.effect === 'shoestring_budget')}
+        />
+      </div>
 
       {/* Main Game Area */}
       <div style={{ display: 'flex', flex: 1, gap: '20px' }}>
-        
+
         {/* Left - Hero and Controls */}
         <HeroControls
           heroName={uiState.hero}
@@ -203,11 +211,13 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
         {/* Center - Game Board */}
         <div style={{
           flex: 1,
-          background: 'rgba(0,0,0,0.1)',
+          background: 'rgba(40, 30, 60, 0.5)',
           borderRadius: '10px',
           padding: '20px',
           display: 'flex',
-          flexDirection: 'column'
+          flexDirection: 'column',
+          border: '1px solid rgba(120, 80, 190, 0.7)',
+          boxShadow: 'inset 0 0 15px rgba(0,0,0,0.5)'
         }}>
           {/* Tools & Employees */}
           <ToolsAndEmployees
@@ -216,7 +226,7 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
             onShowTooltip={showCardTooltip}
             onHideTooltip={hideCardTooltip}
           />
-          
+
           {/* Products */}
           <ProductsSection
             products={uiState.products}
@@ -248,4 +258,4 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
       <DebugPanel gameState={G as GameState} playerID={playerID} />
     </div>
   )
-} 
+}

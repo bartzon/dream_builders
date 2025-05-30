@@ -108,6 +108,7 @@ export const automationArchitectHero: Hero = {
   id: 'automation_architect',
   name: 'The Automation Architect',
   color: 'Blue',
+  image: 'src/assets/heroes/automation_architect.png',
   starterDeck: automationArchitectDeck,
   flavorText: 'A technical founder building tools that run the business for them.',
   playstyle: 'Builds an engine of passive income over time.',
@@ -117,4 +118,4 @@ export const automationArchitectHero: Hero = {
     cost: 2,
     effect: 'automation_architect_deploy',
   },
-}; 
+};

@@ -108,6 +108,7 @@ export const soloHustlerHero: Hero = {
   id: 'solo_hustler',
   name: 'The Solo Hustler',
   color: 'Red',
+  image: 'src/assets/heroes/solo_hustler.png',
   starterDeck: soloHustlerDeck,
   flavorText: 'A first-time merchant juggling everything from design to fulfillment.',
   playstyle: 'Fast and scrappy, focused on card draw and early tempo.',
@@ -117,4 +118,4 @@ export const soloHustlerHero: Hero = {
     cost: 1,
     effect: 'solo_hustler_grind',
   },
-}; 
+};

@@ -16,6 +16,7 @@ export interface Hero extends HeroClass {
   heroPower: HeroPower;
   flavorText: string;
   playstyle: string;
+  image: string;
 }
 
 // Export all heroes as an array for convenience
@@ -25,4 +26,4 @@ export const allHeroes: Hero[] = [
   automationArchitectHero,
   communityLeaderHero,
   serialFounderHero,
-]; 
+];

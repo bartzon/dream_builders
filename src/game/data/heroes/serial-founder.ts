@@ -108,6 +108,7 @@ export const serialFounderHero: Hero = {
   id: 'serial_founder',
   name: 'The Serial Founder',
   color: 'Black',
+  image: 'src/assets/heroes/serial_founder.png',
   starterDeck: serialFounderDeck,
   flavorText: 'Veteran merchant running multiple stores and growth strategies.',
   playstyle: 'Balanced and flexible with a powerful mid-game.',
@@ -117,4 +118,4 @@ export const serialFounderHero: Hero = {
     cost: 2,
     effect: 'serial_founder_double_down',
   },
-}; 
+};

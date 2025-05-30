@@ -108,6 +108,7 @@ export const brandBuilderHero: Hero = {
   id: 'brand_builder',
   name: 'The Brand Builder',
   color: 'White',
+  image: 'src/assets/heroes/brand_builder.png',
   starterDeck: brandBuilderDeck,
   flavorText: 'Believes in design, storytelling, and long-term community.',
   playstyle: 'Synergy-focused, slow burn with strong product support.',
@@ -117,4 +118,4 @@ export const brandBuilderHero: Hero = {
     cost: 2,
     effect: 'brand_builder_engage',
   },
-}; 
+};
