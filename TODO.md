@@ -63,9 +63,6 @@ This file tracks unimplemented features, card effects, and mechanics.
     - **Status**: `passiveEffect`. Cost reduction logic for Tools and Actions needs to be added to `getCardDiscount` based on this card being in play.
 
 ### Serial Founder
-- **Hero Power: Double Down**
-    - **Text**: "Choose one: draw a card OR add 2 inventory to a Product."
-    - **Status**: ✅ **Implemented** (Logic for two-step choice and effects are in place. UI for the initial 'choose_option' modal is a basic sketch; product selection uses existing UI. Specific styling for the option modal can be a UI enhancement task).
 - **Advisory Board (Tool)**
     - **Text**: "Whenever you play a Product, draw 1 card."
     - **Status**: Current effect in `serial-founder-effects.ts` draws based on counts of Products, Tools, and Employees *on the board*, not when a Product is played. Needs to be moved to `handleCardPlayEffects` in `turnEffects.ts` to trigger when a Product card is played.
