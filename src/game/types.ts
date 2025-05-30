@@ -1,4 +1,4 @@
-export type CardType = 'Product' | 'Tool' | 'Action' | 'Employee' | 'Effect';
+export type CardType = 'Product' | 'Tool' | 'Action' | 'Employee';
 
 export type Keyword = 'Recurring' | 'Fulfill' | 'Overhead' | 'Automate' | 'Synergy';
 
