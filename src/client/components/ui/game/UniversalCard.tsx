@@ -15,6 +15,7 @@ interface UniversalCardProps {
   isAffected?: boolean;
   costInfo?: { originalCost: number; discount: number; finalCost: number };
   showBonuses?: boolean;
+  forceShowArt?: boolean;
   onMouseEnterCard?: (e: React.MouseEvent) => void;
   onMouseLeaveCard?: (e: React.MouseEvent) => void;
   onMouseMoveCard?: (e: React.MouseEvent) => void;
@@ -30,6 +31,7 @@ export const UniversalCard: React.FC<UniversalCardProps> = React.memo(({
   isAffected = false,
   costInfo,
   showBonuses = true,
+  forceShowArt = false,
   onMouseEnterCard,
   onMouseLeaveCard,
   onMouseMoveCard,
@@ -54,8 +56,8 @@ export const UniversalCard: React.FC<UniversalCardProps> = React.memo(({
 
   const containerStyle: React.CSSProperties = {
     ...CARD_STYLES,
-    width: '170px',
-    height: '280px',
+    width: displayMode === 'tooltip' ? '150px' : '170px',
+    height: displayMode === 'tooltip' ? '220px' : '280px',
     padding: '0',
     background: COLORS.bgDark,
     border: `3px solid ${showPlayableBorder ? COLORS.success : (isSelected ? COLORS.warning : (isAffected ? COLORS.warningLight : COLORS.bgLight))}`,
@@ -105,7 +107,7 @@ export const UniversalCard: React.FC<UniversalCardProps> = React.memo(({
   };
 
   const artPlaceholderStyle: React.CSSProperties = {
-    height: isCompact ? '50px' : '100px',
+    height: isCompact && !forceShowArt ? '50px' : (displayMode === 'tooltip' ? '120px' : '100px'),
     background: COLORS.bgMedium,
     margin: '10px',
     borderRadius: '6px',
@@ -162,7 +164,7 @@ export const UniversalCard: React.FC<UniversalCardProps> = React.memo(({
         )}
       </div>
 
-      {!isCompact && (
+      {(forceShowArt || !isCompact) && (
         <div style={artPlaceholderStyle}>
           {artworkSrc ? (
             <img src={artworkSrc} alt={`${card.name} artwork`} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '6px' }} />

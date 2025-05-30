@@ -1,6 +1,7 @@
 import React from 'react'
 import { FONT_SIZES, CARD_TYPE_COLORS } from '../../../constants/ui'
 import type { ClientCard } from '../../../types/game'
+import { UniversalCard } from './UniversalCard'
 
 interface CardTooltipProps {
   card?: ClientCard
@@ -29,29 +30,37 @@ export const CardTooltip = React.memo(({ card, visible, x, y }: CardTooltipProps
         maxWidth: '300px',
         zIndex: 1000,
         boxShadow: '0 10px 25px rgba(0,0,0,0.5)',
-        pointerEvents: 'none'
+        pointerEvents: 'none',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '8px'
       }}
     >
+      {/* Card Artwork */}
+      <div style={{ alignSelf: 'center', marginBottom: '8px' }}>
+        <UniversalCard card={card} displayMode="tooltip" forceShowArt={true} />
+      </div>
+
       {/* Header */}
-      <div style={{ 
-        borderBottom: '1px solid #374151', 
-        paddingBottom: '8px', 
-        marginBottom: '8px' 
+      <div style={{
+        borderBottom: '1px solid #374151',
+        paddingBottom: '8px',
+        marginBottom: '8px'
       }}>
-        <div style={{ 
-          fontWeight: 'bold', 
+        <div style={{
+          fontWeight: 'bold',
           fontSize: FONT_SIZES.tooltipTitle,
           color: '#f8fafc'
         }}>
           {card.name}
         </div>
-        <div style={{ 
-          display: 'flex', 
+        <div style={{
+          display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
           marginTop: '4px'
         }}>
-          <span style={{ 
+          <span style={{
             background: typeColor,
             color: 'white',
             padding: '2px 6px',
@@ -61,7 +70,7 @@ export const CardTooltip = React.memo(({ card, visible, x, y }: CardTooltipProps
           }}>
             {card.type}
           </span>
-          <span style={{ 
+          <span style={{
             background: '#fbbf24',
             color: '#000',
             padding: '2px 6px',
@@ -96,7 +105,7 @@ export const CardTooltip = React.memo(({ card, visible, x, y }: CardTooltipProps
 
       {/* Description */}
       {card.text && (
-        <div style={{ 
+        <div style={{
           marginBottom: '8px',
           lineHeight: '1.4',
           color: '#e2e8f0'
@@ -141,7 +150,7 @@ export const CardTooltip = React.memo(({ card, visible, x, y }: CardTooltipProps
 
       {/* Synergy Condition */}
       {card.synergyCondition && (
-        <div style={{ 
+        <div style={{
           marginTop: '8px',
           padding: '6px',
           background: 'rgba(139, 92, 246, 0.2)',
@@ -155,7 +164,7 @@ export const CardTooltip = React.memo(({ card, visible, x, y }: CardTooltipProps
 
       {/* Flavor Text - Always at the bottom */}
       {card.flavor && (
-        <div style={{ 
+        <div style={{
           marginTop: '12px',
           paddingTop: '8px',
           borderTop: '1px solid #374151',
@@ -169,4 +178,4 @@ export const CardTooltip = React.memo(({ card, visible, x, y }: CardTooltipProps
       )}
     </div>
   )
-}) 
+})
