@@ -66,6 +66,7 @@ export interface EffectContext {
   
   // Multi-selection tracking
   warehouseExpansionCount?: number; // Track how many products selected for Warehouse Expansion
+  lastAffectedBoardCardId?: string | null; // ID of the last board card affected by a choice
 }
 
 // Initialize effect context for each player
@@ -106,6 +107,7 @@ export function initEffectContext(): EffectContext {
     delayedInventoryBoostTurns: 0,
     soloHustlerDiscountedCard: undefined,
     warehouseExpansionCount: 0,
+    lastAffectedBoardCardId: null,
   };
 }
 
@@ -156,5 +158,6 @@ export function clearTempEffects(G: GameState, playerID: string) {
     ctx.delayedInventoryBoostTurns = 0;
     ctx.soloHustlerDiscountedCard = undefined;
     ctx.warehouseExpansionCount = 0;
+    ctx.lastAffectedBoardCardId = null;
   }
 } 
