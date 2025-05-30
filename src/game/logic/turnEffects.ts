@@ -91,6 +91,12 @@ export function processPassiveEffects(G: GameState, playerID: string) {
     player.capital = Math.min(10, player.capital + 1);
   }
   
+  // Email Automation - gain 1 capital each turn
+  const emailAutomation = player.board.Tools.find(t => t.effect === 'email_automation');
+  if (emailAutomation) {
+    player.capital = Math.min(10, player.capital + 1);
+  }
+  
   // Machine Learning Model - gain capital equal to number of Tools
   const mlModel = player.board.Tools.find(t => t.effect === 'ml_model');
   if (mlModel) {
