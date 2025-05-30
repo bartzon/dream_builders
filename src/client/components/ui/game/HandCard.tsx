@@ -15,9 +15,9 @@ interface HandCardProps {
     finalCost: number
   }
   onCardClick: () => void
-  onMouseEnter: (e: React.MouseEvent) => void
-  onMouseLeave: () => void
-  onMouseMove: (e: React.MouseEvent) => void
+  onMouseEnter?: (e: React.MouseEvent) => void
+  onMouseLeave?: () => void
+  onMouseMove?: (e: React.MouseEvent) => void
 }
 
 export const HandCard = React.memo(({
@@ -32,7 +32,7 @@ export const HandCard = React.memo(({
   onMouseMove
 }: HandCardProps) => {
   const canInteract = isDiscardMode || canPlay
-  
+
   // Base styles for the card
   const baseCardStyle: React.CSSProperties = {
     ...CARD_STYLES,
@@ -66,7 +66,7 @@ export const HandCard = React.memo(({
     cursor: 'not-allowed',
     boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
   }
-  
+
   // Check for cost discounts to display
   const bonuses: BonusInfo[] = []
   if (costInfo.discount > 0) {
@@ -92,14 +92,14 @@ export const HandCard = React.memo(({
         >
           <BonusIndicator bonuses={bonuses} position="top-right" />
           <div style={{ textAlign: 'center', fontWeight: 'bold', fontSize: FONT_SIZES.medium, marginBottom: '5px' }}>{card.name || 'Card'}</div>
-          
+
           {/* Placeholder for image/icon - Shopify/Ecommerce themed */}
-          <div style={{ 
-            flexGrow: 1, 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center', 
-            background: 'rgba(255,255,255,0.1)', 
+          <div style={{
+            flexGrow: 1,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: 'rgba(255,255,255,0.1)',
             borderRadius: '5px',
             margin: '5px 0',
             minHeight: '60px', // Ensure space for potential image
@@ -110,7 +110,7 @@ export const HandCard = React.memo(({
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '5px' }}>
             <div style={{ fontSize: FONT_SIZES.small }}>{card.type || 'Unknown'}</div>
-            <CostDisplay 
+            <CostDisplay
               originalCost={costInfo.originalCost}
               discount={costInfo.discount}
               size="small"
@@ -136,12 +136,12 @@ export const HandCard = React.memo(({
       <div style={{ textAlign: 'center', fontWeight: 'bold', fontSize: FONT_SIZES.medium, marginBottom: '5px' }}>{card.name || 'Card'}</div>
 
       {/* Placeholder for image/icon - Shopify/Ecommerce themed */}
-      <div style={{ 
-        flexGrow: 1, 
-        display: 'flex', 
-        alignItems: 'center', 
-        justifyContent: 'center', 
-        background: 'rgba(255,255,255,0.15)', 
+      <div style={{
+        flexGrow: 1,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'rgba(255,255,255,0.15)',
         borderRadius: '5px',
         margin: '5px 0',
         minHeight: '60px', // Ensure space for potential image
@@ -149,17 +149,17 @@ export const HandCard = React.memo(({
         {/* <img src="/path/to/ecommerce-icon.svg" alt={card.name} style={{width: '80%', height: '80%', objectFit: 'contain'}} /> */}
         <span style={{fontSize: FONT_SIZES.small, color: 'white'}}>Ecommerce Icon</span>
       </div>
-      
+
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '5px' }}>
         <div style={{ fontSize: FONT_SIZES.small }}>{card.type || 'Unknown'}</div>
-        <CostDisplay 
+        <CostDisplay
           originalCost={costInfo.originalCost}
           discount={costInfo.discount}
           size="small"
           className="text-white"
         />
       </div>
-      
+
       {isDiscardMode && (
         <div style={{
           position: 'absolute',
@@ -179,4 +179,4 @@ export const HandCard = React.memo(({
       )}
     </button>
   )
-}) 
+})
