@@ -23,7 +23,7 @@ export interface PlayerState {
   capital: number;
   hero: "Marketer" | "Developer" | "Operator" | "Visionary" | "solo_hustler" | "brand_builder" | "automation_architect" | "community_leader" | "serial_founder";
   heroAbilityUsed: boolean;
-  pendingChoice?: PendingChoice;
+  pendingChoices: PendingChoice[];
 }
 
 export interface GameState {

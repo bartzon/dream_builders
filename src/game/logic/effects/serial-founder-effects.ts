@@ -8,6 +8,7 @@ import {
 import {
   sellProduct,
 } from '../utils/sales-helpers';
+import { addPendingChoice } from '../utils/choice-helpers';
 
 const passiveEffect = () => {};
 
@@ -57,14 +58,28 @@ export const serialFounderCardEffects: Record<string, (G: GameState, playerID: s
     const sellableProducts = player.board.Products.filter(p => p.isActive !== false && p.inventory && p.inventory > 0);
 
     if (sellableProducts.length > 0) {
-      player.pendingChoice = {
+      addPendingChoice(player, {
         type: 'choose_card',
         effect: 'black_friday_blitz_sell_product',
         cards: sellableProducts.map(p => ({ ...p })),
         sourceCard: card ? { ...card } : undefined,
-      };
+      });
     } else {
       if (G.gameLog) G.gameLog.push('Black Friday Blitz: No products available to sell.');
+    }
+  },
+  // Fast Pivot: Destroy a Product. Draw 2 cards and discount next Product by 2.
+  'fast_pivot': (G, playerID) => {
+    const player = G.players[playerID];
+    const products = player.board.Products.filter(p => p.isActive !== false);
+    if (products.length > 0) {
+      addPendingChoice(player, {
+        type: 'destroy_product',
+        effect: 'fast_pivot',
+        cards: products.map(p => ({ ...p })),
+      });
+    } else {
+      if (G.gameLog) G.gameLog.push('Fast Pivot: No products to destroy.');
     }
   },
 }; 

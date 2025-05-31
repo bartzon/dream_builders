@@ -22,6 +22,7 @@ export function initializePlayer(
     capital: 0, // Initial capital is typically set in game.setup after this
     hero,
     heroAbilityUsed: false,
+    pendingChoices: [], // Initialize empty pending choices queue
   };
   
   // Shuffle deck

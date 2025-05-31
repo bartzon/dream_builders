@@ -14,7 +14,7 @@ import { useTooltip } from '../../../hooks/useTooltip'
 import { useCardDiscount } from '../../../hooks/useCardDiscount'
 import { allHeroes } from '../../../../game/data/heroes'
 import type { GameState } from '../../../../game/state'
-import type { ClientCard, PendingChoice as ClientPendingChoice, EffectContextUI as ClientEffectContextUI } from '../../../types/game'
+import type { PendingChoice as ClientPendingChoice } from '../../../types/game'
 import { HeroDisplay } from './HeroDisplay'
 import { ChoiceModal } from './ChoiceModal'
 import { BUTTON_STYLES, FONT_SIZES } from "../../../constants/ui"
@@ -37,12 +37,11 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
   const [showCredits, setShowCredits] = useState(false)
 
   // Use custom hooks
-  const { uiState, effectContext, toolsAndEmployees } = useGameState(G, playerID) as {
-    uiState: import('../../../types/game').GameUIState;
-    effectContext: ClientEffectContextUI;  // Use aliased client type
-    toolsAndEmployees: ClientCard[];
-  };
-  const pendingChoice = uiState.pendingChoice as ClientPendingChoice | undefined; // Cast to client type
+  const { uiState, effectContext, toolsAndEmployees } = useGameState(G, playerID)
+  
+  // Get the current pending choice (first in queue)
+  const pendingChoice = uiState.pendingChoices[0] as ClientPendingChoice | undefined
+  
   const {
     cardTooltip,
     heroPowerTooltip,

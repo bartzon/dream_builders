@@ -24,3 +24,13 @@ export * from './utils/effect-helpers';
 export * from './utils/inventory-helpers';
 export * from './utils/choice-helpers';
 export * from './utils/sales-helpers'; // This also exports sellProduct and sellFirstAvailableProduct 
+
+// Export choice helpers
+export { 
+  createProductChoice,
+  addPendingChoice,
+  getCurrentPendingChoice,
+  resolveCurrentPendingChoice,
+  hasPendingChoice,
+  clearPendingChoices
+} from './utils/choice-helpers'; 

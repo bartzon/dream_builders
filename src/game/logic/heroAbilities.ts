@@ -1,6 +1,7 @@
 import type { GameState } from '../state';
 import { drawCard } from './utils/deck-helpers';
 import { initEffectContext } from './effectContext';
+import { addPendingChoice } from './utils/choice-helpers';
 
 // Hero Ability Effects Registry
 export const heroAbilityEffects: Record<string, (G: GameState, playerID: string) => void> = {
@@ -43,11 +44,11 @@ export const heroAbilityEffects: Record<string, (G: GameState, playerID: string)
     
     if (products.length > 0) {
       // Create a choice for the player to select which Product
-      player.pendingChoice = {
+      addPendingChoice(player, {
         type: 'choose_card',
         effect: 'brand_builder_engage_add_inventory',
         cards: products.map(p => ({ ...p })), // Send copies to client
-      };
+      });
     } else {
       // No products to add inventory to
       if (G.gameLog) {
@@ -99,12 +100,12 @@ export const heroAbilityEffects: Record<string, (G: GameState, playerID: string)
     const player = G.players[playerID];
     // ensureEffectContext(G, playerID); // Not strictly needed if only setting pendingChoice
 
-    player.pendingChoice = {
+    addPendingChoice(player, {
       type: 'choose_option',
       effect: 'serial_founder_double_down', // The makeChoice will handle sub-effects based on option index
       options: ['Draw a card', 'Add 2 inventory to a Product'],
       // sourceCard is not needed as it's a hero power
-    };
+    });
     // player.heroAbilityUsed = true; // This is already set by the useHeroAbility move in game.ts
   },
 }; 

@@ -8,8 +8,10 @@ import {
 //   addInventoryToSpecificProduct // No longer used here
 // } from '../utils/inventory-helpers';
 import {
-  createProductChoice
+  createProductChoice,
+  addPendingChoice
 } from '../utils/choice-helpers';
+import { drawCard } from '../utils/deck-helpers';
 // import {
 //   sellProduct, // No longer used here
 // } from '../utils/sales-helpers';
@@ -37,20 +39,22 @@ export const inventorySupportCardEffects: Record<string, (G: GameState, playerID
     if (products.length === 0) return;
     const ctx = ensureEffectContext(G, playerID);
     ctx.warehouseExpansionCount = 0;
-    player.pendingChoice = {
-      type: 'choose_card', effect: 'multi_product_inventory_boost', cards: products.map((p: Card) => ({ ...p })),
-    };
+    addPendingChoice(player, {
+      type: 'choose_card',
+      effect: 'multi_product_inventory_boost',
+      cards: products.map((p: Card) => ({ ...p })),
+    });
   },
   // Viral Unboxing Video: Choose a Product. Add +1 inventory and +1 sale this turn.
   'inventory_and_sale_boost': (G, playerID) => {
     const player = G.players[playerID];
     const products = player.board.Products.filter((p: Card) => p.isActive !== false && p.inventory !== undefined);
     if (products.length > 0) {
-      player.pendingChoice = { 
-        type: 'choose_card', 
-        effect: 'inventory_and_sale_boost', 
-        cards: products.map((p: Card) => ({ ...p })) 
-      };
+      addPendingChoice(player, {
+        type: 'choose_card',
+        effect: 'inventory_and_sale_boost',
+        cards: products.map((p: Card) => ({ ...p })),
+      });
     }
   },
   // Supplier Collab: Choose a Product. Add +2 inventory. Its next sale earns +1000.
@@ -58,11 +62,11 @@ export const inventorySupportCardEffects: Record<string, (G: GameState, playerID
     const player = G.players[playerID];
     const products = player.board.Products.filter((p: Card) => p.isActive !== false);
     if (products.length > 0) {
-      player.pendingChoice = { 
-        type: 'choose_card', 
-        effect: 'inventory_boost_plus_revenue', 
-        cards: products.map((p: Card) => ({ ...p })) 
-      };
+      addPendingChoice(player, {
+        type: 'choose_card',
+        effect: 'inventory_boost_plus_revenue',
+        cards: products.map((p: Card) => ({ ...p })),
+      });
     }
   },
   // Fulfillment App Integration: At the start of your next 2 turns, add +1 inventory to a random Product.
@@ -77,4 +81,41 @@ export const inventorySupportCardEffects: Record<string, (G: GameState, playerID
   },
   // Last-Minute Restock: Choose any Product. Add +1 inventory.
   'simple_inventory_boost': (G, playerID) => createProductChoice(G.players[playerID], 'simple_inventory_boost'),
+  'factory_direct': (G, playerID) => {
+    const player = G.players[playerID];
+    
+    const productsOnBoard = player.board.Products.filter(p => p.isActive !== false);
+    if (productsOnBoard.length > 0) {
+      addPendingChoice(player, {
+        type: 'choose_card',
+        effect: 'inventory_boost_plus_revenue',
+        cards: productsOnBoard.map(p => ({ ...p })), 
+      });
+    }
+  },
+  'fulfillment_center': (G, playerID) => {
+    const player = G.players[playerID];
+    drawCard(player);
+    const productsOnBoard = player.board.Products.filter(p => p.isActive !== false);
+    if (productsOnBoard.length > 0) {
+      addPendingChoice(player, {
+        type: 'choose_card',
+        effect: 'draw_and_inventory',
+        cards: productsOnBoard.map(p => ({ ...p })), 
+      });
+    }
+  },
+  'warehouse_expansion': (G, playerID) => {
+    const player = G.players[playerID];
+    const productsOnBoard = player.board.Products.filter(p => p.isActive !== false);
+    if (productsOnBoard.length > 0) {
+      const ctx = ensureEffectContext(G, playerID);
+      ctx.warehouseExpansionCount = 0;
+      addPendingChoice(player, {
+        type: 'choose_card',
+        effect: 'multi_product_inventory_boost',
+        cards: productsOnBoard.map(p => ({ ...p })), 
+      });
+    }
+  },
 }; 

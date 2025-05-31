@@ -24,7 +24,10 @@ import {
   initializePlayer, 
   checkGameEnd,
   sellProduct,
-  gainCapital // Added gainCapital import
+  gainCapital,
+  getCurrentPendingChoice,
+  resolveCurrentPendingChoice,
+  addPendingChoice
 } from './logic/index';
 
 // Helper function to shuffle an array (remains local or could be a general game util)
@@ -239,10 +242,10 @@ export const DreamBuildersGame: Game<GameState> = {
       
       // Create the discard choice
       if (player.hand.length > 0) {
-        player.pendingChoice = {
+        addPendingChoice(player, {
           type: 'discard',
           effect: 'midnight_oil',
-        };
+        });
         
         // Clear the pending flag
         if (G.effectContext?.[playerID]) {
@@ -259,11 +262,11 @@ export const DreamBuildersGame: Game<GameState> = {
       const productsOnBoard = player.board.Products.filter(p => p.isActive !== false);
 
       if (productsOnBoard.length > 0) {
-        player.pendingChoice = {
+        addPendingChoice(player, {
           type: 'destroy_product',
           effect: 'fast_pivot',
           cards: productsOnBoard.map(p => ({ ...p })), 
-        };
+        });
         if (G.effectContext?.[playerID]) {
           G.effectContext[playerID].fastPivotProductDestroyPending = false;
         }
@@ -276,8 +279,8 @@ export const DreamBuildersGame: Game<GameState> = {
     makeChoice: ({ G, ctx, playerID }, choiceIndex: number) => {
       if (playerID !== ctx.currentPlayer) return INVALID_MOVE;
       const player = G.players[playerID];
-      if (!player.pendingChoice) return INVALID_MOVE;
-      const choice = player.pendingChoice;
+      const choice = getCurrentPendingChoice(player);
+      if (!choice) return INVALID_MOVE;
 
       // Initialize or clear recentlyAffectedCardIds for new choice sequences
       if (G.effectContext?.[playerID]) {
@@ -293,14 +296,14 @@ export const DreamBuildersGame: Game<GameState> = {
         const discardedCardName = player.hand[choiceIndex]?.name || 'a card';
         player.hand.splice(choiceIndex, 1);
         if (G.gameLog) G.gameLog.push(`Player ${playerID} discarded ${discardedCardName}.`);
-        player.pendingChoice = undefined;
+        resolveCurrentPendingChoice(player);
       } 
       else if (choice.type === 'destroy_product' && choice.effect === 'fast_pivot') {
         if (!choice.cards || choiceIndex < 0 || choiceIndex >= choice.cards.length) return INVALID_MOVE;
         const productToDestroyId = choice.cards[choiceIndex].id;
         resolveFastPivotEffect(G, playerID, productToDestroyId);
         if (G.gameLog) G.gameLog.push(`Player ${playerID} used Fast Pivot to destroy ${choice.cards[choiceIndex].name}, draw 2 cards, and discount next Product.`);
-        player.pendingChoice = undefined;
+        resolveCurrentPendingChoice(player);
       } 
       else if (choice.type === 'choose_from_drawn_to_discard' && choice.effect === 'ab_test_discard') {
         if (!choice.cards || choiceIndex < 0 || choiceIndex >= choice.cards.length) return INVALID_MOVE;
@@ -312,7 +315,7 @@ export const DreamBuildersGame: Game<GameState> = {
         } else {
           if (G.gameLog) G.gameLog.push(`A/B Test: Error - card to discard not found in hand.`);
         }
-        player.pendingChoice = undefined;
+        resolveCurrentPendingChoice(player);
       } 
       else if (choice.type === 'view_deck_and_discard' && choice.effect === 'analytics_dashboard_discard') {
         if (!choice.cards || !choice.count) return INVALID_MOVE;
@@ -337,26 +340,27 @@ export const DreamBuildersGame: Game<GameState> = {
         } else {
           if (G.gameLog) G.gameLog.push(`Analytics Dashboard: Player ${playerID} viewed top cards, no discard.`);
         }
-        player.pendingChoice = undefined;
+        resolveCurrentPendingChoice(player);
       } 
       else if (choice.type === 'choose_option') {
         if (choice.effect === 'serial_founder_double_down') {
           if (choiceIndex === 0) { // Option: Draw a card
             drawCard(player);
             if (G.gameLog) G.gameLog.push(`Serial Founder (Double Down): Chose to draw a card.`);
-            player.pendingChoice = undefined;
+            resolveCurrentPendingChoice(player);
           } else if (choiceIndex === 1) { // Option: Add 2 inventory to a Product
             const activeProducts = player.board.Products.filter(p => p.isActive !== false && p.inventory !== undefined);
             if (activeProducts.length > 0) {
-              player.pendingChoice = {
+              resolveCurrentPendingChoice(player); // Remove the option choice
+              addPendingChoice(player, {
                 type: 'choose_card',
                 effect: 'serial_founder_double_down_add_inventory',
                 cards: activeProducts.map(p => ({ ...p })),
-              };
+              });
               if (G.gameLog) G.gameLog.push(`Serial Founder (Double Down): Chose to add inventory. Select a product.`);
             } else {
               if (G.gameLog) G.gameLog.push(`Serial Founder (Double Down): Chose to add inventory, but no products on board.`);
-              player.pendingChoice = undefined;
+              resolveCurrentPendingChoice(player);
             }
           } else {
             return INVALID_MOVE;
@@ -372,10 +376,10 @@ export const DreamBuildersGame: Game<GameState> = {
             drawCard(player);
             if (G.gameLog) G.gameLog.push(`Incubator Resources: Player ${playerID} chose "${chosenOptionText}".`);
           }
-          player.pendingChoice = undefined;
+          resolveCurrentPendingChoice(player);
         } else {
           if (G.gameLog) G.gameLog.push(`Unhandled choose_option effect: ${choice.effect}`);
-          player.pendingChoice = undefined; 
+          resolveCurrentPendingChoice(player); 
         }
       } 
       else if (choice.type === 'choose_card') {
@@ -390,7 +394,7 @@ export const DreamBuildersGame: Game<GameState> = {
           } else {
             if (G.gameLog) G.gameLog.push(`Serial Founder (Double Down): Error - product not found or inventory undefined.`);
           }
-          player.pendingChoice = undefined;
+          resolveCurrentPendingChoice(player);
         }
         else if (choice.effect === 'brand_builder_engage_add_inventory') {
           if (!choice.cards || choiceIndex < 0 || choiceIndex >= choice.cards.length) return INVALID_MOVE;
@@ -407,7 +411,7 @@ export const DreamBuildersGame: Game<GameState> = {
           } else {
             if (G.gameLog) G.gameLog.push(`Engage: Error - product not found or inventory undefined.`);
           }
-          player.pendingChoice = undefined;
+          resolveCurrentPendingChoice(player);
         }
         else if (choice.effect === 'black_friday_blitz_sell_product') {
           if (!choice.cards || choiceIndex < 0 || choiceIndex >= choice.cards.length) return INVALID_MOVE;
@@ -428,7 +432,7 @@ export const DreamBuildersGame: Game<GameState> = {
           } else {
             if (G.gameLog) G.gameLog.push(`Black Friday Blitz: Error - selected product ${chosenProductInfo.name} has no inventory or not found.`);
           }
-          player.pendingChoice = undefined;
+          resolveCurrentPendingChoice(player);
         } else {
           // Existing generic inventory/product choice logic
           // Special handling for multi_product_inventory_boost "Done" button
@@ -438,7 +442,7 @@ export const DreamBuildersGame: Game<GameState> = {
               G.effectContext[playerID].warehouseExpansionCount = 0;
               if (G.gameLog) G.gameLog.push(`Warehouse Expansion: Finished selecting (${selectedCount} product${selectedCount === 1 ? '' : 's'} boosted).`);
             }
-            player.pendingChoice = undefined;
+            resolveCurrentPendingChoice(player);
             return; // Early return to avoid invalid card access
           }
           
@@ -470,11 +474,12 @@ export const DreamBuildersGame: Game<GameState> = {
                   if (selectedCount < 3) {
                     const remainingProducts = player.board.Products.filter(p => p.isActive !== false && p.id !== boardProduct.id);
                     if (remainingProducts.length > 0) {
-                      player.pendingChoice = {
+                      resolveCurrentPendingChoice(player); // Remove current choice before adding new one
+                      addPendingChoice(player, {
                         type: 'choose_card',
                         effect: 'multi_product_inventory_boost',
                         cards: remainingProducts.map(p => ({ ...p })),
-                      };
+                      });
                       if (G.gameLog) G.gameLog.push(`Warehouse Expansion: Selected ${boardProduct.name} (${selectedCount}/3). Choose another product.`);
                       return; 
                     }
@@ -510,7 +515,7 @@ export const DreamBuildersGame: Game<GameState> = {
               }
               break;
           }
-          player.pendingChoice = undefined;
+          resolveCurrentPendingChoice(player);
           if (G.gameLog) G.gameLog.push(`Player ${playerID} chose ${chosenCard.name} for ${choice.effect}.`);
         }
       }

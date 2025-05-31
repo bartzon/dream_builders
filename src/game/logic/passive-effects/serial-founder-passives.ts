@@ -1,6 +1,7 @@
 import type { GameState } from '../../state';
 import type { Card } from '../../types'; // Import Card type
 import { drawCard } from '../utils/deck-helpers'; // Assuming drawCard is what's needed
+import { addPendingChoice } from '../utils/choice-helpers';
 
 export function handleSerialFounderChoicePassives(G: GameState, playerID: string): void {
   const player = G.players[playerID];
@@ -21,7 +22,7 @@ export function handleSerialFounderChoicePassives(G: GameState, playerID: string
 
   // Growth Hacking - choose bonus each turn
   const growthHacking = player.board.Tools.find(t => t.effect === 'growth_hacking');
-  if (growthHacking && !player.pendingChoice) {
+  if (growthHacking) {
     const turnMod = G.turn % 3;
     if (turnMod === 0) {
       player.capital = Math.min(10, player.capital + 1);
@@ -37,7 +38,7 @@ export function handleSerialFounderChoicePassives(G: GameState, playerID: string
   
   // Business Development - choose different bonus each turn
   const businessDev = player.board.Employees.find(e => e.effect === 'business_development');
-  if (businessDev && !player.pendingChoice) {
+  if (businessDev) {
     const turnMod = G.turn % 3;
     if (turnMod === 1) { 
       player.capital = Math.min(10, player.capital + 1);
@@ -53,13 +54,13 @@ export function handleSerialFounderChoicePassives(G: GameState, playerID: string
 
   // Incubator Resources - choose capital or card draw at start of turn
   const incubatorResources = player.board.Tools.find(t => t.effect === 'incubator_resources');
-  if (incubatorResources && !player.pendingChoice) { // Ensure no other choice is active
-    player.pendingChoice = {
+  if (incubatorResources) {
+    addPendingChoice(player, {
       type: 'choose_option',
       effect: 'incubator_resources_choice',
       options: ['Gain 1 Capital', 'Draw 1 Card'],
       sourceCard: { ...incubatorResources } as Card 
-    };
+    });
     // The choice will be presented to the player via the UI
   }
 } 

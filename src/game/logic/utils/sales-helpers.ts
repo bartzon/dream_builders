@@ -24,16 +24,28 @@ export function sellFirstAvailableProduct(G: GameState, playerID: string): boole
 }
 
 export function sellProduct(G: GameState, playerID: string, product: Card, quantity: number = 1): number {
-  if (!product.inventory || product.inventory < quantity) return 0;
+  // Add inventory validation
+  if (!product.inventory || product.inventory < quantity) {
+    console.warn(`Cannot sell ${quantity} of ${product.name} - only ${product.inventory || 0} available`);
+    return 0;
+  }
   
+  const player = G.players[playerID];
   const baseRevenue = (product.revenuePerSale || 0) * quantity;
   let totalRevenue = baseRevenue;
   
+  // Apply Optimize Checkout bonus - $1000 more per product sold
+  if (player.board.Tools.find(t => t.effect === 'optimize_checkout')) {
+    totalRevenue += 1000 * quantity;
+  }
+  
   const ctx = G.effectContext?.[playerID];
   if (ctx) {
+    // Apply per-product revenue boosts
     if (ctx.productRevenueBoosts && ctx.productRevenueBoosts[product.id]) {
-      totalRevenue += ctx.productRevenueBoosts[product.id];
-      delete ctx.productRevenueBoosts[product.id];
+      totalRevenue += ctx.productRevenueBoosts[product.id] * quantity;
+      // Don't delete the boost - let it persist for the turn
+      // It will be cleared in clearTempEffects
     }
   }
   
@@ -51,6 +63,7 @@ export function sellProduct(G: GameState, playerID: string, product: Card, quant
   
   if (ctx) {
     ctx.soldProductThisTurn = true;
+    ctx.itemsSoldThisTurn = (ctx.itemsSoldThisTurn || 0) + quantity;
   }
   return totalRevenue;
 } 

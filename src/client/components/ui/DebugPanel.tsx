@@ -30,7 +30,8 @@ export function DebugPanel({ gameState, playerID }: DebugPanelProps) {
       heroAbilityUsed: player?.heroAbilityUsed,
       handSize: player?.hand?.length,
       deckSize: player?.deck?.length,
-      pendingChoice: player?.pendingChoice,
+      pendingChoices: player?.pendingChoices || [],
+      pendingChoicesCount: player?.pendingChoices?.length || 0,
     },
 
     // === BOARD STATE ===

@@ -116,7 +116,19 @@ export function initEffectContext(): EffectContext {
     soloHustlerDiscountedCard: undefined,
     warehouseExpansionCount: 0,
     recentlyAffectedCardIds: [],
+    productRevenueBoosts: {},
   };
+}
+
+// Ensure effect context exists and return it
+export function ensureEffectContext(G: GameState, playerID: string): EffectContext {
+  if (!G.effectContext) {
+    G.effectContext = {};
+  }
+  if (!G.effectContext[playerID]) {
+    G.effectContext[playerID] = initEffectContext();
+  }
+  return G.effectContext[playerID];
 }
 
 // Clear temporary effects at end of turn
@@ -169,5 +181,6 @@ export function clearTempEffects(G: GameState, playerID: string) {
     ctx.soloHustlerDiscountedCard = undefined;
     ctx.warehouseExpansionCount = 0;
     ctx.recentlyAffectedCardIds = [];
+    ctx.productRevenueBoosts = {}; // Clear product revenue boosts at end of turn
   }
 } 

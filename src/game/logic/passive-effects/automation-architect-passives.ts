@@ -36,15 +36,16 @@ export function handleAutomationArchitectPassives(G: GameState, playerID: string
   
   // Analytics Dashboard - view top 2, optionally discard 1
   const analyticsDashboard = player.board.Tools.find(t => t.effect === 'analytics_dashboard');
-  if (analyticsDashboard && player.deck.length > 0 && !player.pendingChoice) { // Ensure no other choice is active
+  if (analyticsDashboard && player.deck.length > 0) {
     const cardsToView = player.deck.slice(-2).reverse(); 
-    player.pendingChoice = {
+    // Add to pending choices queue instead of overwriting
+    player.pendingChoices.push({
       type: 'view_deck_and_discard',
       effect: 'analytics_dashboard_discard',
       cards: cardsToView.map(c => ({ ...c } as Card)), // Ensure cards are of type Card
       count: cardsToView.length, 
       sourceCard: { ...analyticsDashboard } // Pass a copy of the source card
-    };
+    });
   }
   
   // Machine Learning Model - gain capital equal to number of Tools

@@ -1,5 +1,5 @@
 import type { GameState } from '../../game/state'
-import type { GameUIState, EffectContextUI, ClientCard } from '../types/game'
+import type { GameUIState, EffectContextUI, ClientCard, PendingChoice } from '../types/game'
 
 export function useGameState(
   gameState: unknown,
@@ -41,13 +41,11 @@ export function useGameState(
     recentlyAffectedCardIds: effectContextRaw.recentlyAffectedCardIds as string[] | undefined,
   }
   
-  // Extract pending choice
-  const pendingChoice = (currentPlayer as Record<string, unknown>).pendingChoice as {
-    type: string;
-    effect: string;
-    cards?: ClientCard[];
-    cardIndices?: number[];
-  } | undefined
+  // Extract pending choices
+  const pendingChoicesRaw = (currentPlayer as Record<string, unknown>).pendingChoices
+  const pendingChoices = Array.isArray(pendingChoicesRaw) 
+    ? pendingChoicesRaw as PendingChoice[] 
+    : []
   
   const uiState: GameUIState = {
     hand,
@@ -59,7 +57,7 @@ export function useGameState(
     revenue: Number(currentPlayer.revenue || 0),
     hero: String(currentPlayer.hero || 'Unknown'),
     heroAbilityUsed: Boolean(currentPlayer.heroAbilityUsed),
-    pendingChoice,
+    pendingChoices,
     turn: Number(G.turn || 1),
   }
   

@@ -158,7 +158,14 @@ export function getCardDiscount(G: GameState, playerID: string, card: Card): num
   totalDiscount += getSpinOffDiscount(player, card);
   totalDiscount += getSerialOperatorDiscount(player, card);
   
-  return Math.min(Math.max(0, totalDiscount), card.cost); // Ensure discount isn't negative or more than card cost
+  // Technical Cofounder: Your Tools cost 1 less
+  if (card.type === 'Tool' && player.board.Employees.find(e => e.effect === 'technical_cofounder')) {
+    totalDiscount += 1;
+  }
+  
+  // Don't clamp negative discounts to 0 - let cost increases work properly
+  // But ensure final cost is never negative
+  return totalDiscount;
 }
 
 // Get cost information for UI display (read-only, does not consume discounts)
@@ -177,13 +184,17 @@ export function getCardCostInfo(G: GameState, playerID: string, card: Card): { o
   totalDiscount += getMerchDropDiscount(G, playerID, card);
   totalDiscount += getSpinOffDiscount(player, card);
   totalDiscount += getSerialOperatorDiscount(player, card);
+  
+  // Technical Cofounder: Your Tools cost 1 less
+  if (card.type === 'Tool' && player.board.Employees.find(e => e.effect === 'technical_cofounder')) {
+    totalDiscount += 1;
+  }
 
-  const effectiveDiscount = Math.min(Math.max(0, totalDiscount), card.cost);
-  const finalCost = Math.max(0, card.cost - effectiveDiscount);
+  const finalCost = Math.max(0, card.cost - totalDiscount);
   
   return {
     originalCost: card.cost,
-    discount: effectiveDiscount,
+    discount: totalDiscount,
     finalCost
   };
 }

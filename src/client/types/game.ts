@@ -53,7 +53,7 @@ export interface GameUIState {
   revenue: number
   hero: string
   heroAbilityUsed: boolean
-  pendingChoice?: PendingChoice
+  pendingChoices: PendingChoice[]
   turn: number
 }
 

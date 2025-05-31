@@ -5,6 +5,7 @@ import {
   drawCards,
   applyTemporaryBonus
 } from '../utils/effect-helpers';
+import { addPendingChoice } from '../utils/choice-helpers';
 
 const passiveEffect = () => {};
 
@@ -28,13 +29,13 @@ export const automationArchitectCardEffects: Record<string, (G: GameState, playe
     if (cardsDrawnCount > 0) {
       const drawnCards = player.hand.slice(-cardsDrawnCount);
       if (drawnCards.length > 0) {
-        player.pendingChoice = {
+        addPendingChoice(player, {
           type: 'choose_from_drawn_to_discard',
           effect: 'ab_test_discard',
           cards: drawnCards.map(c => ({ ...c })),
           count: 1,
           sourceCard: card ? { ...card } : undefined
-        };
+        });
       }
     } else {
       if(G.gameLog) G.gameLog.push('A/B Test: Drew no cards, no discard necessary.');
