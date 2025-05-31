@@ -287,6 +287,7 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
           {/* Products */}
           <ProductsSection
             products={uiState.products}
+            tools={uiState.tools}
             effectContext={effectContext}
             onShowTooltip={showCardTooltip}
             onHideTooltip={hideCardTooltip}
@@ -298,6 +299,8 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
         <RightSidebar
           hoveredCard={cardTooltip.card}
           isTooltipVisible={cardTooltip.visible}
+          tools={uiState.tools}
+          effectContext={effectContext}
         />
 
       </div>

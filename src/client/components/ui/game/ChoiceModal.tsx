@@ -20,6 +20,10 @@ export const ChoiceModal: React.FC<ChoiceModalProps> = React.memo(({
   let title = 'Make a choice';
   let content = null;
 
+  // Check if Optimize Checkout tool is active for revenue bonus
+  const hasOptimizeCheckout = uiState.tools.some(tool => tool.effect === 'optimize_checkout');
+  const globalRevenueBonus = hasOptimizeCheckout ? 1000 : 0;
+
   const getOptionDisabledState = (optionText: string): boolean => {
     if (effect === 'serial_founder_double_down') {
       if (optionText.toLowerCase().includes('add 2 inventory') && uiState.products.length === 0) {

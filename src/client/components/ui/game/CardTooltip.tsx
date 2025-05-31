@@ -7,11 +7,12 @@ interface CardTooltipProps {
   card?: ClientCard
   visible: boolean
   displayModeOverride?: CardDisplayMode
+  revenueBonus?: number
   // x: number // Removed
   // y: number // Removed
 }
 
-export const CardTooltip = React.memo(({ card, visible, displayModeOverride }: CardTooltipProps) => {
+export const CardTooltip = React.memo(({ card, visible, displayModeOverride, revenueBonus = 0 }: CardTooltipProps) => {
   if (!visible || !card) return null
 
   // const typeColor = CARD_TYPE_COLORS[card.type.toLowerCase()] || CARD_TYPE_COLORS.default // Removed
@@ -31,6 +32,7 @@ export const CardTooltip = React.memo(({ card, visible, displayModeOverride }: C
         card={card}
         displayMode={displayModeOverride || 'tooltip'}
         forceShowArt={true}
+        revenueBonus={revenueBonus}
       />
     </div>
   )

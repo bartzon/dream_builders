@@ -1,13 +1,42 @@
 import React from 'react';
-import type { ClientCard } from '../../../types/game';
+import type { ClientCard, EffectContextUI } from '../../../types/game';
 import { CardTooltip } from './CardTooltip';
+import { calculateProductRevenue } from '../../../utils/revenue-helpers';
 
 interface RightSidebarProps {
   hoveredCard?: ClientCard;
   isTooltipVisible: boolean;
+  tools: ClientCard[];
+  effectContext: EffectContextUI;
 }
 
-export const RightSidebar: React.FC<RightSidebarProps> = ({ hoveredCard, isTooltipVisible }) => {
+export const RightSidebar: React.FC<RightSidebarProps> = ({ 
+  hoveredCard, 
+  isTooltipVisible,
+  tools,
+  effectContext 
+}) => {
+  // Calculate revenue bonus for products
+  let totalRevenueBonus = 0;
+  
+  if (hoveredCard?.type === 'Product') {
+    // Get Optimize Checkout tools that match this product's tier (based on cost)
+    const matchingOptimizeTools = tools.filter(tool => 
+      tool.effect === 'optimize_checkout' && 
+      tool.cost === hoveredCard.cost
+    );
+    
+    // Calculate total revenue using the helper
+    const totalRevenue = calculateProductRevenue(
+      hoveredCard,
+      matchingOptimizeTools,
+      effectContext
+    );
+    
+    // Calculate bonus amount (revenue minus base)
+    totalRevenueBonus = totalRevenue - (hoveredCard.revenuePerSale || 0);
+  }
+  
   return (
     <div style={{
       width: '320px', // Adjust width as needed, a bit wider for a large card display
@@ -25,6 +54,7 @@ export const RightSidebar: React.FC<RightSidebarProps> = ({ hoveredCard, isToolt
           card={hoveredCard}
           visible={true}
           displayModeOverride="sidebarDetail"
+          revenueBonus={totalRevenueBonus}
         />
       ) : (
         <div style={{

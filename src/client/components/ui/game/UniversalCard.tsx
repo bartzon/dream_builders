@@ -16,6 +16,7 @@ interface UniversalCardProps {
   costInfo?: { originalCost: number; discount: number; finalCost: number };
   showBonuses?: boolean;
   forceShowArt?: boolean;
+  revenueBonus?: number;
   onMouseEnterCard?: (e: React.MouseEvent) => void;
   onMouseLeaveCard?: (e: React.MouseEvent) => void;
   onMouseMoveCard?: (e: React.MouseEvent) => void;
@@ -32,6 +33,7 @@ export const UniversalCard: React.FC<UniversalCardProps> = React.memo(({
   costInfo,
   showBonuses = true,
   forceShowArt = false,
+  revenueBonus = 0,
   onMouseEnterCard,
   onMouseLeaveCard,
   onMouseMoveCard,
@@ -146,6 +148,11 @@ export const UniversalCard: React.FC<UniversalCardProps> = React.memo(({
     bonuses.push({ type: 'cost', value: finalCostInfo.discount });
   }
 
+  // Calculate total revenue for products
+  const totalRevenue = card.type === 'Product' && card.revenuePerSale 
+    ? card.revenuePerSale + revenueBonus 
+    : 0;
+
   return (
     <div
       style={containerStyle}
@@ -173,6 +180,23 @@ export const UniversalCard: React.FC<UniversalCardProps> = React.memo(({
         </div>
       )}
 
+      {/* Show inventory and revenue for products */}
+      {card.type === 'Product' && displayMode !== 'hand' && (
+        <div style={{ 
+          padding: '5px 10px', 
+          fontSize: displayMode === 'sidebarDetail' ? FONT_SIZES.small : '11px',
+          color: COLORS.success,
+          fontWeight: 'bold'
+        }}>
+          {card.inventory !== undefined && (
+            <div>Stock: {card.inventory}</div>
+          )}
+          {totalRevenue > 0 && (
+            <div>${totalRevenue.toLocaleString()}/sale</div>
+          )}
+        </div>
+      )}
+
       {card.text && (
         <div style={descriptionStyle}>
           {card.text}
@@ -180,7 +204,7 @@ export const UniversalCard: React.FC<UniversalCardProps> = React.memo(({
       )}
 
       {/* Spacer to push type/keywords to bottom if no description and not compact */}
-      {!card.text && !isCompact && (
+      {!card.text && !isCompact && card.type !== 'Product' && (
         <div style={{ flexGrow: 1 }}></div>
       )}
 
