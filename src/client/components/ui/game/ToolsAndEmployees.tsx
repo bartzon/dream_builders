@@ -1,8 +1,8 @@
 import React from 'react'
 import { FONT_SIZES, COLORS } from '../../../constants/ui'
-import { BonusIndicator, type BonusInfo } from './BonusIndicator'
+import { GameCard } from './GameCard'
+import type { BonusInfo } from './BonusIndicator'
 import type { ClientCard, EffectContextUI } from '../../../types/game'
-import { UniversalCard, type CardDisplayMode } from './UniversalCard'
 
 interface ToolsAndEmployeesProps {
   cards: ClientCard[]
@@ -20,11 +20,23 @@ export const ToolsAndEmployees = React.memo(({
   onHideTooltip
 }: ToolsAndEmployeesProps) => {
   return (
-    <div style={{ marginBottom: '20px' }}>
-      <h4 style={{ fontSize: FONT_SIZES.subheading }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <h4 style={{ 
+        fontSize: FONT_SIZES.subheading, 
+        marginTop: 0,
+        marginBottom: '15px',
+        flexShrink: 0
+      }}>
         Your Tools & Employees ({cards.length})
       </h4>
-      <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+      <div style={{ 
+        display: 'flex', 
+        gap: '8px', 
+        flexWrap: 'wrap',
+        marginBottom: 0,
+        flex: 1,
+        alignContent: 'flex-start'
+      }}>
         {cards.length === 0 ? (
           <EmptyState message="No tools or employees" />
         ) : (
@@ -51,19 +63,17 @@ export const ToolsAndEmployees = React.memo(({
             }
 
             return (
-              <div key={`${card.id || 'tool-employee'}-${i}`} style={{position: 'relative'}}>
-                <UniversalCard
-                  card={card}
-                  displayMode={'board' as CardDisplayMode}
-                  isClickable={false}
-                  isAffected={isAffected}
-                  showBonuses={false}
-                  onMouseEnterCard={(e) => onShowTooltip(card, e)}
-                  onMouseLeaveCard={onHideTooltip}
-                  onMouseMoveCard={(e) => onShowTooltip(card, e)}
-                />
-                {bonuses.length > 0 && <BonusIndicator bonuses={bonuses} position="top-right" />}
-              </div>
+              <GameCard
+                key={`${card.id || 'tool-employee'}-${i}`}
+                card={card}
+                displayMode="board"
+                isAffected={isAffected}
+                showBonuses={true}
+                bonuses={bonuses}
+                onShowTooltip={onShowTooltip}
+                onHideTooltip={onHideTooltip}
+                enableHover={true}
+              />
             );
           })
         )}
@@ -75,7 +85,7 @@ export const ToolsAndEmployees = React.memo(({
 // Empty state component
 const EmptyState = ({ message }: { message: string }) => (
   <div style={{ 
-    padding: '20px', 
+    padding: '15px',
     border: '2px dashed #666', 
     borderRadius: '5px',
     color: COLORS.textMuted,

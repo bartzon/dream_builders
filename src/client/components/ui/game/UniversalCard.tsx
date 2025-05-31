@@ -15,7 +15,6 @@ interface UniversalCardProps {
   isAffected?: boolean;
   costInfo?: { originalCost: number; discount: number; finalCost: number };
   showBonuses?: boolean;
-  forceShowArt?: boolean;
   revenueBonus?: number;
   onMouseEnterCard?: (e: React.MouseEvent) => void;
   onMouseLeaveCard?: (e: React.MouseEvent) => void;
@@ -24,7 +23,6 @@ interface UniversalCardProps {
 
 export const UniversalCard: React.FC<UniversalCardProps> = React.memo(({
   card,
-  displayMode = 'board',
   onClick,
   isClickable = false,
   showPlayableBorder = false,
@@ -32,7 +30,6 @@ export const UniversalCard: React.FC<UniversalCardProps> = React.memo(({
   isAffected = false,
   costInfo,
   showBonuses = true,
-  forceShowArt = false,
   revenueBonus = 0,
   onMouseEnterCard,
   onMouseLeaveCard,
@@ -53,13 +50,13 @@ export const UniversalCard: React.FC<UniversalCardProps> = React.memo(({
   const cardTypeColor = CARD_TYPE_COLORS[card.type.toLowerCase()] || COLORS.default;
   const defaultBoxShadow = '0 4px 8px rgba(0,0,0,0.2), 0 6px 20px rgba(0,0,0,0.19)';
 
-  const isCompact = displayMode === 'choiceModal' || displayMode === 'tooltip';
   const finalCostInfo = costInfo || { originalCost: card.cost, discount: 0, finalCost: card.cost };
 
+  // Standard card dimensions for all display modes
   const containerStyle: React.CSSProperties = {
     ...CARD_STYLES,
-    width: displayMode === 'sidebarDetail' ? '100%' : (displayMode === 'tooltip' ? '150px' : '170px'),
-    height: displayMode === 'sidebarDetail' ? '440px' : (displayMode === 'tooltip' ? '220px' : '280px'),
+    width: '170px',
+    height: '280px',
     padding: '0',
     background: COLORS.bgDark,
     border: `3px solid ${showPlayableBorder ? COLORS.success : (isSelected ? COLORS.warning : (isAffected ? COLORS.warningLight : COLORS.bgLight))}`,
@@ -70,8 +67,7 @@ export const UniversalCard: React.FC<UniversalCardProps> = React.memo(({
     boxShadow: isAffected ? `0 0 15px 5px ${COLORS.warningLight}` : (isSelected ? `0 0 12px 4px ${COLORS.warning}` : defaultBoxShadow),
     display: 'flex',
     flexDirection: 'column',
-    transition: CARD_STYLES.transition + ', box-shadow 0.2s ease-in-out, border-color 0.2s ease-in-out, transform 0.2s ease-in-out',
-    transform: isSelected || isAffected ? 'scale(1.05)' : 'scale(1)',
+    transition: CARD_STYLES.transition + ', box-shadow 0.2s ease-in-out, border-color 0.2s ease-in-out',
     overflow: 'hidden',
   };
 
@@ -79,7 +75,7 @@ export const UniversalCard: React.FC<UniversalCardProps> = React.memo(({
     background: `linear-gradient(to right, ${cardTypeColor}, ${COLORS.bgMedium})`,
     padding: '8px 10px',
     fontWeight: 'bold',
-    fontSize: displayMode === 'sidebarDetail' ? FONT_SIZES.heading : (isCompact ? FONT_SIZES.small : FONT_SIZES.large),
+    fontSize: FONT_SIZES.large,
     color: COLORS.textLight,
     borderBottom: `2px solid ${COLORS.bgLight}`,
     textAlign: 'center',
@@ -96,20 +92,20 @@ export const UniversalCard: React.FC<UniversalCardProps> = React.memo(({
     left: '-5px',
     background: COLORS.primary,
     color: COLORS.white,
-    width: isCompact ? '28px' : '36px',
-    height: isCompact ? '28px' : '36px',
+    width: '36px',
+    height: '36px',
     borderRadius: '50%',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     fontWeight: 'bold',
-    fontSize: isCompact ? FONT_SIZES.medium : FONT_SIZES.large,
+    fontSize: FONT_SIZES.large,
     border: `2px solid ${COLORS.white}`,
     boxShadow: '0 2px 4px rgba(0,0,0,0.3)',
   };
 
   const artPlaceholderStyle: React.CSSProperties = {
-    height: displayMode === 'sidebarDetail' ? '200px' : (isCompact && !forceShowArt ? '50px' : (displayMode === 'tooltip' ? '120px' : '100px')),
+    height: '100px',
     background: COLORS.bgMedium,
     margin: '10px',
     borderRadius: '6px',
@@ -123,22 +119,22 @@ export const UniversalCard: React.FC<UniversalCardProps> = React.memo(({
 
   const descriptionStyle: React.CSSProperties = {
     padding: '0 10px 10px 10px',
-    fontSize: displayMode === 'sidebarDetail' ? FONT_SIZES.small : (!isCompact ? '12px' : '10px'),
+    fontSize: '12px',
     color: COLORS.textLight,
     lineHeight: '1.4',
     textAlign: 'center',
     flexGrow: 1,
     overflow: 'hidden',
     display: '-webkit-box',
-    WebkitLineClamp: displayMode === 'sidebarDetail' ? 6 : (isCompact ? 2 : 3),
+    WebkitLineClamp: 3,
     WebkitBoxOrient: 'vertical',
   };
 
   const typeAndKeywordsStyle: React.CSSProperties = {
-    padding: displayMode === 'sidebarDetail' ? '6px 10px' : '5px 10px',
+    padding: '5px 10px',
     background: COLORS.bgLight,
     borderTop: `1px solid ${COLORS.textMuted}`,
-    fontSize: displayMode === 'sidebarDetail' ? FONT_SIZES.small : '10px',
+    fontSize: '10px',
     color: COLORS.textMuted,
     textAlign: 'center',
   };
@@ -170,26 +166,24 @@ export const UniversalCard: React.FC<UniversalCardProps> = React.memo(({
         )}
       </div>
 
-      {(forceShowArt || !isCompact) && (
-        <div style={artPlaceholderStyle}>
-          {artworkSrc ? (
-            <img src={artworkSrc} alt={`${card.name} artwork`} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '6px' }} />
-          ) : (
-            'Card Art'
-          )}
-        </div>
-      )}
+      <div style={artPlaceholderStyle}>
+        {artworkSrc ? (
+          <img src={artworkSrc} alt={`${card.name} artwork`} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '6px' }} />
+        ) : (
+          'Card Art'
+        )}
+      </div>
 
       {/* Show inventory and revenue for products */}
-      {card.type === 'Product' && displayMode !== 'hand' && (
+      {card.type === 'Product' && (
         <div style={{ 
           padding: '5px 10px', 
-          fontSize: displayMode === 'sidebarDetail' ? FONT_SIZES.small : '11px',
+          fontSize: '11px',
           color: COLORS.success,
           fontWeight: 'bold'
         }}>
           {card.inventory !== undefined && (
-            <div>Stock: {card.inventory}</div>
+            <div>Inventory: {card.inventory}</div>
           )}
           {totalRevenue > 0 && (
             <div>${totalRevenue.toLocaleString()}/sale</div>
@@ -203,29 +197,27 @@ export const UniversalCard: React.FC<UniversalCardProps> = React.memo(({
         </div>
       )}
 
-      {/* Spacer to push type/keywords to bottom if no description and not compact */}
-      {!card.text && !isCompact && card.type !== 'Product' && (
+      {/* Spacer to push type/keywords to bottom if no description */}
+      {!card.text && card.type !== 'Product' && (
         <div style={{ flexGrow: 1 }}></div>
       )}
 
-      {(!isCompact || (card.keywords && card.keywords.length > 0)) && (
-        <div style={typeAndKeywordsStyle}>
-          {card.type}
-          {card.keywords && card.keywords.length > 0 && !isCompact && (
-            <div style={{ marginTop: '3px', display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '3px' }}>
-              {card.keywords.slice(0, 2).map(kw => (
-                <span key={kw} style={{
-                  background: COLORS.primaryDark,
-                  color: COLORS.textLight,
-                  fontSize: displayMode === 'sidebarDetail' ? '12px' : '9px',
-                  padding: displayMode === 'sidebarDetail' ? '2px 5px' : '1px 4px',
-                  borderRadius: '3px',
-                }}>{kw}</span>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
+      <div style={typeAndKeywordsStyle}>
+        {card.type}
+        {card.keywords && card.keywords.length > 0 && (
+          <div style={{ marginTop: '3px', display: 'flex', justifyContent: 'center', flexWrap: 'wrap', gap: '3px' }}>
+            {card.keywords.slice(0, 2).map(kw => (
+              <span key={kw} style={{
+                background: COLORS.primaryDark,
+                color: COLORS.textLight,
+                fontSize: '9px',
+                padding: '1px 4px',
+                borderRadius: '3px',
+              }}>{kw}</span>
+            ))}
+          </div>
+        )}
+      </div>
 
     </div>
   );

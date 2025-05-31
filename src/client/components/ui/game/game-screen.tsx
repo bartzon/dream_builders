@@ -18,7 +18,6 @@ import type { PendingChoice as ClientPendingChoice } from '../../../types/game'
 import { HeroDisplay } from './HeroDisplay'
 import { ChoiceModal } from './ChoiceModal'
 import { BUTTON_STYLES, FONT_SIZES } from "../../../constants/ui"
-import { RightSidebar } from './RightSidebar'
 
 interface GameScreenProps {
   gameState: unknown
@@ -43,7 +42,6 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
   const pendingChoice = uiState.pendingChoices[0] as ClientPendingChoice | undefined
   
   const {
-    cardTooltip,
     heroPowerTooltip,
     showCardTooltip,
     hideCardTooltip,
@@ -215,9 +213,12 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
       background: 'radial-gradient(ellipse at top, #3b2a4f, #1a1a2e 70%)',
       color: 'white',
       padding: '20px',
+      paddingBottom: '0', // Remove bottom padding since hand extends beyond
       display: 'flex',
       flexDirection: 'column',
-      fontFamily: '"Inter", "ShopifySans", "Helvetica Neue", "sans-serif"'
+      fontFamily: '"Inter", "ShopifySans", "Helvetica Neue", "sans-serif"',
+      overflowX: 'hidden', // Prevent horizontal scrolling
+      overflowY: 'hidden' // Keep vertical hidden
     }}>
       {/* Tooltips */}
       {/* <CardTooltip {...cardTooltip} /> */}
@@ -237,7 +238,8 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
         padding: '15px',
         borderRadius: '8px',
         boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
-        marginBottom: '20px',
+        marginBottom: '15px',
+        flexShrink: 0
       }}>
         <GameHeader
           heroName={uiState.hero}
@@ -252,10 +254,22 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
       </div>
 
       {/* Main Game Area */}
-      <div style={{ display: 'flex', flex: 1, gap: '20px' }}>
+      <div style={{ 
+        display: 'flex', 
+        flex: 1, 
+        gap: '20px',
+        minHeight: 0,
+        maxHeight: 'calc(100vh - 280px)'
+      }}>
 
         {/* Left - Controls and Game Log */}
-        <div style={{ display: 'flex', flexDirection: 'column', width: '250px', gap: '20px' }}>
+        <div style={{ 
+          display: 'flex', 
+          flexDirection: 'column', 
+          width: '250px', 
+          gap: '20px',
+          overflow: 'hidden'
+        }}>
         <HeroControls
           isMyTurn={isMyTurn}
           gameLog={gameLog}
@@ -269,44 +283,80 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
           flex: 1,
           background: 'rgba(40, 30, 60, 0.5)',
           borderRadius: '10px',
-          padding: '20px',
+          padding: '15px',
           display: 'flex',
-          flexDirection: 'column',
+          flexDirection: 'row',
+          gap: '15px',
           border: '1px solid rgba(120, 80, 190, 0.7)',
-          boxShadow: 'inset 0 0 15px rgba(0,0,0,0.5)'
+          boxShadow: 'inset 0 0 15px rgba(0,0,0,0.5)',
+          overflowY: 'auto',
+          overflowX: 'hidden'
         }}>
-          {/* Tools & Employees */}
-          <ToolsAndEmployees
-            cards={toolsAndEmployees}
-            effectContext={effectContext}
-            onShowTooltip={showCardTooltip}
-            onHideTooltip={hideCardTooltip}
-            affectedCardIds={affectedCardIds}
-          />
+          {/* Tools & Employees - Left Side */}
+          <div style={{ 
+            flex: 1, 
+            minWidth: 0,
+            background: 'rgba(120, 80, 190, 0.1)', // Purple tint for tools/employees
+            borderRadius: '8px',
+            padding: '15px',
+            minHeight: '280px', // Ensure space for at least 2 rows of cards
+            display: 'flex',
+            flexDirection: 'column'
+          }}>
+            <ToolsAndEmployees
+              cards={toolsAndEmployees}
+              effectContext={effectContext}
+              onShowTooltip={showCardTooltip}
+              onHideTooltip={hideCardTooltip}
+              affectedCardIds={affectedCardIds}
+            />
+          </div>
 
-          {/* Products */}
-          <ProductsSection
-            products={uiState.products}
-            tools={uiState.tools}
-            effectContext={effectContext}
-            onShowTooltip={showCardTooltip}
-            onHideTooltip={hideCardTooltip}
-            affectedCardIds={affectedCardIds}
-          />
+          {/* Divider */}
+          <div style={{
+            width: '1px',
+            background: 'rgba(120, 80, 190, 0.3)',
+            margin: '0 5px'
+          }} />
+
+          {/* Products - Right Side */}
+          <div style={{ 
+            flex: 1, 
+            minWidth: 0,
+            background: 'rgba(34, 197, 94, 0.1)', // Green tint for products
+            borderRadius: '8px',
+            padding: '15px',
+            minHeight: '280px', // Ensure space for at least 2 rows of cards
+            display: 'flex',
+            flexDirection: 'column'
+          }}>
+            <ProductsSection
+              products={uiState.products}
+              tools={uiState.tools}
+              effectContext={effectContext}
+              onShowTooltip={showCardTooltip}
+              onHideTooltip={hideCardTooltip}
+              affectedCardIds={affectedCardIds}
+            />
+          </div>
         </div>
 
-        {/* Right - Card Tooltip Display Area */}
-        <RightSidebar
-          hoveredCard={cardTooltip.card}
-          isTooltipVisible={cardTooltip.visible}
-          tools={uiState.tools}
-          effectContext={effectContext}
-        />
-
-      </div>
+      </div> {/* End of Main Game Area */}
 
       {/* Bottom Row - Hero Display and Hand */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%', marginTop: '20px' }}>
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center', // Back to center
+        width: '100%', 
+        marginTop: '15px',
+        flexShrink: 0,
+        minHeight: '120px', // Keep reduced height
+        position: 'relative',
+        marginBottom: '-80px', // Pull content up by pushing container down
+        paddingBottom: '80px', // Add padding to compensate
+        overflow: 'visible' // Allow cards to pop up
+      }}>
         {/* Hero Display - Bottom Left */}
         <HeroDisplay
           hero={currentHero}
@@ -320,7 +370,14 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
         />
 
         {/* Player Hand - Centered at Bottom */}
-        <div style={{ flex: 1, display: 'flex', justifyContent: 'center' }}>
+        <div style={{ 
+          flex: 1, 
+          display: 'flex', 
+          justifyContent: 'center',
+          transform: 'translateY(80px)', // Push hand down
+          zIndex: 100, // Increased from 10
+          overflow: 'visible' // Allow cards to pop up
+        }}>
         <PlayerHand
           hand={uiState.hand}
           midnightOilPending={effectContext.midnightOilDiscardPending}
@@ -332,6 +389,7 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
           onPlayCard={handlePlayCard}
           onShowTooltip={showCardTooltip}
           onHideTooltip={hideCardTooltip}
+          isChoiceModalOpen={!!pendingChoice}
         />
         </div>
 

@@ -1,7 +1,7 @@
 import React from 'react';
 import type { ClientCard, PendingChoice, GameUIState } from '../../../types/game';
 import { FONT_SIZES, BUTTON_STYLES, COLORS } from '../../../constants/ui';
-import { UniversalCard, type CardDisplayMode } from './UniversalCard';
+import { GameCard } from './GameCard';
 
 interface ChoiceModalProps {
   pendingChoice: PendingChoice | undefined;
@@ -19,10 +19,6 @@ export const ChoiceModal: React.FC<ChoiceModalProps> = React.memo(({
   const { options, effect, type, cards, count } = pendingChoice;
   let title = 'Make a choice';
   let content = null;
-
-  // Check if Optimize Checkout tool is active for revenue bonus
-  const hasOptimizeCheckout = uiState.tools.some(tool => tool.effect === 'optimize_checkout');
-  const globalRevenueBonus = hasOptimizeCheckout ? 1000 : 0;
 
   const getOptionDisabledState = (optionText: string): boolean => {
     if (effect === 'serial_founder_double_down') {
@@ -43,12 +39,14 @@ export const ChoiceModal: React.FC<ChoiceModalProps> = React.memo(({
           </p>
           <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', flexWrap: 'wrap' }}>
             {uiState.hand.map((card: ClientCard, index: number) => (
-              <UniversalCard
+              <GameCard
                 key={card.id || index}
                 card={card}
-                displayMode={'choiceModal' as CardDisplayMode}
+                displayMode="choiceModal"
                 isClickable={true}
                 onClick={() => onMakeChoice(index)}
+                isDiscardMode={true}
+                enableHover={true}
               />
             ))}
           </div>
@@ -66,12 +64,13 @@ export const ChoiceModal: React.FC<ChoiceModalProps> = React.memo(({
           </p>
           <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', flexWrap: 'wrap' }}>
             {cards.map((card: ClientCard, index: number) => (
-              <UniversalCard
+              <GameCard
                 key={card.id || index}
                 card={card}
-                displayMode={'choiceModal' as CardDisplayMode}
+                displayMode="choiceModal"
                 isClickable={true}
                 onClick={() => onMakeChoice(index)}
+                enableHover={true}
               />
             ))}
           </div>
@@ -114,12 +113,14 @@ export const ChoiceModal: React.FC<ChoiceModalProps> = React.memo(({
               const isSelectable = effect === 'black_friday_blitz_sell_product' ? ((card.inventory || 0) > 0) : true;
               
               return (
-                <div key={card.id || index} style={{ opacity: (isDisabled || !isSelectable) ? 0.5 : 1 }}>
-                  <UniversalCard
+                <div key={card.id || index} style={{ position: 'relative' }}>
+                  <GameCard
                     card={card}
-                    displayMode={'choiceModal' as CardDisplayMode}
+                    displayMode="choiceModal"
                     isClickable={!isDisabled && isSelectable}
-                    onClick={() => !isDisabled && isSelectable && onMakeChoice(index)}
+                    onClick={() => onMakeChoice(index)}
+                    enableHover={true}
+                    style={{ opacity: (isDisabled || !isSelectable) ? 0.5 : 1 }}
                   />
                   {effect === 'add_inventory_if_empty' && card.inventory === 0 && (
                     <div style={{ textAlign: 'center', marginTop: '5px', color: COLORS.success, fontWeight: 'bold' }}>
@@ -192,7 +193,11 @@ export const ChoiceModal: React.FC<ChoiceModalProps> = React.memo(({
           <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', flexWrap: 'wrap' }}>
             {cards.map((card: ClientCard, index: number) => (
               <div key={card.id || index} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
-                <UniversalCard card={card} displayMode={'choiceModal' as CardDisplayMode} />
+                <GameCard
+                  card={card}
+                  displayMode="choiceModal"
+                  enableHover={true}
+                />
                 <button 
                   onClick={() => onMakeChoice(index)}
                   style={{...BUTTON_STYLES, background: COLORS.danger, padding: '6px 12px', fontSize: FONT_SIZES.small}}
@@ -220,12 +225,13 @@ export const ChoiceModal: React.FC<ChoiceModalProps> = React.memo(({
           <p style={{fontSize: FONT_SIZES.body, margin: '0 0 10px 0'}}>You drew these cards. Click one to discard:</p>
           <div style={{ display: 'flex', justifyContent: 'center', gap: '15px', flexWrap: 'wrap' }}>
             {cards.map((card: ClientCard, index: number) => (
-              <UniversalCard 
-                key={card.id || index} 
-                card={card} 
-                displayMode={'choiceModal' as CardDisplayMode}
-                isClickable={true} 
-                onClick={() => onMakeChoice(index)} 
+              <GameCard
+                key={card.id || index}
+                card={card}
+                displayMode="choiceModal"
+                isClickable={true}
+                onClick={() => onMakeChoice(index)}
+                enableHover={true}
               />
             ))}
           </div>

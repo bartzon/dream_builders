@@ -1,8 +1,8 @@
 import React from 'react'
 import type { ClientCard, EffectContextUI } from '../../../types/game'
 import { FONT_SIZES } from '../../../constants/ui'
-import { BonusIndicator, type BonusInfo } from './BonusIndicator'
-import { UniversalCard, type CardDisplayMode } from './UniversalCard'
+import { GameCard } from './GameCard'
+import type { BonusInfo } from './BonusIndicator'
 import { calculateProductRevenue } from "../../../utils/revenue-helpers"
 
 interface ProductsSectionProps {
@@ -66,33 +66,42 @@ export const ProductsSection = React.memo(({
     const isAffected = product.id ? affectedCardIds.has(product.id) : false
 
     return (
-      <div key={`${product.id || 'product'}-${index}`} style={{position: 'relative'}}>
-        <UniversalCard
-          card={product}
-          displayMode={'board' as CardDisplayMode}
-          isClickable={false}
-          isAffected={isAffected}
-          isSelected={false}
-          showBonuses={true}
-          revenueBonus={revenueBonus}
-          onMouseEnterCard={(e) => onShowTooltip(product, e)}
-          onMouseLeaveCard={onHideTooltip}
-          onMouseMoveCard={(e) => onShowTooltip(product, e)}
-        />
-        {bonuses.length > 0 && <BonusIndicator bonuses={bonuses} position="bottom-left" />}
-      </div>
+      <GameCard
+        key={`${product.id || 'product'}-${index}`}
+        card={product}
+        displayMode="board"
+        isAffected={isAffected}
+        showBonuses={true}
+        revenueBonus={revenueBonus}
+        bonuses={bonuses}
+        onShowTooltip={onShowTooltip}
+        onHideTooltip={onHideTooltip}
+        enableHover={true}
+      />
     )
   }
 
   return (
-    <div style={{ marginBottom: '20px' }}>
-      <h4 style={{ fontSize: FONT_SIZES.subheading }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <h4 style={{ 
+        fontSize: FONT_SIZES.subheading, 
+        marginTop: 0,
+        marginBottom: '15px',
+        flexShrink: 0
+      }}>
         Your Products ({products.length})
       </h4>
-      <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+      <div style={{ 
+        display: 'flex', 
+        gap: '8px', 
+        flexWrap: 'wrap',
+        marginBottom: 0,
+        flex: 1,
+        alignContent: 'flex-start'
+      }}>
         {products.length === 0 ? (
           <div style={{ 
-            padding: '20px', 
+            padding: '15px',
             border: '2px dashed #666', 
             borderRadius: '5px',
             color: '#999',

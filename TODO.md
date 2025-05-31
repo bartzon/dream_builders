@@ -2,7 +2,7 @@
 
 This file tracks unimplemented features, card effects, and mechanics.
 
-## III. UI & UX Enhancements
+## I. UI & UX Enhancements
 
 - **Advanced Player Choice UI**: 
     - UI for Custom App modal play choice.
@@ -11,8 +11,13 @@ This file tracks unimplemented features, card effects, and mechanics.
 - **Tooltips**: Review all tooltips for clarity and completeness, especially for cards with complex or unimplemented effects.
 - **Visual Feedback**: 
     - Enhance for other game states or effects (e.g., when a choice is pending generally).
+- **Big Card Viewer**: 
+    - Implement a full-screen or large overlay card viewer to showcase card artwork
+    - Should be triggered by right-click or specific key/button on cards
+    - Display high-resolution card art, full effect text, and flavor text
+    - Include smooth animations for opening/closing the viewer
 
-## IV. Code & System Improvements
+## II. Code & System Improvements
 
 - **Multiplayer Support**: Adapt game logic and UI for multiplayer (if planned).
 - **Card Balance**: Comprehensive playtesting and balancing of card costs, effects, and hero powers.
@@ -21,7 +26,7 @@ This file tracks unimplemented features, card effects, and mechanics.
 - **`cardEffects.ts` Linter Issues**: Manually ensure `cardEffects.ts` is correctly refactored by removing all local helper function definitions and ensuring all callsites use imported helpers to resolve persistent linter errors. 
 
 
-## V. Real World opponent
+## III. Real World opponent
 - // TASK: Implement "The Real World" opponent deck for the single-player game mode.
 
 // CONTEXT:
@@ -87,7 +92,7 @@ export const realWorldDeck: RealWorldCard[] = [
     id: 'supplier_delay',
     name: 'Supplier Delay',
     type: 'Ongoing',
-    text: 'Reduce all new product inventory by 1 for 2 turns.',
+    text: 'Reduce all product inventory by 1 for 2 turns.',
     flavor: 'Waiting is the new hustle.',
     duration: 2
   },

@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { FONT_SIZES } from '../../../constants/ui'
-import { HandCard } from './HandCard'
+import { GameCard } from './GameCard'
 import type { ClientCard, EffectContextUI } from '../../../types/game'
 
 interface PlayerHandProps {
@@ -14,12 +14,13 @@ interface PlayerHandProps {
   onPlayCard: (index: number) => void
   onShowTooltip: (card: ClientCard, e: React.MouseEvent) => void
   onHideTooltip: () => void
+  isChoiceModalOpen?: boolean
 }
 
 // Hearthstone-like card animation constants
 const FAN_ANGLE = 10 // Max angle for fanning cards
 const CARD_OVERLAP = 40 // Pixels to overlap cards by
-const HOVER_RAISE_Y = 30 // Pixels to raise card on hover
+const HOVER_RAISE_Y = 90 // Increased from 30 to show full card when hovering
 const HOVER_SCALE = 1.15 // Scale factor on hover
 
 export const PlayerHand = React.memo(({
@@ -32,19 +33,10 @@ export const PlayerHand = React.memo(({
   affectedCardIds,
   onPlayCard,
   onShowTooltip,
-  onHideTooltip
+  onHideTooltip,
+  isChoiceModalOpen = false
 }: PlayerHandProps) => {
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null) // Added state for hovered card
-
-  const handleMouseEnterCard = (index: number, card: ClientCard, e: React.MouseEvent) => {
-    setHoveredIndex(index)
-    onShowTooltip(card, e)
-  }
-
-  const handleMouseLeaveCard = () => {
-    setHoveredIndex(null)
-    onHideTooltip()
-  }
+  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
 
   const renderHandCard = (card: ClientCard, index: number) => {
     const costInfo = getCostInfo(card)
@@ -62,42 +54,49 @@ export const PlayerHand = React.memo(({
     const numCards = hand.length
     const isHovered = hoveredIndex === index
     const cardAngle = numCards > 1 ? (index - (numCards - 1) / 2) * (FAN_ANGLE / (numCards -1 )) * 2 : 0;
-    const cardRaiseY = isHovered ? -HOVER_RAISE_Y : 0
-    const cardScale = isHovered ? HOVER_SCALE : (canPlay ? 1 : 0.85)
     const cardZIndex = isHovered ? 100 : index
 
     const cardStyle: React.CSSProperties = {
-      transition: 'transform 0.2s ease-out, filter 0.2s ease-out',
-      transform: `translateY(${cardRaiseY}px) rotate(${cardAngle}deg) scale(${cardScale})`,
+      transform: `rotate(${cardAngle}deg)`,
       transformOrigin: 'bottom center',
       marginLeft: index > 0 ? `-${CARD_OVERLAP}px` : '0',
       zIndex: cardZIndex,
-      position: 'relative', // Needed for z-index to work
+      position: 'relative',
+      transition: 'z-index 0s' // Instant z-index change
     }
 
     return (
-      <div style={cardStyle} // Apply dynamic style here
-        onMouseEnter={(e) => handleMouseEnterCard(index, card, e)}
-        onMouseLeave={handleMouseLeaveCard}
-        onMouseMove={(e) => onShowTooltip(card, e)} // Keep existing mouse move for tooltip
-      >
-        <HandCard
-          key={`${card.id || 'card'}-${index}`}
-          card={card}
-          canPlay={canPlay}
-          isDiscardMode={false}
-          isAffected={isAffected}
-          costInfo={costInfo}
-          onCardClick={() => canPlay ? onPlayCard(index) : () => {} }
-         // Remove individual card mouse enter/leave/move, handled by the div wrapper now
-        />
-      </div>
+      <GameCard
+        key={`${card.id || 'card'}-${index}`}
+        card={card}
+        displayMode="hand"
+        canPlay={canPlay}
+        isClickable={canPlay}
+        onClick={() => onPlayCard(index)}
+        isAffected={isAffected}
+        costInfo={costInfo}
+        onShowTooltip={(card, e) => {
+          setHoveredIndex(index)
+          onShowTooltip(card, e)
+        }}
+        onHideTooltip={() => {
+          setHoveredIndex(null)
+          onHideTooltip()
+        }}
+        enableHover={!isChoiceModalOpen}
+        hoverScale={HOVER_SCALE}
+        hoverRaiseY={HOVER_RAISE_Y}
+        style={cardStyle}
+      />
     )
   }
 
   return (
-    <div>
-      <h4 style={{ fontSize: FONT_SIZES.subheading }}>
+    <div style={{ position: 'relative', zIndex: 50 }}>
+      <h4 style={{ 
+        fontSize: FONT_SIZES.subheading, 
+        marginBottom: '10px'
+      }}>
         Your Hand ({hand.length})
         {midnightOilPending && (
           <span style={{
@@ -113,14 +112,16 @@ export const PlayerHand = React.memo(({
       </h4>
       <div style={{
         display: 'flex',
-        justifyContent: 'center', // Center the cards
-        alignItems: 'flex-end', // Align cards to the bottom
-        paddingBottom: `${HOVER_RAISE_Y + 20}px`, // Add padding to prevent cut-off
-        minHeight: '200px' // Ensure enough space for raised cards
+        justifyContent: 'center',
+        alignItems: 'flex-end',
+        paddingBottom: '20px',
+        minHeight: '160px',
+        overflow: 'visible',
+        position: 'relative'
       }}>
         {hand.length === 0 ? (
           <div style={{
-            padding: '20px',
+            padding: '15px',
             border: '2px dashed #666',
             borderRadius: '5px',
             color: '#999',
