@@ -227,6 +227,8 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
         heroPowerName={heroPowerInfo.name}
         heroPowerDescription={heroPowerInfo.description}
         cost={heroPowerCost}
+        heroId={uiState.hero}
+        cardsPlayedThisTurn={effectContext.cardsPlayedThisTurn || 0}
       />
 
       {/* Credits Modal */}

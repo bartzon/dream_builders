@@ -8,6 +8,8 @@ interface HeroPowerTooltipProps {
   heroPowerName: string
   heroPowerDescription: string
   cost: number
+  heroId?: string
+  cardsPlayedThisTurn?: number
 }
 
 export const HeroPowerTooltip = React.memo(({
@@ -16,7 +18,9 @@ export const HeroPowerTooltip = React.memo(({
   y,
   heroPowerName,
   heroPowerDescription,
-  cost
+  cost,
+  heroId,
+  cardsPlayedThisTurn = 0
 }: HeroPowerTooltipProps) => {
   if (!visible) return null
 
@@ -53,6 +57,16 @@ export const HeroPowerTooltip = React.memo(({
       }}>
         {heroPowerDescription}
       </div>
+      {heroId === 'community_leader' && (
+        <div style={{
+          marginBottom: '8px',
+          fontSize: FONT_SIZES.tooltipMeta,
+          color: cardsPlayedThisTurn >= 2 ? '#10b981' : '#9ca3af',
+          fontStyle: 'italic'
+        }}>
+          {cardsPlayedThisTurn} {cardsPlayedThisTurn === 1 ? 'card' : 'cards'} played this turn
+        </div>
+      )}
       <div style={{ 
         background: '#fbbf24',
         color: '#000',
