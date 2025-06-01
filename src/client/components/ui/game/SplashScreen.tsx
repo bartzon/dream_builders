@@ -22,7 +22,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onStartGame }) => {
           style={{
             width: '100vw',
             height: '100vh',
-            background: 'radial-gradient(ellipse at top, #3b2a4f, #1a1a2e 70%)',
+            background: `url('/src/assets/background.png') center/cover no-repeat, radial-gradient(ellipse at top, #3b2a4f, #1a1a2e 70%)`,
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',

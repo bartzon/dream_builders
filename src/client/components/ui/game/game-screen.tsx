@@ -208,7 +208,7 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
     <div style={{
       width: '100vw',
       height: '100vh',
-      background: 'radial-gradient(ellipse at top, #3b2a4f, #1a1a2e 70%)',
+      background: `url('/src/assets/background.png') center/cover no-repeat, radial-gradient(ellipse at top, #3b2a4f, #1a1a2e 70%)`,
       color: 'white',
       padding: '20px',
       paddingBottom: '0', // Remove bottom padding since hand extends beyond
