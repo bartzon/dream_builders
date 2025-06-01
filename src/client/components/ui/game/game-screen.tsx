@@ -8,7 +8,6 @@ import { HeroControls } from './HeroControls'
 import { PlayerHand } from './PlayerHand'
 import { ProductsSection } from './ProductsSection'
 import { ToolsAndEmployees } from './ToolsAndEmployees'
-import { Credits } from '../Credits'
 import { useGameState } from '../../../hooks/useGameState'
 import { useTooltip } from '../../../hooks/useTooltip'
 import { useCardDiscount } from '../../../hooks/useCardDiscount'
@@ -33,7 +32,6 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
   const [gameLog, setGameLog] = useState<string[]>([])
   const [lastPlayerRevenue, setLastPlayerRevenue] = useState(0)
   const [affectedCardIds, setAffectedCardIds] = useState<Set<string>>(new Set());
-  const [showCredits, setShowCredits] = useState(false)
 
   // Use custom hooks
   const { uiState, effectContext, toolsAndEmployees } = useGameState(G, playerID)
@@ -231,9 +229,6 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
         cardsPlayedThisTurn={effectContext.cardsPlayedThisTurn || 0}
       />
 
-      {/* Credits Modal */}
-      <Credits isOpen={showCredits} onClose={() => setShowCredits(false)} />
-
       {/* Header */}
       <div style={{
         background: 'rgba(0,0,0,0.2)',
@@ -251,7 +246,6 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
           revenue={uiState.revenue}
           effectContext={effectContext}
           hasShoestringBudget={toolsAndEmployees.some(card => card.effect === 'shoestring_budget')}
-          onCreditsClick={() => setShowCredits(true)}
         />
       </div>
 
