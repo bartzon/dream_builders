@@ -78,7 +78,7 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
   useEffect(() => {
     if (uiState.revenue > lastPlayerRevenue && lastPlayerRevenue > 0) {
       try {
-        const audio = new Audio('/sounds/cha_ching_sound.mp3')
+        const audio = new Audio('/dream_builders/sounds/cha_ching_sound.mp3')
         audio.volume = 0.7
         audio.play().catch(() => {})
       } catch {
@@ -133,7 +133,7 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
   useEffect(() => {
     if (effectContext.turnStartProductsSold && isMyTurn) {
       try {
-        const audio = new Audio('/sounds/cha_ching_sound.mp3')
+        const audio = new Audio('/dream_builders/sounds/cha_ching_sound.mp3')
         audio.volume = 0.5
         audio.play().catch(() => {})
       } catch {
@@ -184,7 +184,7 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
     <div style={{
       width: '100vw',
       height: '100vh',
-      background: `url('/src/assets/background.png') center/cover no-repeat, radial-gradient(ellipse at top, #3b2a4f, #1a1a2e 70%)`,
+      background: `url('/dream_builders/assets/background.png') center/cover no-repeat, radial-gradient(ellipse at top, #3b2a4f, #1a1a2e 70%)`,
       color: 'white',
       padding: '20px',
       paddingBottom: '0', // Remove bottom padding since hand extends beyond

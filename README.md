@@ -130,6 +130,33 @@ This project is a work in progress. Contributions are welcome, especially in are
 - Enhancing UI/UX, especially for player choices.
 - Game balancing and adding more diverse card interactions.
 
+## 🚀 Deployment
+
+### GitHub Pages
+
+The project is configured to deploy to GitHub Pages. To deploy:
+
+1. Ensure your repository is pushed to GitHub
+2. Run the deployment command:
+   ```bash
+   npm run deploy
+   ```
+3. The game will be available at: `https://[your-username].github.io/dream_builders/`
+
+The deployment process:
+- Builds the project (`npm run build`)
+- Deploys the `dist` folder to the `gh-pages` branch
+- GitHub Pages will automatically serve from this branch
+
+### Manual Deployment
+
+If you prefer to deploy manually:
+1. Build the project: `npm run build`
+2. The production files will be in the `dist` folder
+3. Deploy this folder to your preferred hosting service
+
+Note: The base URL is configured as `/dream_builders/` in `vite.config.ts`. If deploying to a different path, update this configuration.
+
 ## 📄 License
 
 MIT License.

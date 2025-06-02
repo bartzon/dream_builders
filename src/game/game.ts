@@ -97,6 +97,8 @@ export const DreamBuildersGame: Game<GameState> = {
       
       if (!G.effectContext) G.effectContext = {};
       if (!G.effectContext[playerID]) G.effectContext[playerID] = initEffectContext();
+      G.effectContext[playerID].recentlySoldProductIds = [];
+      G.effectContext[playerID].recentlySoldProductTimestamps = {};
       processAutomaticSales(G, playerID);
       
       // Check if player won from automatic sales

@@ -24,7 +24,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onStartGame }) => {
           style={{
             width: '100vw',
             height: '100vh',
-            background: `url('/src/assets/background.png') center/cover no-repeat, radial-gradient(ellipse at top, #3b2a4f, #1a1a2e 70%)`,
+            background: `url('/dream_builders/assets/background.png') center/cover no-repeat, radial-gradient(ellipse at top, #3b2a4f, #1a1a2e 70%)`,
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
@@ -66,7 +66,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onStartGame }) => {
             {/* Game Logo/Title */}
             <div>
               <img
-                src="/src/assets/logo.png"
+                src="/dream_builders/assets/logo.png"
                 alt="Dream Builders"
                 style={{
                   maxWidth: '500px',

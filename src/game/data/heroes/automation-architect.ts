@@ -80,7 +80,7 @@ export const automationArchitectDeck: Card[] = [
     keywords: ['Draw', 'Flexibility'],
     text: 'When played: draw 1 card. Recurring: Gain 1 capital.',
     effect: 'custom_app',
-    flavor: 'There’s a plug-in for that.',
+    flavor: 'There\'s a plug-in for that.',
   },
   {
     id: 'aa9',
@@ -108,7 +108,7 @@ export const automationArchitectHero: Hero = {
   id: 'automation_architect',
   name: 'The Automation Architect',
   color: 'Blue',
-  image: 'src/assets/heroes/automation_architect.png',
+  image: '/dream_builders/assets/heroes/automation_architect.png',
   starterDeck: automationArchitectDeck,
   flavorText: 'A technical founder building tools that run the business for them.',
   playstyle: 'Builds an engine of passive income over time.',

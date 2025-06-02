@@ -65,7 +65,7 @@ export const Tutorial: React.FC<TutorialProps> = ({ onClose }) => {
         <div style={{ textAlign: 'center' }}>
           <div style={{ marginBottom: '30px' }}>
             <img
-              src="/src/assets/logo.png"
+              src="/dream_builders/assets/logo.png"
               alt="Dream Builders"
               style={{
                 maxWidth: '300px',

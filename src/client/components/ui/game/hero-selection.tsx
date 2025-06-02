@@ -44,7 +44,7 @@ export default function HeroSelection({ onHeroSelected }: HeroSelectionProps) {
     <div style={{
       width: '100vw',
       height: '100vh',
-      background: `url('/src/assets/background.png') center/cover no-repeat, linear-gradient(to bottom, #1e293b, #0f172a)`,
+      background: `url('/dream_builders/assets/background.png') center/cover no-repeat, linear-gradient(to bottom, #1e293b, #0f172a)`,
       color: 'white',
       padding: '40px',
       display: 'flex',

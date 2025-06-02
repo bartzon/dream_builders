@@ -39,7 +39,7 @@ export const UniversalCard: React.FC<UniversalCardProps> = React.memo(({
 
   React.useEffect(() => {
     if (card.id) {
-      const imagePath = `/src/assets/cards/${card.id}.png`;
+      const imagePath = `/dream_builders/assets/cards/${card.id}.png`;
       const img = new Image();
       img.src = imagePath;
       img.onload = () => setArtworkSrc(imagePath);

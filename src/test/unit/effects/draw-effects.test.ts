@@ -45,7 +45,7 @@ describe('Draw Effects - Parameterized Tests', () => {
 
   describe.each(simpleDrawEffects)(
     '$name - Draw $drawCount cards',
-    ({ name, effectFn, drawCount, additionalEffect }) => {
+    ({ effectFn, drawCount, additionalEffect }) => {
       it(`should draw ${drawCount} cards`, () => {
         // Add enough cards to deck
         const deckCards = Array.from({ length: drawCount + 2 }, () => 
@@ -115,7 +115,7 @@ describe('Draw Effects - Parameterized Tests', () => {
 
   describe.each(conditionalDrawEffects)(
     '$name - $condition',
-    ({ name, effectFn, condition, setup, expectedDraw }) => {
+    ({ effectFn, condition, setup, expectedDraw }) => {
       it(`should draw ${expectedDraw} cards when ${condition}`, () => {
         G = setup()
           .withDeck(

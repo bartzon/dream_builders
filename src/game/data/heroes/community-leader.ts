@@ -108,7 +108,7 @@ export const communityLeaderHero: Hero = {
   id: 'community_leader',
   name: 'The Community Leader',
   color: 'Green',
-  image: 'src/assets/heroes/community_leader.png',
+  image: '/dream_builders/assets/heroes/community_leader.png',
   starterDeck: communityLeaderDeck,
   flavorText: 'Uses content and conversation to spark passionate growth.',
   playstyle: 'High variance, explosive combo turns with viral momentum.',

@@ -45,7 +45,7 @@ export const HeroDisplay = React.memo(
         onMouseMove={onHeroPowerMouseMove}
       >
         <img
-          src={`/${hero.image}`}
+          src={hero.image}
           alt={hero.name}
           style={{
             width: '180px', // Adjust size as needed
