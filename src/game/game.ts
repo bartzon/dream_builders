@@ -46,12 +46,12 @@ function selectRandomCards<T>(cards: T[], count: number): T[] {
   return shuffled.slice(0, Math.min(count, shuffled.length));
 }
 
-// New drafting function that creates a 40-card deck
+// New drafting function that creates a 45-card deck
 function createDraftedDeck(heroStarterDeck: Card[]): Card[] {
   const heroCards = [...heroStarterDeck];
   const additionalHeroCards = selectRandomCards(heroStarterDeck, 10);
   const inventoryCards = selectRandomCards(inventorySupportCards, 7);
-  const productCards = selectRandomCards(sharedProductPool, 13);
+  const productCards = selectRandomCards(sharedProductPool, 18);
   const combinedDeck = [
     ...heroCards,          
     ...additionalHeroCards, 

@@ -7,7 +7,7 @@ A strategic digital card game where players take on the roles of entrepreneurs, 
 Dream Builders is a card game for 1 player (currently) where you choose a hero with a unique playstyle and deck, then attempt to build your business to reach **$500,000 in revenue**.
 
 ### Core Features
-- **5 Unique Heroes**: Each with distinct abilities and a 10-card starter deck that forms the basis of a 40-card drafted play deck.
+- **5 Unique Heroes**: Each with distinct abilities and a 10-card starter deck that forms the basis of a 45-card drafted play deck.
 - **Product-Based Economy**: Play Product cards, manage their inventory, and generate revenue through automatic sales and card effects.
 - **Dynamic Card Effects**: Utilize Actions, deploy Tools for ongoing benefits, and hire Employees with unique skills.
 - **Cost and Discount System**: Manage your Capital to play cards, and leverage effects that provide temporary or ongoing cost reductions.
