@@ -72,6 +72,9 @@ export interface EffectContext {
   
   // Unified list for recently affected board cards for UI feedback
   recentlyAffectedCardIds?: string[];
+  
+  // Track products that were just sold for UI animations
+  recentlySoldProductIds?: string[];
 }
 
 // Initialize effect context for each player
@@ -117,6 +120,7 @@ export function initEffectContext(): EffectContext {
     warehouseExpansionCount: 0,
     recentlyAffectedCardIds: [],
     productRevenueBoosts: {},
+    recentlySoldProductIds: [],
   };
 }
 
@@ -182,5 +186,6 @@ export function clearTempEffects(G: GameState, playerID: string) {
     ctx.warehouseExpansionCount = 0;
     ctx.recentlyAffectedCardIds = [];
     ctx.productRevenueBoosts = {}; // Clear product revenue boosts at end of turn
+    ctx.recentlySoldProductIds = [];
   }
 } 

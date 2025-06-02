@@ -74,4 +74,5 @@ export interface EffectContextUI {
   warehouseExpansionCount?: number
   productCardsPlayedThisTurn?: number
   recentlyAffectedCardIds?: string[]
+  recentlySoldProductIds?: string[]
 } 

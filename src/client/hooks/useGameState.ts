@@ -36,9 +36,10 @@ export function useGameState(
     productRevenueBoosts: effectContextRaw.productRevenueBoosts as Record<string, number> | undefined,
     delayedInventoryBoostTurns: effectContextRaw.delayedInventoryBoostTurns as number | undefined,
     soloHustlerDiscountedCard: effectContextRaw.soloHustlerDiscountedCard as string | undefined,
-    warehouseExpansionCount: effectContextRaw.warehouseExpansionCount as number | undefined,
-    productCardsPlayedThisTurn: effectContextRaw.productCardsPlayedThisTurn as number | undefined,
-    recentlyAffectedCardIds: effectContextRaw.recentlyAffectedCardIds as string[] | undefined,
+    warehouseExpansionCount: effectContextRaw.warehouseExpansionCount as number || 0,
+    productCardsPlayedThisTurn: effectContextRaw.productCardsPlayedThisTurn as number || 0,
+    recentlyAffectedCardIds: effectContextRaw.recentlyAffectedCardIds as string[] || [],
+    recentlySoldProductIds: effectContextRaw.recentlySoldProductIds as string[] || [],
   }
   
   // Extract pending choices

@@ -119,6 +119,28 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
     }
   }, [effectContext.recentlyAffectedCardIds, affectedCardIds]);
 
+  // Handle sparkle animation for recently sold products
+  useEffect(() => {
+    if (effectContext.recentlySoldProductIds && effectContext.recentlySoldProductIds.length > 0) {
+      // Play cash register sound once for all products sold
+      try {
+        const audio = new Audio('/sounds/cha_ching_sound.mp3')
+        audio.volume = 0.5
+        audio.play().catch(() => {})
+      } catch {
+        // Ignore audio errors
+      }
+      
+      // Clear the recently sold products after the sparkle animation completes (2s)
+      const timeout = setTimeout(() => {
+        // We can't directly modify the game state here, but the effect will be cleared
+        // at the end of the turn or when new products are sold
+      }, 2000)
+      
+      return () => clearTimeout(timeout)
+    }
+  }, [effectContext.recentlySoldProductIds?.length]) // Only trigger when the length changes
+
   // Game action handlers
   const handlePlayCard = useCallback((cardIndex: number) => {
     if (!isMyTurn) return

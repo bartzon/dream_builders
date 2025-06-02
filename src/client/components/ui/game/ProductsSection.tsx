@@ -4,6 +4,7 @@ import { FONT_SIZES } from '../../../constants/ui'
 import { GameCard } from './GameCard'
 import type { BonusInfo } from './BonusIndicator'
 import { calculateProductRevenue } from "../../../utils/revenue-helpers"
+import { SparkleEffect } from './SparkleEffect'
 
 interface ProductsSectionProps {
   products: ClientCard[]
@@ -64,20 +65,46 @@ export const ProductsSection = React.memo(({
     }
     
     const isAffected = product.id ? affectedCardIds.has(product.id) : false
+    const isRecentlySold = product.id && effectContext.recentlySoldProductIds?.includes(product.id)
 
     return (
-      <GameCard
-        key={`${product.id || 'product'}-${index}`}
-        card={product}
-        displayMode="board"
-        isAffected={isAffected}
-        showBonuses={true}
-        revenueBonus={revenueBonus}
-        bonuses={bonuses}
-        onShowTooltip={onShowTooltip}
-        onHideTooltip={onHideTooltip}
-        enableHover={true}
-      />
+      <div 
+        key={`${product.id || 'product'}-${index}`} 
+        style={{ 
+          position: 'relative',
+          borderRadius: '8px',
+          boxShadow: isRecentlySold ? '0 0 20px rgba(255, 215, 0, 0.6)' : 'none',
+          animation: isRecentlySold ? 'pulse-glow 2s ease-out' : 'none'
+        }}
+      >
+        <GameCard
+          card={product}
+          displayMode="board"
+          isAffected={isAffected}
+          showBonuses={true}
+          revenueBonus={revenueBonus}
+          bonuses={bonuses}
+          onShowTooltip={onShowTooltip}
+          onHideTooltip={onHideTooltip}
+          enableHover={true}
+        />
+        {isRecentlySold && <SparkleEffect />}
+        {isRecentlySold && (
+          <style>{`
+            @keyframes pulse-glow {
+              0% {
+                box-shadow: 0 0 20px rgba(255, 215, 0, 0.6);
+              }
+              50% {
+                box-shadow: 0 0 30px rgba(255, 215, 0, 0.8), 0 0 40px rgba(255, 215, 0, 0.4);
+              }
+              100% {
+                box-shadow: 0 0 20px rgba(255, 215, 0, 0);
+              }
+            }
+          `}</style>
+        )}
+      </div>
     )
   }
 

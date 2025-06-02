@@ -64,6 +64,14 @@ export function sellProduct(G: GameState, playerID: string, product: Card, quant
   if (ctx) {
     ctx.soldProductThisTurn = true;
     ctx.itemsSoldThisTurn = (ctx.itemsSoldThisTurn || 0) + quantity;
+    
+    // Track this product as recently sold for UI animation
+    if (product.id && !ctx.recentlySoldProductIds) {
+      ctx.recentlySoldProductIds = [];
+    }
+    if (product.id) {
+      ctx.recentlySoldProductIds?.push(product.id);
+    }
   }
   return totalRevenue;
 } 
