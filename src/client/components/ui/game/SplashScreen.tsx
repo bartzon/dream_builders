@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Credits } from '../Credits'
+import { Tutorial } from './Tutorial'
 import { FONT_SIZES, COLORS, BUTTON_STYLES } from '../../../constants/ui'
 
 interface SplashScreenProps {
@@ -8,6 +9,7 @@ interface SplashScreenProps {
 
 export const SplashScreen: React.FC<SplashScreenProps> = ({ onStartGame }) => {
   const [showCredits, setShowCredits] = useState(false)
+  const [showTutorial, setShowTutorial] = useState(false)
   const [isVisible, setIsVisible] = useState(false)
 
   useEffect(() => {
@@ -17,7 +19,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onStartGame }) => {
 
   return (
     <>
-      {!showCredits && (
+      {!showCredits && !showTutorial && (
         <div
           style={{
             width: '100vw',
@@ -86,22 +88,6 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onStartGame }) => {
               </p>
             </div>
 
-            {/* Heroes Image - Absolutely positioned */}
-            <img
-              src="/src/assets/heroes.png"
-              alt="Heroes"
-              style={{
-                position: 'absolute',
-                width: 'auto',
-                height: '30%',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-                filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.3))',
-                zIndex: 0,
-              }}
-            />
-
             {/* Buttons container */}
             <div
               style={{
@@ -138,6 +124,33 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onStartGame }) => {
                 }}
               >
                 NEW GAME
+              </button>
+
+              {/* Tutorial Button */}
+              <button
+                onClick={() => setShowTutorial(true)}
+                style={{
+                  ...BUTTON_STYLES,
+                  background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+                  color: 'white',
+                  padding: '16px 50px',
+                  fontSize: FONT_SIZES.large,
+                  borderRadius: '12px',
+                  boxShadow: '0 6px 15px rgba(59, 130, 246, 0.3), 0 3px 8px rgba(0,0,0,0.3)',
+                  transition: 'all 0.3s ease',
+                  border: '2px solid transparent',
+                  minWidth: '250px',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-2px)'
+                  e.currentTarget.style.boxShadow = '0 8px 20px rgba(59, 130, 246, 0.4), 0 5px 12px rgba(0,0,0,0.4)'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)'
+                  e.currentTarget.style.boxShadow = '0 6px 15px rgba(59, 130, 246, 0.3), 0 3px 8px rgba(0,0,0,0.3)'
+                }}
+              >
+                HOW TO PLAY
               </button>
 
               {/* Credits Button */}
@@ -215,6 +228,9 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onStartGame }) => {
 
       {/* Credits Modal */}
       <Credits isOpen={showCredits} onClose={() => setShowCredits(false)} />
+
+      {/* Tutorial Modal */}
+      {showTutorial && <Tutorial onClose={() => setShowTutorial(false)} />}
 
       {/* CSS Animations */}
       <style>{`

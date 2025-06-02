@@ -89,7 +89,7 @@ export const ProductsSection = React.memo(({
         marginBottom: '15px',
         flexShrink: 0
       }}>
-        Your Products ({products.length})
+        Products
       </h4>
       <div style={{ 
         display: 'flex', 
@@ -99,19 +99,7 @@ export const ProductsSection = React.memo(({
         flex: 1,
         alignContent: 'flex-start'
       }}>
-        {products.length === 0 ? (
-          <div style={{ 
-            padding: '15px',
-            border: '2px dashed #666', 
-            borderRadius: '5px',
-            color: '#999',
-            fontSize: FONT_SIZES.body
-          }}>
-            No products
-          </div>
-        ) : (
-          products.map(renderProduct)
-        )}
+        {products.map(renderProduct)}
       </div>
     </div>
   )

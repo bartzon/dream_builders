@@ -27,7 +27,7 @@ export const ToolsAndEmployees = React.memo(({
         marginBottom: '15px',
         flexShrink: 0
       }}>
-        Your Tools & Employees ({cards.length})
+        Tools & Employees
       </h4>
       <div style={{ 
         display: 'flex', 
@@ -37,9 +37,7 @@ export const ToolsAndEmployees = React.memo(({
         flex: 1,
         alignContent: 'flex-start'
       }}>
-        {cards.length === 0 ? (
-          <EmptyState message="No tools or employees" />
-        ) : (
+        {
           cards.map((card, i) => {
             const isAffected = card.id ? affectedCardIds.has(card.id) : false;
             
@@ -75,7 +73,7 @@ export const ToolsAndEmployees = React.memo(({
                 enableHover={true}
               />
             );
-          })
+          }
         )}
       </div>
     </div>
