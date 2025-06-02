@@ -68,7 +68,7 @@ export const serialFounderDeck: Card[] = [
     cost: 2,
     type: 'Action',
     keywords: ['Capital', 'Marketing'],
-    text: 'Next time you gain capital this turn, double it.',
+    text: 'Next time you gain capital, double it.',
     effect: 'investor_buzz',
     flavor: 'Hype is a currency.',
   },

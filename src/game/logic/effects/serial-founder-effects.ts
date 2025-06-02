@@ -43,7 +43,7 @@ export const serialFounderCardEffects: Record<string, (G: GameState, playerID: s
   },
   // Serial Operator: Your Products cost 1 less.
   'serial_operator': passiveEffect, // Cost reduction handled in getCardDiscount if implemented
-  // Investor Buzz: Next time you gain capital this turn, double it.
+  // Investor Buzz: Next time you gain capital, double it.
   'investor_buzz': (G, playerID) => {
     const ctx = ensureEffectContext(G, playerID);
     ctx.doubleCapitalGain = true;

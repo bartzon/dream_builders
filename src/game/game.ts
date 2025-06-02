@@ -104,7 +104,10 @@ export const DreamBuildersGame: Game<GameState> = {
       if (G.gameOver) return;
       
       const baseCapital = Math.min(G.turn, GAME_CONFIG.MAX_CAPITAL);
-      player.capital = G.effectContext[playerID].doubleCapitalGain ? Math.min(GAME_CONFIG.MAX_CAPITAL, baseCapital * 2) : baseCapital;
+      // Use gainCapital instead of direct assignment to trigger Investor Buzz effect
+      player.capital = 0; // Reset capital first
+      gainCapital(G, playerID, baseCapital); // This will handle doubling if Investor Buzz is active
+      
       processOverheadCosts(G, playerID);
       for (let i = 0; i < GAME_CONFIG.CARDS_DRAWN_PER_TURN; i++) {
         drawCard(player, 'Start of turn', G.gameLog); // Uses imported drawCard

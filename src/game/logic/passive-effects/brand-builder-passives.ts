@@ -1,5 +1,6 @@
 import type { GameState } from '../../state';
 import { drawCard } from '../utils/deck-helpers';
+import { gainCapital } from '../utils/effect-helpers';
 
 export function handleBrandBuilderPassives(G: GameState, playerID: string): void {
   const player = G.players[playerID];
@@ -45,7 +46,7 @@ export function handleBrandBuilderPassives(G: GameState, playerID: string): void
   const emailList = player.board.Tools.find(t => t.effect === 'email_list');
   if (emailList) {
     if (player.board.Products.length >= 2) {
-      player.capital = Math.min(10, player.capital + 1);
+      gainCapital(G, playerID, 1);
       
       if (G.gameLog) {
         G.gameLog.push('Email List: Gained +1 capital for controlling 2+ Products.');

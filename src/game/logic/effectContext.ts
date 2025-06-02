@@ -1,5 +1,6 @@
 import type { GameState } from '../state';
 import type { Card } from '../types';
+import { gainCapital } from './utils/effect-helpers';
 
 // Effect context to track temporary state modifications
 export interface EffectContext {
@@ -149,8 +150,7 @@ export function clearTempEffects(G: GameState, playerID: string) {
     
     // Apply recurring capital if any
     if (ctx.recurringCapitalNextTurn && ctx.recurringCapitalNextTurn > 0) {
-      const player = G.players[playerID];
-      player.capital = Math.min(10, player.capital + ctx.recurringCapitalNextTurn);
+      gainCapital(G, playerID, ctx.recurringCapitalNextTurn);
       ctx.recurringCapitalNextTurn = 0;
     }
     
@@ -163,7 +163,6 @@ export function clearTempEffects(G: GameState, playerID: string) {
     ctx.nextProductDiscount = 0;
     ctx.extraCardPlays = 0;
     ctx.extraActionPlays = 0;
-    ctx.doubleCapitalGain = false;
     ctx.firstProductPlayed = false;
     ctx.playedActionThisTurn = false;
     ctx.playedToolThisTurn = false;
@@ -190,5 +189,6 @@ export function clearTempEffects(G: GameState, playerID: string) {
     ctx.productRevenueBoosts = {}; // Clear product revenue boosts at end of turn
     ctx.recentlySoldProductIds = [];
     // Note: nextRevenueGainMultiplier is NOT cleared here - it persists until used (e.g., Social Proof)
+    // Note: doubleCapitalGain is NOT cleared here - it persists until used (e.g., Investor Buzz)
   }
 } 

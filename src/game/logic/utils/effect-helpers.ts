@@ -14,7 +14,21 @@ export function ensureEffectContext(G: GameState, playerID: string) {
 
 export function gainCapital(G: GameState, playerID: string, amount: number) {
   const player = G.players[playerID];
-  player.capital = Math.min(10, player.capital + amount);
+  const ctx = G.effectContext?.[playerID];
+  
+  let finalAmount = amount;
+  
+  // Check for Investor Buzz effect (doubleCapitalGain)
+  if (ctx && ctx.doubleCapitalGain) {
+    finalAmount = amount * 2;
+    ctx.doubleCapitalGain = false; // Consume the effect - it's one-time only
+    
+    if (G.gameLog) {
+      G.gameLog.push(`Investor Buzz: Capital gain doubled! (${amount} → ${finalAmount})`);
+    }
+  }
+  
+  player.capital = Math.min(10, player.capital + finalAmount);
 }
 
 export function gainRevenue(G: GameState, playerID: string, amount: number) {
