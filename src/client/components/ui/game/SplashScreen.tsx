@@ -53,34 +53,54 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onStartGame }) => {
               transition: 'transform 0.5s ease-out',
               position: 'relative',
               zIndex: 1,
+              width: '100%',
+              height: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              padding: '60px 0',
             }}
           >
             {/* Game Logo/Title */}
-            <div style={{ marginBottom: '60px' }}>
-              <h1
+            <div>
+              <img
+                src="/src/assets/logo.png"
+                alt="Dream Builders"
                 style={{
-                  fontSize: '72px',
-                  fontWeight: 'bold',
-                  color: COLORS.warningLight,
-                  textShadow: '0 0 40px rgba(251, 191, 36, 0.5), 0 5px 15px rgba(0,0,0,0.5)',
-                  letterSpacing: '4px',
-                  marginBottom: '20px',
-                  animation: 'pulse 2s ease-in-out infinite',
+                  maxWidth: '500px',
+                  width: '100%',
+                  height: 'auto',
+                  filter: 'drop-shadow(0 0 40px rgba(251, 191, 36, 0.5)) drop-shadow(0 5px 15px rgba(0,0,0,0.5))',
                 }}
-              >
-                DREAM BUILDERS
-              </h1>
+              />
               <p
                 style={{
                   fontSize: FONT_SIZES.heading,
                   color: COLORS.textMuted,
                   fontStyle: 'italic',
                   opacity: 0.8,
+                  marginTop: '20px',
                 }}
               >
                 Build Your Startup Empire
               </p>
             </div>
+
+            {/* Heroes Image - Absolutely positioned */}
+            <img
+              src="/src/assets/heroes.png"
+              alt="Heroes"
+              style={{
+                position: 'absolute',
+                width: 'auto',
+                height: '30%',
+                top: '50%',
+                left: '50%',
+                transform: 'translate(-50%, -50%)',
+                filter: 'drop-shadow(0 10px 20px rgba(0,0,0,0.3))',
+                zIndex: 0,
+              }}
+            />
 
             {/* Buttons container */}
             <div
@@ -151,7 +171,6 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onStartGame }) => {
             {/* Decorative elements */}
             <div
               style={{
-                marginTop: '80px',
                 fontSize: FONT_SIZES.small,
                 color: COLORS.textMuted,
                 opacity: 0.6,
@@ -199,17 +218,6 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onStartGame }) => {
 
       {/* CSS Animations */}
       <style>{`
-        @keyframes pulse {
-          0%, 100% {
-            opacity: 1;
-            transform: scale(1);
-          }
-          50% {
-            opacity: 0.9;
-            transform: scale(1.02);
-          }
-        }
-
         @keyframes float {
           0%, 100% {
             transform: translateY(0) translateX(0);
