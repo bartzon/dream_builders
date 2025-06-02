@@ -8,6 +8,7 @@ Dream Builders is a card game for 1 player (currently) where you choose a hero w
 
 ### Core Features
 - **5 Unique Heroes**: Each with distinct abilities and a 10-card starter deck that forms the basis of a 45-card drafted play deck.
+  - Drafted deck composition: 10 hero starter cards + 10 additional hero cards + 7 inventory support cards + 18 product cards
 - **Product-Based Economy**: Play Product cards, manage their inventory, and generate revenue through automatic sales and card effects.
 - **Dynamic Card Effects**: Utilize Actions, deploy Tools for ongoing benefits, and hire Employees with unique skills.
 - **Cost and Discount System**: Manage your Capital to play cards, and leverage effects that provide temporary or ongoing cost reductions.
@@ -131,6 +132,10 @@ Reach **$500,000 in revenue**.
   │   └── ...         # state.ts, types.ts, constants.ts, game.ts
   └── ...             # main.tsx, App.tsx, etc.
   ```
+
+## 📝 Recent Updates
+
+- **Deck Composition Enhancement** (Latest): Increased product cards in drafted decks from 13 to 18, bringing total deck size from 40 to 45 cards. This provides more variety and strategic options for revenue generation throughout the game.
 
 ## 🤝 Contributing
 

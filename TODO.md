@@ -2,6 +2,10 @@
 
 This file tracks unimplemented features, card effects, and mechanics.
 
+## ✅ Completed
+
+- **Deck Composition Update**: Increased product cards in drafted decks from 13 to 18 (total deck size from 40 to 45 cards) to provide more variety and strategic options.
+
 ## I. UI & UX Enhancements
 
 - **Advanced Player Choice UI**: 
@@ -19,6 +23,7 @@ This file tracks unimplemented features, card effects, and mechanics.
 
 ## II. Code & System Improvements
 
+- **Deck Building/Drafting Mode**: Implement a pre-game drafting phase where players can customize their deck composition by choosing which cards to include from available pools.
 - **Multiplayer Support**: Adapt game logic and UI for multiplayer (if planned).
 - **Card Balance**: Comprehensive playtesting and balancing of card costs, effects, and hero powers.
 - **Test Coverage**: Implement unit and integration tests.
