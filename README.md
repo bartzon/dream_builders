@@ -107,20 +107,6 @@ Reach **$500,000 in revenue**.
 *   **Player Choices**: Basic choice system for effects like discarding cards (Midnight Oil), destroying products (Fast Pivot), or choosing a product for an effect (most Inventory Support cards).
 *   **UI Bonus Indicators**: Visual cues on cards for active discounts, revenue bonuses, and delayed effect counters.
 
-## 🚧 Known Missing Features / TODOs
-
-*   **Audience Mechanic**: This is a major planned mechanic, especially for Brand Builder and Community Leader, but is not yet implemented. Many card texts refer to gaining or using Audience.
-*   **Complex Card Effects**: Several cards have placeholder or simplified effects:
-    *   **Quick Learner**: Does not currently copy last Action.
-    *   **Analytics Dashboard**: Does not yet offer a choice to view/discard cards from deck.
-    *   **Scale Systems**: Does not yet repeat the first recurring effect.
-    *   **Custom App**: Cannot yet be played as an Action to copy a Tool effect.
-    *   **Zap Everything**: Triggers some simple recurring effects, but not all or choice-based ones.
-    *   Many hero powers have simplified targeting or choice-making (e.g., Brand Builder, Serial Founder).
-*   **Advanced UI for Choices**: UI for more complex choices (e.g., choose from multiple options for Incubator Resources, multi-select for Warehouse Expansion beyond 3) needs to be developed.
-*   **Multiplayer**: Currently single-player only. BoardGame.io supports multiplayer, but UI and some game logic (e.g., "teammate" effects) would need adaptation.
-*   **Comprehensive Card Balance & Testing**.
-
 ## 🛠️ Technical Overview
 
 - **Frontend**: React with TypeScript, Vite
@@ -136,10 +122,6 @@ Reach **$500,000 in revenue**.
   │   └── ...         # state.ts, types.ts, constants.ts, game.ts
   └── ...             # main.tsx, App.tsx, etc.
   ```
-
-## 📝 Recent Updates
-
-- **Deck Composition Enhancement** (Latest): Increased product cards in drafted decks from 13 to 18, bringing total deck size from 40 to 45 cards. This provides more variety and strategic options for revenue generation throughout the game.
 
 ## 🤝 Contributing
 

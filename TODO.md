@@ -2,10 +2,6 @@
 
 This file tracks unimplemented features, card effects, and mechanics.
 
-## ✅ Completed
-
-- **Deck Composition Update**: Increased product cards in drafted decks from 13 to 18 (total deck size from 40 to 45 cards) to provide more variety and strategic options.
-
 ## I. UI & UX Enhancements
 
 - **Advanced Player Choice UI**: 
