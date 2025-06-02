@@ -89,6 +89,12 @@ export const DreamBuildersGame: Game<GameState> = {
     onBegin: ({ G, ctx }) => {
       const playerID = ctx.currentPlayer;
       const player = G.players[playerID];
+      
+      // Add a test log entry
+      if (G.gameLog) {
+        G.gameLog.push(`=== Turn ${G.turn} begins ===`);
+      }
+      
       if (!G.effectContext) G.effectContext = {};
       if (!G.effectContext[playerID]) G.effectContext[playerID] = initEffectContext();
       processAutomaticSales(G, playerID);
@@ -150,6 +156,11 @@ export const DreamBuildersGame: Game<GameState> = {
       
       // Pay cost
       player.capital -= finalCost;
+      
+      // Log the card play
+      if (G.gameLog) {
+        G.gameLog.push(`Played ${card.name} (${card.type}) for ${finalCost} capital`);
+      }
       
       // Remove from hand
       player.hand.splice(cardIndex, 1);
@@ -225,6 +236,11 @@ export const DreamBuildersGame: Game<GameState> = {
       // Pay cost
       player.capital -= hero.heroPower.cost;
       player.heroAbilityUsed = true;
+      
+      // Log the hero ability usage
+      if (G.gameLog) {
+        G.gameLog.push(`Used ${hero.name}'s hero power: ${hero.heroPower.name}`);
+      }
       
       // Execute hero power effect
       const effectName = hero.heroPower.effect;

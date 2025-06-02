@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback } from "react"
 import { DebugPanel } from '../DebugPanel'
 import { HeroPowerTooltip } from './HeroPowerTooltip'
 import { GameHeader } from './GameHeader'
-import { HeroControls } from './HeroControls'
 import { PlayerHand } from './PlayerHand'
 import { ProductsSection } from './ProductsSection'
 import { ToolsAndEmployees } from './ToolsAndEmployees'
@@ -16,6 +15,7 @@ import type { GameState } from '../../../../game/state'
 import type { PendingChoice as ClientPendingChoice } from '../../../types/game'
 import { HeroDisplay } from './HeroDisplay'
 import { ChoiceModal } from './ChoiceModal'
+import { GameLog } from './GameLog'
 import { BUTTON_STYLES, FONT_SIZES } from "../../../constants/ui"
 
 interface GameScreenProps {
@@ -29,9 +29,13 @@ interface GameScreenProps {
 }
 
 export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, events }: GameScreenProps) {
-  const [gameLog, setGameLog] = useState<string[]>([])
+  const [showGameLog, setShowGameLog] = useState(false)
   const [lastPlayerRevenue, setLastPlayerRevenue] = useState(0)
   const [affectedCardIds, setAffectedCardIds] = useState<Set<string>>(new Set());
+
+  // Debug logging
+  console.log('Game State:', G);
+  console.log('Game Log:', (G as GameState).gameLog);
 
   // Use custom hooks
   const { uiState, effectContext, toolsAndEmployees } = useGameState(G, playerID)
@@ -79,10 +83,7 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
     if (effectContext.midnightOilDiscardPending && isMyTurn) {
       const timer = setTimeout(() => {
         moves.triggerMidnightOilDiscard?.()
-        setGameLog(prev => [`Ready to discard...`, ...prev.slice(0, 4)])
       }, 1500)
-
-      setGameLog(prev => [`Drew 3 cards from Midnight Oil!`, ...prev.slice(0, 4)])
 
       return () => clearTimeout(timer)
     }
@@ -92,66 +93,44 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
   useEffect(() => {
     if (effectContext.fastPivotProductDestroyPending && isMyTurn) {
       moves.triggerFastPivotDestroyChoice?.()
-      setGameLog(prev => [`Choose a Product to destroy...`, ...prev.slice(0, 4)])
     }
   }, [effectContext.fastPivotProductDestroyPending, isMyTurn, moves])
 
   useEffect(() => {
-    // console.log('[GameScreen] useEffect for recentlyAffectedCardIds triggered. Current effectContext.recentlyAffectedCardIds:', effectContext.recentlyAffectedCardIds);
-    // console.log('[GameScreen] Current local affectedCardIds (before processing):', Array.from(affectedCardIds));
-
     if (effectContext.recentlyAffectedCardIds && effectContext.recentlyAffectedCardIds.length > 0) {
       const newAffected = new Set(affectedCardIds);
       let newIdsAdded = false;
       effectContext.recentlyAffectedCardIds.forEach(id => {
-        if (id && !newAffected.has(id)) { // Ensure id is not null/undefined
+        if (id && !newAffected.has(id)) {
           newAffected.add(id);
           newIdsAdded = true;
-          // console.log(`[GameScreen] Adding ${id} to local affectedCardIds. Setting timeout.`);
           setTimeout(() => {
             setAffectedCardIds(prev => {
               const updated = new Set(prev);
               updated.delete(id);
-              // console.log(`[GameScreen] Timeout: Removed ${id} from local affectedCardIds. Now:`, Array.from(updated));
               return updated;
             });
           }, 1500);
         }
       });
       if (newIdsAdded) {
-        // console.log('[GameScreen] Setting updated local affectedCardIds:', Array.from(newAffected));
         setAffectedCardIds(newAffected);
       }
-      // Clear the game state's recentlyAffectedCardIds after processing to prevent re-triggering on unrelated re-renders
-      // This needs a game move or a different pattern to be truly clean.
-      // For now, this effect will re-run if the object reference changes but content is same.
-      // A more robust solution might be for the game logic to set it to null after one read, or use a version counter.
-    } else {
-      // console.log('[GameScreen] useEffect for recentlyAffectedCardIds: No new IDs or empty list.');
     }
-  }, [effectContext.recentlyAffectedCardIds, affectedCardIds]); // Added affectedCardIds to dependency to re-evaluate if it changes externally (though it shouldn't much)
+  }, [effectContext.recentlyAffectedCardIds, affectedCardIds]);
 
   // Game action handlers
   const handlePlayCard = useCallback((cardIndex: number) => {
     if (!isMyTurn) return
     hideCardTooltip()
-    const card = uiState.hand[cardIndex]
-
-    // Add specific messages for cards with delayed effects
-    if (card?.effect === 'delayed_inventory_boost') {
-      setGameLog(prev => [`Playing ${card?.name} - Will add inventory for 2 turns!`, ...prev.slice(0, 4)])
-    } else {
-      setGameLog(prev => [`Playing ${card?.name}...`, ...prev.slice(0, 4)])
-    }
 
     moves.playCard?.(cardIndex)
-  }, [moves, uiState.hand, isMyTurn, hideCardTooltip])
+  }, [moves, isMyTurn, hideCardTooltip])
 
   const handleEndTurn = useCallback(() => {
     if (isMyTurn && events?.endTurn) {
       hideCardTooltip()
       hideHeroPowerTooltip()
-      setGameLog(prev => ['Ending turn...', ...prev.slice(0, 4)])
       events.endTurn()
     }
   }, [events, isMyTurn, hideCardTooltip, hideHeroPowerTooltip])
@@ -167,42 +146,17 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
     if (hasProductsToBoost || hasProductsToRefresh) {
       moves.useHeroAbility?.(uiState.hero)
     } else {
-      setGameLog(prev => [`Using ${heroPowerInfo.name}...`, ...prev.slice(0, 4)])
       moves.useHeroAbility?.(uiState.hero)
     }
-  }, [moves, uiState.hero, uiState.products, heroPowerInfo.name, canUseHeroPower, hideHeroPowerTooltip])
+  }, [moves, uiState.hero, uiState.products, canUseHeroPower, hideHeroPowerTooltip])
 
   const handleMakeChoice = useCallback((choiceIndex: number) => {
     if (!isMyTurn || !pendingChoice) return;
     hideCardTooltip();
     hideHeroPowerTooltip();
 
-    // Log based on choice type and effect before sending move
-    if (pendingChoice.type === 'discard') {
-      const cardToDiscard = uiState.hand[choiceIndex];
-      setGameLog(prev => [`Discarding ${cardToDiscard?.name || 'card'}...`, ...prev.slice(0, 4)]);
-    } else if (pendingChoice.type === 'destroy_product') {
-      const productToDestroy = pendingChoice.cards?.[choiceIndex];
-      setGameLog(prev => [`Destroying ${productToDestroy?.name || 'product'}...`, ...prev.slice(0, 4)]);
-    } else if (pendingChoice.type === 'choose_card' && pendingChoice.cards) {
-      const chosenCard = pendingChoice.cards[choiceIndex];
-      const effectName = pendingChoice.effect?.replace(/_/g, ' ') || 'effect';
-      setGameLog(prev => [`Applying ${effectName} to ${chosenCard?.name || 'card'}...`, ...prev.slice(0, 4)]);
-    } else if (pendingChoice.type === 'choose_option' && pendingChoice.options) {
-      // Use choice.options[choiceIndex] for logging the chosen option text
-      setGameLog(prev => [`Chose option: "${pendingChoice.options?.[choiceIndex]}" for ${pendingChoice.effect}`, ...prev.slice(0,4)]);
-    } else if (pendingChoice.type === 'view_deck_and_discard' && pendingChoice.cards) {
-      if (choiceIndex >=0 && choiceIndex < pendingChoice.cards.length) {
-        setGameLog(prev => [`Opted to discard ${pendingChoice.cards?.[choiceIndex]?.name} from deck view.`, ...prev.slice(0,4)]);
-      } else {
-        setGameLog(prev => [`Opted to keep cards from deck view.`, ...prev.slice(0,4)]);
-      }
-    } else if (pendingChoice.type === 'choose_from_drawn_to_discard' && pendingChoice.cards) {
-       setGameLog(prev => [`Opted to discard ${pendingChoice.cards?.[choiceIndex]?.name} from A/B Test draw.`, ...prev.slice(0,4)]);
-    }
-
     moves.makeChoice?.(choiceIndex);
-  }, [moves, uiState.hand, pendingChoice, isMyTurn, hideCardTooltip, hideHeroPowerTooltip]);
+  }, [moves, pendingChoice, isMyTurn, hideCardTooltip, hideHeroPowerTooltip]);
 
   return (
     <div style={{
@@ -257,22 +211,6 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
         minHeight: 0,
         maxHeight: 'calc(100vh - 280px)'
       }}>
-
-        {/* Left - Controls and Game Log */}
-        <div style={{ 
-          display: 'flex', 
-          flexDirection: 'column', 
-          width: '250px', 
-          gap: '20px',
-          overflow: 'hidden'
-        }}>
-        <HeroControls
-          isMyTurn={isMyTurn}
-          gameLog={gameLog}
-          soldProductThisTurn={effectContext.soldProductThisTurn}
-          itemsSoldThisTurn={effectContext.itemsSoldThisTurn}
-        />
-        </div>
 
         {/* Center - Game Board */}
         <div style={{
@@ -354,16 +292,50 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
         overflow: 'visible' // Allow cards to pop up
       }}>
         {/* Hero Display - Bottom Left */}
-        <HeroDisplay
-          hero={currentHero}
-          heroCost={heroPowerCost}
-          isHeroPowerUsed={uiState.heroAbilityUsed}
-          canUseHeroPower={canUseHeroPower}
-          onUseHeroPower={handleUseHeroPower}
-          onHeroPowerMouseEnter={showHeroPowerTooltip}
-          onHeroPowerMouseLeave={hideHeroPowerTooltip}
-          onHeroPowerMouseMove={showHeroPowerTooltip}
-        />
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '10px'
+        }}>
+          <HeroDisplay
+            hero={currentHero}
+            heroCost={heroPowerCost}
+            isHeroPowerUsed={uiState.heroAbilityUsed}
+            canUseHeroPower={canUseHeroPower}
+            onUseHeroPower={handleUseHeroPower}
+            onHeroPowerMouseEnter={showHeroPowerTooltip}
+            onHeroPowerMouseLeave={hideHeroPowerTooltip}
+            onHeroPowerMouseMove={showHeroPowerTooltip}
+          />
+          
+          {/* Game Log Button */}
+          <button
+            onClick={() => setShowGameLog(true)}
+            style={{
+              ...BUTTON_STYLES,
+              background: 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)',
+              color: 'white',
+              padding: '8px 16px',
+              fontSize: FONT_SIZES.small,
+              borderRadius: '6px',
+              boxShadow: '0 2px 5px rgba(0,0,0,0.3)',
+              transition: 'all 0.2s ease',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+              minWidth: '120px',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-1px)'
+              e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.4)'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)'
+              e.currentTarget.style.boxShadow = '0 2px 5px rgba(0,0,0,0.3)'
+            }}
+          >
+            📜 Game Log
+          </button>
+        </div>
 
         {/* Player Hand - Centered at Bottom */}
         <div style={{ 
@@ -401,6 +373,15 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
 
       {/* Debug Panel */}
       <DebugPanel gameState={G as GameState} playerID={playerID} />
+
+      {/* Game Log Popup */}
+      <GameLog
+        isOpen={showGameLog}
+        onClose={() => setShowGameLog(false)}
+        gameLog={(G as GameState).gameLog || []}
+        gameState={G as GameState}
+        playerID={playerID}
+      />
 
       {/* End Turn Button - Bottom Right */}
       {isMyTurn && (
