@@ -17,6 +17,7 @@ import { HeroDisplay } from './HeroDisplay'
 import { ChoiceModal } from './ChoiceModal'
 import { GameLog } from './GameLog'
 import { BUTTON_STYLES, FONT_SIZES } from "../../../constants/ui"
+import { heroPowerRequirementsMet } from '../../../utils/heroPowerHelpers'
 
 interface GameScreenProps {
   gameState: unknown
@@ -62,7 +63,7 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
 
   // Extract derived state
   const canUseHeroPower = isMyTurn && !uiState.heroAbilityUsed &&
-    uiState.capital >= heroPowerCost
+    uiState.capital >= heroPowerCost && heroPowerRequirementsMet(uiState.hero, uiState.products)
 
   // Automatic cha-ching sound when revenue increases
   useEffect(() => {
@@ -138,17 +139,8 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
   const handleUseHeroPower = useCallback(() => {
     if (!canUseHeroPower) return
     hideHeroPowerTooltip()
-
-    const hasProductsToBoost = uiState.hero === 'brand_builder' && uiState.products.length > 0
-    const hasProductsToRefresh = uiState.hero === 'serial_founder' &&
-      uiState.products.some(p => !p.isActive && p.inventory !== undefined && p.inventory > 0)
-
-    if (hasProductsToBoost || hasProductsToRefresh) {
-      moves.useHeroAbility?.(uiState.hero)
-    } else {
-      moves.useHeroAbility?.(uiState.hero)
-    }
-  }, [moves, uiState.hero, uiState.products, canUseHeroPower, hideHeroPowerTooltip])
+    moves.useHeroAbility?.(uiState.hero)
+  }, [moves, uiState.hero, canUseHeroPower, hideHeroPowerTooltip])
 
   const handleMakeChoice = useCallback((choiceIndex: number) => {
     if (!isMyTurn || !pendingChoice) return;
@@ -358,6 +350,7 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
           onShowTooltip={showCardTooltip}
           onHideTooltip={hideCardTooltip}
           isChoiceModalOpen={!!pendingChoice}
+          products={uiState.products}
         />
         </div>
 

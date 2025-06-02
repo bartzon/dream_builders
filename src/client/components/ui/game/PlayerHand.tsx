@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { FONT_SIZES } from '../../../constants/ui'
 import { GameCard } from './GameCard'
 import type { ClientCard, EffectContextUI } from '../../../types/game'
+import { cardPlayabilityRequirementsMet } from '../../../utils/cardPlayabilityHelpers'
 
 interface PlayerHandProps {
   hand: ClientCard[]
@@ -15,6 +16,7 @@ interface PlayerHandProps {
   onShowTooltip: (card: ClientCard, e: React.MouseEvent) => void
   onHideTooltip: () => void
   isChoiceModalOpen?: boolean
+  products?: ClientCard[] // Add products to check playability
 }
 
 // Hearthstone-like card animation constants
@@ -34,7 +36,8 @@ export const PlayerHand = React.memo(({
   onPlayCard,
   onShowTooltip,
   onHideTooltip,
-  isChoiceModalOpen = false
+  isChoiceModalOpen = false,
+  products
 }: PlayerHandProps) => {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null)
 
@@ -48,7 +51,10 @@ export const PlayerHand = React.memo(({
     const lastActionCard = effectContext?.lastActionCard
     const hasPlayedAction = Boolean(lastActionEffect && lastActionCard && lastActionCard.type === 'Action')
 
-    const canPlay = isMyTurn && canAffordCard && (!isQuickLearner || hasPlayedAction)
+    // Check if card's playability requirements are met (e.g., requires products on board)
+    const requirementsMet = cardPlayabilityRequirementsMet(card, products || [])
+
+    const canPlay = isMyTurn && canAffordCard && (!isQuickLearner || hasPlayedAction) && requirementsMet
     const isAffected = card.id ? affectedCardIds.has(card.id) : false
 
     const numCards = hand.length
