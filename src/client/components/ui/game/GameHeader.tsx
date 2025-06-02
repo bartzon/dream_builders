@@ -1,6 +1,8 @@
 import React from 'react'
 import { FONT_SIZES } from '../../../constants/ui'
 import type { EffectContextUI } from '../../../types/game'
+import { formatCurrency } from '../../../utils/formatHelpers'
+import { GAME_CONFIG } from '../../../../game/constants'
 
 interface GameHeaderProps {
   heroName: string
@@ -20,6 +22,9 @@ export const GameHeader = React.memo(({
   effectContext,
   hasShoestringBudget
 }: GameHeaderProps) => {
+  const revenueGoal = GAME_CONFIG.REVENUE_GOAL
+  const revenueProgress = Math.min(revenue / revenueGoal * 100, 100)
+  
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
       <div style={{ display: 'flex', gap: '30px', alignItems: 'center', fontSize: FONT_SIZES.body }}>
@@ -27,7 +32,14 @@ export const GameHeader = React.memo(({
           <strong style={{ color: '#10b981' }}>Capital:</strong> {capital} / 10
         </div>
         <div>
-          <strong style={{ color: '#3b82f6' }}>Revenue:</strong> ${revenue}
+          <strong style={{ color: '#3b82f6' }}>Revenue:</strong> {formatCurrency(revenue)} / {formatCurrency(revenueGoal)}
+          <span style={{ 
+            marginLeft: '10px', 
+            fontSize: FONT_SIZES.small, 
+            color: revenueProgress >= 100 ? '#10b981' : '#6b7280' 
+          }}>
+            ({revenueProgress.toFixed(0)}%)
+          </span>
         </div>
       </div>
 
