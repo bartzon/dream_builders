@@ -98,6 +98,11 @@ export const DreamBuildersGame: Game<GameState> = {
       if (!G.effectContext) G.effectContext = {};
       if (!G.effectContext[playerID]) G.effectContext[playerID] = initEffectContext();
       processAutomaticSales(G, playerID);
+      
+      // Check if player won from automatic sales
+      checkGameEnd(G);
+      if (G.gameOver) return;
+      
       const baseCapital = Math.min(G.turn, GAME_CONFIG.MAX_CAPITAL);
       player.capital = G.effectContext[playerID].doubleCapitalGain ? Math.min(GAME_CONFIG.MAX_CAPITAL, baseCapital * 2) : baseCapital;
       processOverheadCosts(G, playerID);
@@ -218,6 +223,9 @@ export const DreamBuildersGame: Game<GameState> = {
       if (hasExtraPlays && G.effectContext?.[playerID]) {
         G.effectContext[playerID].extraCardPlays = (G.effectContext[playerID].extraCardPlays || 0) - 1;
       }
+      
+      // Check for game end after playing a card
+      checkGameEnd(G);
     },
     useHeroAbility: ({ G, ctx, playerID }) => {
       if (playerID !== ctx.currentPlayer) return INVALID_MOVE;
@@ -247,6 +255,9 @@ export const DreamBuildersGame: Game<GameState> = {
       if (effectName && heroAbilityEffects[effectName]) {
         heroAbilityEffects[effectName](G, playerID);
       }
+      
+      // Check for game end after hero ability
+      checkGameEnd(G);
     },
     triggerMidnightOilDiscard: ({ G, ctx, playerID }) => {
       if (playerID !== ctx.currentPlayer) return INVALID_MOVE;
@@ -535,6 +546,9 @@ export const DreamBuildersGame: Game<GameState> = {
           if (G.gameLog) G.gameLog.push(`Player ${playerID} chose ${chosenCard.name} for ${choice.effect}.`);
         }
       }
+      
+      // Check for game end after making a choice
+      checkGameEnd(G);
     },
   },
   endIf: ({ G }) => {

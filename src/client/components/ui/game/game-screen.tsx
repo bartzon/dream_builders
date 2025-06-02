@@ -15,6 +15,7 @@ import type { PendingChoice as ClientPendingChoice } from '../../../types/game'
 import { HeroDisplay } from './HeroDisplay'
 import { ChoiceModal } from './ChoiceModal'
 import { GameLog } from './GameLog'
+import { GameOverModal } from './GameOverModal'
 import { BUTTON_STYLES, FONT_SIZES } from "../../../constants/ui"
 import { heroPowerRequirementsMet } from '../../../utils/heroPowerHelpers'
 
@@ -30,6 +31,7 @@ interface GameScreenProps {
 
 export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, events }: GameScreenProps) {
   const [showGameLog, setShowGameLog] = useState(false)
+  const [showGameOver, setShowGameOver] = useState(false)
   const [lastPlayerRevenue, setLastPlayerRevenue] = useState(0)
   const [affectedCardIds, setAffectedCardIds] = useState<Set<string>>(new Set());
 
@@ -63,6 +65,14 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
   // Extract derived state
   const canUseHeroPower = isMyTurn && !uiState.heroAbilityUsed &&
     uiState.capital >= heroPowerCost && heroPowerRequirementsMet(uiState.hero, uiState.products)
+
+  // Check for game over
+  useEffect(() => {
+    const gameState = G as GameState
+    if (gameState.gameOver && !showGameOver) {
+      setShowGameOver(true)
+    }
+  }, [G, showGameOver])
 
   // Automatic cha-ching sound when revenue increases
   useEffect(() => {
@@ -392,6 +402,21 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
         gameLog={(G as GameState).gameLog || []}
         gameState={G as GameState}
         playerID={playerID}
+      />
+
+      {/* Game Over Modal */}
+      <GameOverModal
+        isOpen={showGameOver}
+        isVictory={(G as GameState).winner}
+        revenue={uiState.revenue}
+        turn={uiState.turn}
+        onNewGame={() => {
+          // Refresh the page to start a new game
+          window.location.reload()
+        }}
+        onContinue={() => {
+          setShowGameOver(false)
+        }}
       />
 
       {/* End Turn Button - Bottom Right */}
