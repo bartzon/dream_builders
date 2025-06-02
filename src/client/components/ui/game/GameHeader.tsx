@@ -13,7 +13,6 @@ interface GameHeaderProps {
 }
 
 export const GameHeader = React.memo(({
-  heroName,
   capital,
   turn,
   deckSize,
@@ -24,9 +23,6 @@ export const GameHeader = React.memo(({
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
       <div style={{ display: 'flex', gap: '30px', alignItems: 'center', fontSize: FONT_SIZES.body }}>
-        <div>
-          <strong style={{ color: '#f59e0b' }}>Hero:</strong> {heroName}
-        </div>
         <div>
           <strong style={{ color: '#10b981' }}>Capital:</strong> {capital} / 10
         </div>
@@ -46,19 +42,9 @@ export const GameHeader = React.memo(({
 
       {/* Cost Reductions */}
       <div style={{ fontSize: FONT_SIZES.small, color: '#10b981', fontWeight: 'bold' }}>
-        {/* Meme Magic */}
-        {effectContext.cardsPlayedThisTurn && effectContext.cardsPlayedThisTurn >= 2 && (
-          <div>Meme Magic -$1</div>
-        )}
-        
         {/* Shoestring Budget */}
         {hasShoestringBudget && (!effectContext?.cardsPlayedThisTurn || effectContext.cardsPlayedThisTurn === 0) && (
           <div>First card free!</div>
-        )}
-        
-        {/* Merch Drop */}
-        {effectContext.productCardsPlayedThisTurn && effectContext.productCardsPlayedThisTurn >= 2 && (
-          <div>Merch Drop -$1</div>
         )}
       </div>
     </div>

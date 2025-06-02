@@ -41,6 +41,8 @@ export function getProductSynergyDiscount(G: GameState, playerID: string, player
 }
 
 // Discount source: Meme Magic (Community Leader card)
+// REMOVED: No card with meme_magic effect exists in the game
+/*
 export function getMemeMagicDiscount(G: GameState, playerID: string, card: Card): number {
   if (card.effect === 'meme_magic') {
     const cardsPlayed = G.effectContext?.[playerID]?.cardsPlayedThisTurn || 0;
@@ -50,6 +52,7 @@ export function getMemeMagicDiscount(G: GameState, playerID: string, card: Card)
   }
   return 0;
 }
+*/
 
 // Cost Increase: Quality Materials (Brand Builder card, acts as negative discount)
 export function getQualityMaterialsCostIncrease(player: PlayerState, card: Card): number {

@@ -18,7 +18,6 @@ import {
   getNextCardDiscount,
   getActionCardSynergyDiscount,
   getProductSynergyDiscount,
-  getMemeMagicDiscount,
   getQualityMaterialsCostIncrease,
   getShoestringBudgetDiscount,
   getCommunityManagerDiscount,
@@ -149,7 +148,6 @@ export function getCardDiscount(G: GameState, playerID: string, card: Card): num
   totalDiscount += getNextCardDiscount(G, playerID, true); // true for applying/consuming
   totalDiscount += getActionCardSynergyDiscount(player, card);
   totalDiscount += getProductSynergyDiscount(G, playerID, player, card, true); // true for applying/consuming
-  totalDiscount += getMemeMagicDiscount(G, playerID, card);
   totalDiscount += getQualityMaterialsCostIncrease(player, card); // This will be negative
   totalDiscount += getShoestringBudgetDiscount(G, playerID, player);
   totalDiscount += getCommunityManagerDiscount(player, card);
@@ -176,7 +174,6 @@ export function getCardCostInfo(G: GameState, playerID: string, card: Card): { o
   totalDiscount += getNextCardDiscount(G, playerID, false); // false for UI display only
   totalDiscount += getActionCardSynergyDiscount(player, card);
   totalDiscount += getProductSynergyDiscount(G, playerID, player, card, false); // false for UI display only
-  totalDiscount += getMemeMagicDiscount(G, playerID, card);
   totalDiscount += getQualityMaterialsCostIncrease(player, card);
   totalDiscount += getShoestringBudgetDiscount(G, playerID, player);
   totalDiscount += getCommunityManagerDiscount(player, card);
