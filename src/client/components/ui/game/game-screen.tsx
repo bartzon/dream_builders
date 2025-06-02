@@ -191,7 +191,7 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
       paddingBottom: '0', // Remove bottom padding since hand extends beyond
       display: 'flex',
       flexDirection: 'column',
-      fontFamily: '"Inter", "ShopifySans", "Helvetica Neue", "sans-serif"',
+      fontFamily: '"Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif',
       overflowX: 'hidden', // Prevent horizontal scrolling
       overflowY: 'hidden' // Keep vertical hidden
     }}>

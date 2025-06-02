@@ -51,7 +51,7 @@ export default function HeroSelection({ onHeroSelected }: HeroSelectionProps) {
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'space-between',
-      fontFamily: 'Arial, sans-serif'
+      fontFamily: '"Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif'
     }}>
       {/* Header Text - Might need adjustment or removal later */}
       <div style={{
