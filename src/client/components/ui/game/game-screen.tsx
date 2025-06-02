@@ -1,7 +1,6 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
-import { DebugPanel } from '../DebugPanel'
 import { HeroPowerTooltip } from './HeroPowerTooltip'
 import { GameHeader } from './GameHeader'
 import { PlayerHand } from './PlayerHand'
@@ -242,7 +241,7 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
           <div style={{
             width: '1px',
             background: 'rgba(120, 80, 190, 0.3)',
-            margin: '0 5px'
+            margin: '0 15px'
           }} />
 
           {/* Products - Right Side */}
@@ -363,9 +362,6 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
         onMakeChoice={handleMakeChoice}
         uiState={uiState}
       />
-
-      {/* Debug Panel */}
-      <DebugPanel gameState={G as GameState} playerID={playerID} />
 
       {/* Game Log Popup */}
       <GameLog

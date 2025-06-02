@@ -99,23 +99,6 @@ export const PlayerHand = React.memo(({
 
   return (
     <div style={{ position: 'relative', zIndex: 50 }}>
-      <h4 style={{ 
-        fontSize: FONT_SIZES.subheading, 
-        marginBottom: '10px'
-      }}>
-        Your Hand ({hand.length})
-        {midnightOilPending && (
-          <span style={{
-            color: '#10b981',
-            marginLeft: '10px',
-            fontSize: FONT_SIZES.body,
-            fontWeight: 'bold',
-            animation: 'pulse 1s infinite'
-          }}>
-            ✨ Drawing 3 cards...
-          </span>
-        )}
-      </h4>
       <div style={{
         display: 'flex',
         justifyContent: 'center',
@@ -125,19 +108,7 @@ export const PlayerHand = React.memo(({
         overflow: 'visible',
         position: 'relative'
       }}>
-        {hand.length === 0 ? (
-          <div style={{
-            padding: '15px',
-            border: '2px dashed #666',
-            borderRadius: '5px',
-            color: '#999',
-            fontSize: FONT_SIZES.body
-          }}>
-            No cards
-          </div>
-        ) : (
-          hand.map(renderHandCard)
-        )}
+        {hand.map(renderHandCard) }
       </div>
     </div>
   )
