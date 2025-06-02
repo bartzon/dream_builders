@@ -1,5 +1,4 @@
 import React from 'react'
-import { GameLog } from './GameLog'
 
 interface HeroControlsProps {
   isMyTurn: boolean
@@ -24,12 +23,41 @@ export const HeroControls = React.memo(({
       flexDirection: 'column',
       gap: '10px'
     }}>
-      <GameLog
-        logs={gameLog}
-        soldProductThisTurn={soldProductThisTurn}
-        itemsSoldThisTurn={itemsSoldThisTurn}
-        isMyTurn={isMyTurn}
-      />
+      {/* Turn Status */}
+      <div style={{ color: '#fff', fontSize: '14px' }}>
+        {isMyTurn ? "Your Turn" : "Waiting..."}
+      </div>
+      
+      {/* Sales Info */}
+      {soldProductThisTurn && (
+        <div style={{ color: '#4ade80', fontSize: '12px' }}>
+          Sold {itemsSoldThisTurn} item{itemsSoldThisTurn !== 1 ? 's' : ''} this turn
+        </div>
+      )}
+      
+      {/* Simple Game Log */}
+      <div style={{
+        background: 'rgba(0,0,0,0.3)',
+        borderRadius: '6px',
+        padding: '10px',
+        maxHeight: '200px',
+        overflowY: 'auto',
+        fontSize: '11px',
+        color: '#aaa'
+      }}>
+        <div style={{ fontWeight: 'bold', marginBottom: '5px', color: '#fff' }}>
+          Recent Events:
+        </div>
+        {gameLog.length > 0 ? (
+          gameLog.slice(-5).reverse().map((log, index) => (
+            <div key={index} style={{ marginBottom: '3px' }}>
+              {log}
+            </div>
+          ))
+        ) : (
+          <div style={{ fontStyle: 'italic' }}>No events yet</div>
+        )}
+      </div>
     </div>
   )
 })

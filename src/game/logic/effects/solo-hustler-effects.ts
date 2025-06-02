@@ -15,7 +15,7 @@ const passiveEffect = () => {}; // Define passiveEffect if it's used here
 export const soloHustlerCardEffects: Record<string, (G: GameState, playerID: string, card?: Card) => void> = {
   // Hustle Hard: Draw 2 cards, gain 1 capital.
   'hustle_hard': (G, playerID) => {
-    drawCards(G, playerID, 2);
+    drawCards(G, playerID, 2, 'Hustle Hard');
     gainCapital(G, playerID, 1);
   },
   // Bootstrap Capital: Gain 2 capital.
@@ -34,7 +34,7 @@ export const soloHustlerCardEffects: Record<string, (G: GameState, playerID: str
   },
   // Freelancer Network: When played, draw 2 cards.
   'freelancer_network': (G, playerID) => {
-    drawCards(G, playerID, 2);
+    drawCards(G, playerID, 2, 'Freelancer Network');
   },
   // Resourceful Solutions: Next card costs 2 less.
   'resourceful_solutions': (G, playerID) => {
@@ -44,12 +44,12 @@ export const soloHustlerCardEffects: Record<string, (G: GameState, playerID: str
   'scrappy_marketing': (G, playerID) => {
     const player = G.players[playerID];
     if (player.board.Products.length > 0) {
-      drawCards(G, playerID, 2);
+      drawCards(G, playerID, 2, 'Scrappy Marketing');
     }
   },
   // Midnight Oil: Draw 3 cards, then discard 1 card.
   'midnight_oil': (G, playerID) => {
-    drawCards(G, playerID, 3);
+    drawCards(G, playerID, 3, 'Midnight Oil');
     const ctx = ensureEffectContext(G, playerID);
     ctx.midnightOilDiscardPending = true;
   },

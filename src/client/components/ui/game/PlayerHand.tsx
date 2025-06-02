@@ -1,12 +1,10 @@
 import React, { useState } from 'react'
-import { FONT_SIZES } from '../../../constants/ui'
 import { GameCard } from './GameCard'
 import type { ClientCard, EffectContextUI } from '../../../types/game'
 import { cardPlayabilityRequirementsMet } from '../../../utils/cardPlayabilityHelpers'
 
 interface PlayerHandProps {
   hand: ClientCard[]
-  midnightOilPending: boolean
   getCostInfo: (card: ClientCard) => { originalCost: number; discount: number; finalCost: number }
   capital: number
   isMyTurn: boolean
@@ -27,7 +25,6 @@ const HOVER_SCALE = 1.15 // Scale factor on hover
 
 export const PlayerHand = React.memo(({
   hand,
-  midnightOilPending,
   getCostInfo,
   capital,
   isMyTurn,

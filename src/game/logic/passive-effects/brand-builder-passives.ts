@@ -56,10 +56,6 @@ export function handleBrandBuilderPassives(G: GameState, playerID: string): void
   // Personal Branding: Recurring: Draw 1 card if you played an Action last turn.
   const personalBranding = player.board.Tools.find(t => t.effect === 'personal_branding');
   if (personalBranding && ctx?.playedActionLastTurn) {
-    drawCard(player);
-    
-    if (G.gameLog) {
-      G.gameLog.push('Personal Branding: Drew 1 card for playing an Action last turn.');
-    }
+    drawCard(player, 'Personal Branding', G.gameLog);
   }
 } 

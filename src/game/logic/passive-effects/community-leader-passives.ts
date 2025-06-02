@@ -14,7 +14,7 @@ export function handleCommunityLeaderPassives(G: GameState, playerID: string): v
   // Mentorship Circle effect - Draw an extra card at the start of your turn
   const mentorshipCircle = player.board.Tools.find(t => t.effect === 'mentorship_circle');
   if (mentorshipCircle) {
-    drawCard(player);
+    drawCard(player, 'Mentorship Circle', G.gameLog);
   }
   
   // Steady Fans effect - Gain 1 capital every other turn

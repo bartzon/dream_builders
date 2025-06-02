@@ -2,6 +2,10 @@
 
 A strategic digital card game where players take on the roles of entrepreneurs, building their startup to achieve a revenue goal.
 
+Two rules for this project:
+1. Nothing is written by hand, everything is vibe coded.
+2. Blindly Accept all suggestions from Cursor, no reviewing of code.
+
 ## 🎮 Game Overview
 
 Dream Builders is a card game for 1 player (currently) where you choose a hero with a unique playstyle and deck, then attempt to build your business to reach **$500,000 in revenue**.

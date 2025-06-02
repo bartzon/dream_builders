@@ -76,7 +76,7 @@ export const inventorySupportCardEffects: Record<string, (G: GameState, playerID
   },
   // Inventory Forecast Tool: Draw 1. Then choose a Product to gain +1 inventory.
   'draw_and_inventory': (G, playerID) => {
-    drawCards(G, playerID, 1);
+    drawCards(G, playerID, 1, 'Inventory Forecast Tool');
     createProductChoice(G.players[playerID], 'draw_and_inventory');
   },
   // Last-Minute Restock: Choose any Product. Add +1 inventory.
@@ -95,7 +95,7 @@ export const inventorySupportCardEffects: Record<string, (G: GameState, playerID
   },
   'fulfillment_center': (G, playerID) => {
     const player = G.players[playerID];
-    drawCard(player);
+    drawCard(player, 'Fulfillment Center', G.gameLog);
     const productsOnBoard = player.board.Products.filter(p => p.isActive !== false);
     if (productsOnBoard.length > 0) {
       addPendingChoice(player, {

@@ -371,7 +371,6 @@ export default function GameScreen({ gameState: G, moves, playerID, isMyTurn, ev
         }}>
         <PlayerHand
           hand={uiState.hand}
-          midnightOilPending={effectContext.midnightOilDiscardPending}
           getCostInfo={getCostInfo}
           capital={uiState.capital}
           isMyTurn={isMyTurn}

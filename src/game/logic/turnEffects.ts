@@ -219,7 +219,7 @@ export function handleCardPlayEffects(G: GameState, playerID: string, card: Card
       // Innovation Lab effect - draw when playing actions
       const innovationLab = player.board.Tools.find(t => t.effect === 'innovation_lab');
       if (innovationLab) {
-        drawCard(player);
+        drawCard(player, 'Innovation Lab', G.gameLog);
       }
       
       // Thought Leadership effect - add revenue to action
@@ -266,13 +266,12 @@ export function handleCardPlayEffects(G: GameState, playerID: string, card: Card
       if (ventureNetwork) {
         // Storing hand size before to identify the new card for potential highlight
         const handSizeBeforeVentureDraw = player.hand.length;
-        drawCard(player);
+        drawCard(player, 'Venture Network', G.gameLog);
         if (player.hand.length > handSizeBeforeVentureDraw && G.effectContext?.[playerID]) {
           const drawnCardFromVenture = player.hand[player.hand.length - 1];
           if (drawnCardFromVenture?.id) {
             if (!G.effectContext[playerID].recentlyAffectedCardIds) G.effectContext[playerID].recentlyAffectedCardIds = [];
             G.effectContext[playerID].recentlyAffectedCardIds?.push(drawnCardFromVenture.id);
-            if(G.gameLog) G.gameLog.push(`Venture Network drew ${drawnCardFromVenture.name}.`);
           }
         }
       }
@@ -281,7 +280,7 @@ export function handleCardPlayEffects(G: GameState, playerID: string, card: Card
       const advisoryBoard = player.board.Tools.find(t => t.effect === 'advisory_board');
       if (advisoryBoard) {
         const handSizeBeforeAdvisoryDraw = player.hand.length;
-        drawCard(player);
+        drawCard(player, `Advisory Board (${card.name} played)`, G.gameLog);
         if (player.hand.length > handSizeBeforeAdvisoryDraw && G.effectContext?.[playerID]) {
           const drawnCardFromAdvisory = player.hand[player.hand.length - 1];
           if (drawnCardFromAdvisory?.id) {
@@ -290,7 +289,6 @@ export function handleCardPlayEffects(G: GameState, playerID: string, card: Card
               G.effectContext[playerID].recentlyAffectedCardIds = [];
             }
             G.effectContext[playerID].recentlyAffectedCardIds?.push(drawnCardFromAdvisory.id);
-            if(G.gameLog) G.gameLog.push(`Advisory Board (due to ${card.name} play) drew ${drawnCardFromAdvisory.name}.`);
           }
         }
       }

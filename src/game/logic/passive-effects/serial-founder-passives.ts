@@ -9,8 +9,7 @@ export function handleSerialFounderChoicePassives(G: GameState, playerID: string
   // Legacy Playbook - draw 1 extra card at the start of your turn
   const legacyPlaybook = player.board.Tools.find(t => t.effect === 'legacy_playbook');
   if (legacyPlaybook) {
-    drawCard(player);
-    if(G.gameLog) G.gameLog.push('Legacy Playbook drew an extra card.');
+    drawCard(player, 'Legacy Playbook', G.gameLog);
   }
 
   // Board of Directors - Recurring: Gain 2 capital
@@ -28,8 +27,7 @@ export function handleSerialFounderChoicePassives(G: GameState, playerID: string
       player.capital = Math.min(10, player.capital + 1);
       if(G.gameLog) G.gameLog.push('Growth Hacking provided +1 Capital.');
     } else if (turnMod === 1) {
-      drawCard(player);
-      if(G.gameLog) G.gameLog.push('Growth Hacking provided +1 Card.');
+      drawCard(player, 'Growth Hacking', G.gameLog);
     } else {
       player.revenue += 20000;
       if(G.gameLog) G.gameLog.push('Growth Hacking provided +$20k Revenue.');
@@ -44,8 +42,7 @@ export function handleSerialFounderChoicePassives(G: GameState, playerID: string
       player.capital = Math.min(10, player.capital + 1);
       if(G.gameLog) G.gameLog.push('Business Development provided +1 Capital.');
     } else if (turnMod === 2) {
-      drawCard(player);
-      if(G.gameLog) G.gameLog.push('Business Development provided +1 Card.');
+      drawCard(player, 'Business Development', G.gameLog);
     } else { 
       player.revenue += 25000;
       if(G.gameLog) G.gameLog.push('Business Development provided +$25k Revenue.');

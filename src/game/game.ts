@@ -107,7 +107,7 @@ export const DreamBuildersGame: Game<GameState> = {
       player.capital = G.effectContext[playerID].doubleCapitalGain ? Math.min(GAME_CONFIG.MAX_CAPITAL, baseCapital * 2) : baseCapital;
       processOverheadCosts(G, playerID);
       for (let i = 0; i < GAME_CONFIG.CARDS_DRAWN_PER_TURN; i++) {
-        drawCard(player); // Uses imported drawCard
+        drawCard(player, 'Start of turn', G.gameLog); // Uses imported drawCard
       }
       processPassiveEffects(G, playerID);
       player.heroAbilityUsed = false;
@@ -372,7 +372,7 @@ export const DreamBuildersGame: Game<GameState> = {
       else if (choice.type === 'choose_option') {
         if (choice.effect === 'serial_founder_double_down') {
           if (choiceIndex === 0) { // Option: Draw a card
-            drawCard(player);
+            drawCard(player, 'Serial Founder (Double Down)', G.gameLog);
             if (G.gameLog) G.gameLog.push(`Serial Founder (Double Down): Chose to draw a card.`);
             resolveCurrentPendingChoice(player);
           } else if (choiceIndex === 1) { // Option: Add 2 inventory to a Product
@@ -400,7 +400,7 @@ export const DreamBuildersGame: Game<GameState> = {
             gainCapital(G, playerID, 1);
             if (G.gameLog) G.gameLog.push(`Incubator Resources: Player ${playerID} chose "${chosenOptionText}".`);
           } else if (choiceIndex === 1) { // Draw 1 Card
-            drawCard(player);
+            drawCard(player, 'Incubator Resources', G.gameLog);
             if (G.gameLog) G.gameLog.push(`Incubator Resources: Player ${playerID} chose "${chosenOptionText}".`);
           }
           resolveCurrentPendingChoice(player);

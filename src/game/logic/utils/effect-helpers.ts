@@ -22,10 +22,10 @@ export function gainRevenue(G: GameState, playerID: string, amount: number) {
   player.revenue += amount;
 }
 
-export function drawCards(G: GameState, playerID: string, count: number) {
+export function drawCards(G: GameState, playerID: string, count: number, reason?: string) {
   const player = G.players[playerID];
   for (let i = 0; i < count; i++) {
-    drawCard(player); // Now correctly uses drawCard from deck-helpers
+    drawCard(player, reason, G.gameLog); // Now correctly uses drawCard from deck-helpers
   }
 }
 

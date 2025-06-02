@@ -57,7 +57,7 @@ export function resolveFastPivotEffect(G: GameState, playerID: string, productTo
 
   if (productIndexInBoard !== -1) {
     player.board.Products.splice(productIndexInBoard, 1); // Destroy product
-    drawCards(G, playerID, 2); // Uses imported helper from effect-helpers
+    drawCards(G, playerID, 2, 'Fast Pivot'); // Uses imported helper from effect-helpers
     applyTemporaryBonus(G, playerID, 'nextProductDiscount', 2); // Uses imported helper from effect-helpers
   } else {
     console.warn(`Fast Pivot: Product with ID ${productToDestroyId} not found on board for player ${playerID}.`);

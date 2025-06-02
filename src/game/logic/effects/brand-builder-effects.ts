@@ -13,7 +13,7 @@ export const brandBuilderCardEffects: Record<string, (G: GameState, playerID: st
   // Brand Vision: Draw 1 card. If you control a Product, draw 2 instead.
   'brand_vision': (G, playerID) => {
     const player = G.players[playerID];
-    drawCards(G, playerID, player.board.Products.length > 0 ? 2 : 1);
+    drawCards(G, playerID, player.board.Products.length > 0 ? 2 : 1, 'Brand Vision');
   },
   // Influencer Collab: Add 3 Audience. Gain 2 capital.
   'influencer_collab': (G, playerID) => {
@@ -23,7 +23,7 @@ export const brandBuilderCardEffects: Record<string, (G: GameState, playerID: st
   'content_calendar': passiveEffect, // Placeholder for Audience
   // Viral Post: Add 5 Audience. If you've gained Audience this turn, gain 2 capital.
   'viral_post': (G, playerID) => {
-    drawCards(G, playerID, 1); // Placeholder for Audience
+    drawCards(G, playerID, 1, 'Viral Post'); // Placeholder for Audience
     if ((G.effectContext?.[playerID]?.cardsPlayedThisTurn || 0) >= 2) {
       gainCapital(G, playerID, 2);
     }
@@ -35,7 +35,7 @@ export const brandBuilderCardEffects: Record<string, (G: GameState, playerID: st
   // Founder Story: Draw 2 cards. If you control an Employee, draw 3 instead.
   'founder_story': (G, playerID) => {
     const player = G.players[playerID];
-    drawCards(G, playerID, player.board.Employees.length > 0 ? 3 : 2);
+    drawCards(G, playerID, player.board.Employees.length > 0 ? 3 : 2, 'Founder Story');
   },
   // Social Proof: Next time you gain capital this turn, gain 1 extra.
   'social_proof': (G, playerID) => {
@@ -44,7 +44,7 @@ export const brandBuilderCardEffects: Record<string, (G: GameState, playerID: st
   // UGC Explosion: Double your Audience if you control a Product.
   'ugc_explosion': (G, playerID) => { // Placeholder for Audience
     if (G.players[playerID].board.Products.length > 0) {
-      drawCards(G, playerID, 2);
+      drawCards(G, playerID, 2, 'UGC Explosion');
     }
   },
   // Personal Branding: Whenever you play a Brand card, gain 1 Audience.

@@ -23,7 +23,7 @@ export const automationArchitectCardEffects: Record<string, (G: GameState, playe
   'ab_test': (G, playerID, card) => {
     const player = G.players[playerID];
     const handSizeBeforeDraw = player.hand.length;
-    drawCards(G, playerID, 2);
+    drawCards(G, playerID, 2, 'A/B Test');
     const cardsDrawnCount = player.hand.length - handSizeBeforeDraw;
 
     if (cardsDrawnCount > 0) {
@@ -50,7 +50,7 @@ export const automationArchitectCardEffects: Record<string, (G: GameState, playe
   // Custom App: When played: draw 1 card. Recurring: Gain 1 capital.
   'custom_app': (G, playerID) => {
     // Immediate effect: draw 1 card
-    drawCards(G, playerID, 1);
+    drawCards(G, playerID, 1, 'Custom App');
     // The recurring effect (gain 1 capital) is handled by passive-effects.ts
   },
   // Zap Everything: Gain 2 capital. If you control 3+ Tools, gain 1 more.

@@ -15,7 +15,6 @@ interface GameCardProps {
   isAffected?: boolean
   isSelected?: boolean
   showBonuses?: boolean
-  forceShowArt?: boolean
   // Cost info
   costInfo?: {
     originalCost: number
@@ -48,7 +47,6 @@ export const GameCard: React.FC<GameCardProps> = React.memo(({
   isAffected = false,
   isSelected = false,
   showBonuses = true,
-  forceShowArt = false,
   costInfo,
   revenueBonus = 0,
   bonuses = [],
@@ -143,7 +141,6 @@ export const GameCard: React.FC<GameCardProps> = React.memo(({
         costInfo={costInfo}
         showBonuses={showBonuses}
         revenueBonus={revenueBonus}
-        forceShowArt={forceShowArt}
       />
       
       {/* Bonus indicators */}

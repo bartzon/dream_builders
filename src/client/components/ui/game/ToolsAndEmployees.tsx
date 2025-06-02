@@ -1,5 +1,5 @@
 import React from 'react'
-import { FONT_SIZES, COLORS } from '../../../constants/ui'
+import { FONT_SIZES } from '../../../constants/ui'
 import { GameCard } from './GameCard'
 import type { BonusInfo } from './BonusIndicator'
 import type { ClientCard, EffectContextUI } from '../../../types/game'
@@ -79,16 +79,3 @@ export const ToolsAndEmployees = React.memo(({
     </div>
   )
 })
-
-// Empty state component
-const EmptyState = ({ message }: { message: string }) => (
-  <div style={{ 
-    padding: '15px',
-    border: '2px dashed #666', 
-    borderRadius: '5px',
-    color: COLORS.textMuted,
-    fontSize: FONT_SIZES.body
-  }}>
-    {message}
-  </div>
-)
