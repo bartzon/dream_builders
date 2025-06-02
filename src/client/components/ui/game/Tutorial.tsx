@@ -129,7 +129,7 @@ export const Tutorial: React.FC<TutorialProps> = ({ onClose }) => {
         <div>
           <div style={{ 
             display: 'grid', 
-            gridTemplateColumns: 'repeat(2, 1fr)', 
+            gridTemplateColumns: 'repeat(4, 1fr)', 
             gap: '20px',
             marginBottom: '20px'
           }}>
@@ -143,7 +143,7 @@ export const Tutorial: React.FC<TutorialProps> = ({ onClose }) => {
                 enableHover={true}
                 hoverScale={1.1}
                 hoverRaiseY={10}
-                style={{ transform: 'scale(0.9)' }}
+                style={{ transform: 'scale(1.1)' }}
               />
               <p style={{ marginTop: '10px', fontSize: FONT_SIZES.small }}>
                 <strong style={{ color: COLORS.success }}>Products</strong><br/>
@@ -162,7 +162,7 @@ export const Tutorial: React.FC<TutorialProps> = ({ onClose }) => {
                 enableHover={true}
                 hoverScale={1.1}
                 hoverRaiseY={10}
-                style={{ transform: 'scale(0.9)' }}
+                style={{ transform: 'scale(1.1)' }}
               />
               <p style={{ marginTop: '10px', fontSize: FONT_SIZES.small }}>
                 <strong style={{ color: COLORS.primary }}>Tools</strong><br/>
@@ -181,7 +181,7 @@ export const Tutorial: React.FC<TutorialProps> = ({ onClose }) => {
                 enableHover={true}
                 hoverScale={1.1}
                 hoverRaiseY={10}
-                style={{ transform: 'scale(0.9)' }}
+                style={{ transform: 'scale(1.1)' }}
               />
               <p style={{ marginTop: '10px', fontSize: FONT_SIZES.small }}>
                 <strong style={{ color: COLORS.warning }}>Employees</strong><br/>
@@ -200,7 +200,7 @@ export const Tutorial: React.FC<TutorialProps> = ({ onClose }) => {
                 enableHover={true}
                 hoverScale={1.1}
                 hoverRaiseY={10}
-                style={{ transform: 'scale(0.9)' }}
+                style={{ transform: 'scale(1.1)' }}
               />
               <p style={{ marginTop: '10px', fontSize: FONT_SIZES.small }}>
                 <strong style={{ color: COLORS.danger }}>Actions</strong><br/>
@@ -471,12 +471,14 @@ export const Tutorial: React.FC<TutorialProps> = ({ onClose }) => {
           background: 'linear-gradient(135deg, #1a1a2e 0%, #0f0f1e 100%)',
           borderRadius: '20px',
           padding: '40px',
-          maxWidth: '800px',
-          width: '90%',
-          maxHeight: '80vh',
-          overflowY: 'auto',
+          width: '75vw',
+          height: '75vh',
+          maxWidth: '1400px',
+          maxHeight: '900px',
           boxShadow: '0 25px 60px rgba(0, 0, 0, 0.7)',
           border: '1px solid rgba(120, 80, 190, 0.3)',
+          display: 'flex',
+          flexDirection: 'column',
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -485,7 +487,8 @@ export const Tutorial: React.FC<TutorialProps> = ({ onClose }) => {
           display: 'flex', 
           justifyContent: 'space-between', 
           alignItems: 'center',
-          marginBottom: '30px'
+          marginBottom: '30px',
+          flexShrink: 0,
         }}>
           <h1 style={{ 
             fontSize: FONT_SIZES.title, 
@@ -525,7 +528,13 @@ export const Tutorial: React.FC<TutorialProps> = ({ onClose }) => {
         </div>
 
         {/* Content */}
-        <div style={{ marginBottom: '30px', minHeight: '300px' }}>
+        <div style={{ 
+          marginBottom: '30px', 
+          minHeight: '300px',
+          flexGrow: 1,
+          overflowY: 'auto',
+          paddingRight: '10px',
+        }}>
           {currentPageData.content}
         </div>
 
@@ -533,7 +542,10 @@ export const Tutorial: React.FC<TutorialProps> = ({ onClose }) => {
         <div style={{ 
           display: 'flex', 
           justifyContent: 'space-between', 
-          alignItems: 'center' 
+          alignItems: 'center',
+          flexShrink: 0,
+          paddingTop: '20px',
+          borderTop: '1px solid rgba(255, 255, 255, 0.1)',
         }}>
           <button
             onClick={() => setCurrentPage(Math.max(0, currentPage - 1))}
