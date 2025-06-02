@@ -78,7 +78,7 @@ export const brandBuilderDeck: Card[] = [
     cost: 1,
     type: 'Action',
     keywords: ['Synergy'],
-    text: 'Next time you gain revenue this turn, gain +25% extra.',
+    text: 'Next time you gain revenue, gain +25% extra.',
     effect: 'social_proof',
     flavor: 'If others love it, maybe they will too.',
   },

@@ -19,7 +19,22 @@ export function gainCapital(G: GameState, playerID: string, amount: number) {
 
 export function gainRevenue(G: GameState, playerID: string, amount: number) {
   const player = G.players[playerID];
-  player.revenue += amount;
+  const ctx = G.effectContext?.[playerID];
+  
+  let finalAmount = amount;
+  
+  // Apply revenue multiplier if any (e.g., from Social Proof)
+  if (ctx && ctx.nextRevenueGainMultiplier && ctx.nextRevenueGainMultiplier !== 1) {
+    finalAmount = Math.floor(amount * ctx.nextRevenueGainMultiplier);
+    if (G.gameLog) {
+      const percentBoost = Math.round((ctx.nextRevenueGainMultiplier - 1) * 100);
+      G.gameLog.push(`Revenue boosted by ${percentBoost}%: $${amount.toLocaleString()} → $${finalAmount.toLocaleString()}`);
+    }
+    // Reset the multiplier after use
+    ctx.nextRevenueGainMultiplier = 1;
+  }
+  
+  player.revenue += finalAmount;
 }
 
 export function drawCards(G: GameState, playerID: string, count: number, reason?: string) {

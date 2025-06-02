@@ -11,6 +11,7 @@ export interface EffectContext {
   nextActionRevenue?: number;
   nextProductDiscount?: number;
   productRevenueBoosts?: Record<string, number>; // product ID -> revenue bonus
+  nextRevenueGainMultiplier?: number; // multiplier for next revenue gain (e.g., 1.25 for +25%)
   
   // Cost modifiers
   nextCardDiscount?: number;
@@ -121,6 +122,7 @@ export function initEffectContext(): EffectContext {
     recentlyAffectedCardIds: [],
     productRevenueBoosts: {},
     recentlySoldProductIds: [],
+    nextRevenueGainMultiplier: 1,
   };
 }
 
@@ -187,5 +189,6 @@ export function clearTempEffects(G: GameState, playerID: string) {
     ctx.recentlyAffectedCardIds = [];
     ctx.productRevenueBoosts = {}; // Clear product revenue boosts at end of turn
     ctx.recentlySoldProductIds = [];
+    // Note: nextRevenueGainMultiplier is NOT cleared here - it persists until used (e.g., Social Proof)
   }
 } 

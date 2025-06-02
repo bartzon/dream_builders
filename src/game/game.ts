@@ -460,6 +460,23 @@ export const DreamBuildersGame: Game<GameState> = {
             if (G.gameLog) G.gameLog.push(`Black Friday Blitz: Error - selected product ${chosenProductInfo.name} has no inventory or not found.`);
           }
           resolveCurrentPendingChoice(player);
+        }
+        else if (choice.effect === 'merch_drop_add_inventory') {
+          if (!choice.cards || choiceIndex < 0 || choiceIndex >= choice.cards.length) return INVALID_MOVE;
+          const chosenProductInfo = choice.cards[choiceIndex];
+          const boardProduct = player.board.Products.find(p => p.id === chosenProductInfo.id);
+          if (boardProduct && boardProduct.inventory !== undefined) {
+            boardProduct.inventory += 2;
+            // Ensure effect context exists
+            if (!G.effectContext) G.effectContext = {};
+            if (!G.effectContext[playerID]) G.effectContext[playerID] = { recentlyAffectedCardIds: [] };
+            if (!G.effectContext[playerID].recentlyAffectedCardIds) G.effectContext[playerID].recentlyAffectedCardIds = [];
+            G.effectContext[playerID].recentlyAffectedCardIds.push(boardProduct.id);
+            if (G.gameLog) G.gameLog.push(`Merch Drop: Added +2 inventory to ${boardProduct.name}.`);
+          } else {
+            if (G.gameLog) G.gameLog.push(`Merch Drop: Error - product not found or inventory undefined.`);
+          }
+          resolveCurrentPendingChoice(player);
         } else {
           // Existing generic inventory/product choice logic
           // Special handling for multi_product_inventory_boost "Done" button

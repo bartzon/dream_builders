@@ -5,6 +5,7 @@ import {
   drawCards,
   applyTemporaryBonus,
 } from '../utils/effect-helpers';
+import { addPendingChoice } from '../utils/choice-helpers';
 
 const passiveEffect = () => {};
 
@@ -51,11 +52,20 @@ export const communityLeaderCardEffects: Record<string, (G: GameState, playerID:
   // Merch Drop: Costs 1 less if you played 2+ cards this turn. Choose a Product and add +2 to its inventory.
   'merch_drop': (G, playerID) => {
     // Cost reduction is handled in getCardDiscount
-    // For now, add inventory to the first product with inventory
-    const product = G.players[playerID].board.Products.find(p => p.inventory !== undefined);
-    if (product && product.inventory !== undefined) {
-      product.inventory += 2;
-      // TODO: Implement product selection UI when choice system is available
+    const player = G.players[playerID];
+    const products = player.board.Products.filter(p => p.isActive !== false && p.inventory !== undefined);
+    
+    if (products.length > 0) {
+      // Create a choice for the player to select which Product
+      addPendingChoice(player, {
+        type: 'choose_card',
+        effect: 'merch_drop_add_inventory',
+        cards: products.map(p => ({ ...p })), // Send copies to client
+      });
+    } else {
+      if (G.gameLog) {
+        G.gameLog.push('Merch Drop: No products available to boost inventory.');
+      }
     }
   },
   

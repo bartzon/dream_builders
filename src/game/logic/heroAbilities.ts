@@ -87,11 +87,29 @@ export const heroAbilityEffects: Record<string, (G: GameState, playerID: string)
     // Check if combo threshold was met
     const cardsPlayed = G.effectContext?.[playerID]?.cardsPlayedThisTurn || 0;
     if (cardsPlayed >= 2) {
-      // Find a Product to copy inventory from
-      // In full implementation, player would choose
-      const product = player.board.Products.find(p => p.inventory !== undefined);
-      if (product && product.inventory !== undefined) {
-        product.inventory += 1;
+      // Find all Products on the board
+      const products = player.board.Products.filter(p => p.isActive !== false);
+      
+      if (products.length > 0) {
+        // Select a random Product to copy
+        const randomIndex = Math.floor(Math.random() * products.length);
+        const productToCopy = products[randomIndex];
+        
+        // Create a copy of the Product card and add it to the player's deck
+        const productCopy = { ...productToCopy };
+        player.deck.push(productCopy);
+        
+        if (G.gameLog) {
+          G.gameLog.push(`Go Viral: Added a copy of ${productToCopy.name} to your deck!`);
+        }
+      } else {
+        if (G.gameLog) {
+          G.gameLog.push('Go Viral: No products on board to copy.');
+        }
+      }
+    } else {
+      if (G.gameLog) {
+        G.gameLog.push(`Go Viral: Need to play 2+ cards this turn (played ${cardsPlayed}).`);
       }
     }
     
