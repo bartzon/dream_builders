@@ -12,15 +12,22 @@ import { inventorySupportCards } from '../../../game/data/inventory-support-card
 
 describe('Test Coverage Analysis', () => {
   it('should identify which cards and hero powers need tests', () => {
-    // Track which effects have explicit tests in hero-card-effects.test.ts
+    // Track which effects have explicit tests across all test files
     const testedEffects = new Set([
-      // Solo Hustler effects tested
+      // Solo Hustler effects tested (from solo-hustler.test.ts)
+      'solo_hustler_grind', // Hero power
       'midnight_oil',
       'hustle_hard',
       'bootstrap_capital',
       'fast_pivot',
+      'diy_assembly',
+      'freelancer_network',
+      'resourceful_solutions',
+      'scrappy_marketing',
+      'quick_learner',
+      'shoestring_budget',
       
-      // Brand Builder effects tested (all of them based on Object.entries approach)
+      // Brand Builder effects tested (from brand-builder.test.ts)
       'brand_vision',
       'influencer_collab',
       'content_calendar',
@@ -32,6 +39,56 @@ describe('Test Coverage Analysis', () => {
       'ugc_explosion',
       'personal_branding',
       'brand_builder_engage', // Hero power
+      
+      // Automation Architect effects tested (from automation-architect.test.ts)
+      'automation_architect_deploy', // Hero power
+      'auto_fulfill',
+      'optimize_checkout',
+      'analytics_dashboard',
+      'email_automation',
+      'ab_test',
+      'scale_systems',
+      'optimize_workflow',
+      'custom_app',
+      'zap_everything',
+      'technical_cofounder',
+      
+      // Community Leader effects tested (from community-leader.test.ts)
+      'community_leader_viral', // Hero power
+      'town_hall',
+      'mutual_aid',
+      'hype_train',
+      'mentorship_circle',
+      'steady_fans',
+      'shared_spotlight',
+      'community_manager',
+      'live_ama',
+      'merch_drop',
+      'grassroots_launch',
+      
+      // Serial Founder effects tested (from serial-founder.test.ts)
+      'serial_founder_double_down', // Hero power
+      'legacy_playbook',
+      'advisory_board',
+      'spin_off',
+      'high_profile_exit',
+      'market_surge',
+      'serial_operator',
+      'investor_buzz',
+      'incubator_resources',
+      'board_of_directors',
+      'black_friday_blitz',
+      
+      // Inventory support effects tested (from inventory-support.test.ts)
+      'add_inventory_to_product',
+      'add_inventory_if_empty',
+      'add_inventory_to_low_stock',
+      'multi_product_inventory_boost',
+      'delayed_inventory_boost',
+      'draw_and_inventory',
+      'inventory_and_sale_boost',
+      'inventory_boost_plus_revenue',
+      'simple_inventory_boost'
     ])
 
     const missingTests: { hero: string; cardName: string; effect: string; text: string }[] = []
@@ -71,17 +128,7 @@ describe('Test Coverage Analysis', () => {
 
     // Check inventory support cards
     inventorySupportCards.forEach(card => {
-      // These are tested in card-effects.test.ts
-      const testedInventoryEffects = [
-        'add_inventory_to_product',
-        'add_inventory_if_empty',
-        'add_inventory_to_low_stock',
-        'multi_product_inventory_boost',
-        'delayed_inventory_boost',
-        'draw_and_inventory'
-      ]
-      
-      if (card.effect && !testedInventoryEffects.includes(card.effect)) {
+      if (card.effect && !testedEffects.has(card.effect)) {
         missingTests.push({
           hero: 'Shared',
           cardName: card.name,
@@ -118,6 +165,6 @@ describe('Test Coverage Analysis', () => {
     }
 
     // Return the missing tests for use in other tests
-    expect(missingTests.length).toBeGreaterThan(0) // We expect some missing tests
+    expect(missingTests.length).toBe(0) // We expect all effects to have tests
   })
 }) 
