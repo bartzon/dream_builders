@@ -40,6 +40,7 @@ export function useGameState(
     productCardsPlayedThisTurn: effectContextRaw.productCardsPlayedThisTurn as number || 0,
     recentlyAffectedCardIds: effectContextRaw.recentlyAffectedCardIds as string[] || [],
     recentlySoldProductIds: effectContextRaw.recentlySoldProductIds as string[] || [],
+    turnStartProductsSold: effectContextRaw.turnStartProductsSold as boolean || false,
   }
   
   // Extract pending choices

@@ -60,6 +60,9 @@ export const GameCard: React.FC<GameCardProps> = React.memo(({
 }) => {
   const [isHovered, setIsHovered] = useState(false)
 
+  // Check if this is a product with no inventory
+  const hasNoInventory = card.type === 'Product' && card.inventory === 0
+
   const handleMouseEnter = (e: React.MouseEvent) => {
     if (enableHover) {
       setIsHovered(true)
@@ -117,8 +120,9 @@ export const GameCard: React.FC<GameCardProps> = React.memo(({
     transform: combinedTransform,
     transformOrigin: transformOrigin || 'center',
     cursor: canInteract ? 'pointer' : 'default',
-    filter: !canPlay && displayMode === 'hand' ? 'brightness(0.8)' : 'none',
+    filter: !canPlay && displayMode === 'hand' ? 'brightness(0.8)' : hasNoInventory ? 'grayscale(50%)' : 'none',
     boxShadow: isHovered && enableHover ? '0 10px 30px rgba(0,0,0,0.5)' : 'none',
+    opacity: hasNoInventory ? 0.6 : 1,
     ...restStyle
   }
 
@@ -149,6 +153,27 @@ export const GameCard: React.FC<GameCardProps> = React.memo(({
           bonuses={bonuses} 
           position={displayMode === 'hand' ? 'top-right' : 'bottom-left'} 
         />
+      )}
+      
+      {/* No inventory indicator */}
+      {hasNoInventory && displayMode !== 'hand' && (
+        <div style={{
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          background: 'rgba(0, 0, 0, 0.8)',
+          color: '#ef4444',
+          padding: '4px 8px',
+          borderRadius: '4px',
+          fontSize: '12px',
+          fontWeight: 'bold',
+          pointerEvents: 'none',
+          zIndex: 10,
+          whiteSpace: 'nowrap'
+        }}>
+          NO INVENTORY
+        </div>
       )}
       
       {/* Discard mode indicator */}

@@ -77,6 +77,8 @@ export interface EffectContext {
   
   // Track products that were just sold for UI animations
   recentlySoldProductIds?: string[];
+  recentlySoldProductTimestamps?: Record<string, number>; // Track when each product was sold
+  turnStartProductsSold?: boolean; // Track if products were sold at turn start for sound effect
 }
 
 // Initialize effect context for each player
@@ -124,6 +126,8 @@ export function initEffectContext(): EffectContext {
     productRevenueBoosts: {},
     recentlySoldProductIds: [],
     nextRevenueGainMultiplier: 1,
+    recentlySoldProductTimestamps: {},
+    turnStartProductsSold: false,
   };
 }
 
@@ -187,7 +191,26 @@ export function clearTempEffects(G: GameState, playerID: string) {
     ctx.warehouseExpansionCount = 0;
     ctx.recentlyAffectedCardIds = [];
     ctx.productRevenueBoosts = {}; // Clear product revenue boosts at end of turn
-    ctx.recentlySoldProductIds = [];
+    ctx.turnStartProductsSold = false; // Clear turn start sales flag
+    
+    // Clear recently sold products whose animations have completed (2+ seconds old)
+    const now = Date.now();
+    const SPARKLE_DURATION = 2000; // 2 seconds
+    
+    if (ctx.recentlySoldProductIds && ctx.recentlySoldProductTimestamps) {
+      ctx.recentlySoldProductIds = ctx.recentlySoldProductIds.filter(productId => {
+        const soldTime = ctx.recentlySoldProductTimestamps![productId];
+        if (soldTime && (now - soldTime < SPARKLE_DURATION)) {
+          // Keep this product in the list - animation still playing
+          return true;
+        } else {
+          // Remove from timestamps too
+          delete ctx.recentlySoldProductTimestamps![productId];
+          return false;
+        }
+      });
+    }
+    
     // Note: nextRevenueGainMultiplier is NOT cleared here - it persists until used (e.g., Social Proof)
     // Note: doubleCapitalGain is NOT cleared here - it persists until used (e.g., Investor Buzz)
   }

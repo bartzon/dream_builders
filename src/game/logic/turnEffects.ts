@@ -77,6 +77,7 @@ export function processOverheadCosts(G: GameState, playerID: string) {
 export function processAutomaticSales(G: GameState, playerID: string) {
   const player = G.players[playerID];
   let productsSold = 0;
+  let turnStartSales = false;
   
   // === NEW AUTOMATIC SELLING MECHANIC ===
   // Sell 1 item from each Product with inventory > 0
@@ -84,6 +85,7 @@ export function processAutomaticSales(G: GameState, playerID: string) {
     if (product.inventory && product.inventory > 0 && product.isActive !== false) {
       sellProduct(G, playerID, product, 1);
       productsSold++;
+      turnStartSales = true;
     }
   });
   
@@ -92,6 +94,7 @@ export function processAutomaticSales(G: GameState, playerID: string) {
     G.effectContext[playerID].soldProductThisTurn = true;
     G.effectContext[playerID].itemsSoldThisTurn = 
       (G.effectContext[playerID].itemsSoldThisTurn || 0) + productsSold;
+    G.effectContext[playerID].turnStartProductsSold = turnStartSales;
   }
   
   // === LEGACY CARD EFFECTS (additional automatic sales) ===

@@ -66,7 +66,6 @@ export const ProductsSection = React.memo(({
     
     const isAffected = product.id ? affectedCardIds.has(product.id) : false
     const isRecentlySold = product.id && effectContext.recentlySoldProductIds?.includes(product.id)
-    const hasNoInventory = product.inventory === 0
 
     return (
       <div 
@@ -88,31 +87,8 @@ export const ProductsSection = React.memo(({
           onShowTooltip={onShowTooltip}
           onHideTooltip={onHideTooltip}
           enableHover={true}
-          style={{
-            opacity: hasNoInventory ? 0.6 : 1,
-            filter: hasNoInventory ? 'grayscale(50%)' : 'none'
-          }}
         />
         {isRecentlySold && <SparkleEffect />}
-        {hasNoInventory && (
-          <div style={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            background: 'rgba(0, 0, 0, 0.8)',
-            color: '#ef4444',
-            padding: '4px 8px',
-            borderRadius: '4px',
-            fontSize: '12px',
-            fontWeight: 'bold',
-            pointerEvents: 'none',
-            zIndex: 10,
-            whiteSpace: 'nowrap'
-          }}>
-            NO INVENTORY
-          </div>
-        )}
         {isRecentlySold && (
           <style>{`
             @keyframes pulse-glow {
