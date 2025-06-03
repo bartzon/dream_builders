@@ -10,6 +10,7 @@ interface SplashScreenProps {
 export const SplashScreen: React.FC<SplashScreenProps> = ({ onStartGame }) => {
   const [showCredits, setShowCredits] = useState(false)
   const [showTutorial, setShowTutorial] = useState(false)
+  const [showTrailer, setShowTrailer] = useState(false)
   const [isVisible, setIsVisible] = useState(false)
 
   useEffect(() => {
@@ -19,7 +20,7 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onStartGame }) => {
 
   return (
     <>
-      {!showCredits && !showTutorial && (
+      {!showCredits && !showTutorial && !showTrailer && (
         <div
           style={{
             width: '100vw',
@@ -126,6 +127,34 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onStartGame }) => {
                 NEW GAME
               </button>
 
+              {/* Trailer Button */}
+              <button
+                onClick={() => setShowTrailer(true)}
+                style={{
+                  ...BUTTON_STYLES,
+                  background: 'linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)',
+                  color: '#1f2937',
+                  padding: '16px 50px',
+                  fontSize: FONT_SIZES.large,
+                  borderRadius: '12px',
+                  boxShadow: '0 6px 15px rgba(251, 191, 36, 0.3), 0 3px 8px rgba(0,0,0,0.3)',
+                  transition: 'all 0.3s ease',
+                  border: '2px solid transparent',
+                  minWidth: '250px',
+                  fontWeight: 'bold',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-2px)'
+                  e.currentTarget.style.boxShadow = '0 8px 20px rgba(251, 191, 36, 0.4), 0 5px 12px rgba(0,0,0,0.4)'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)'
+                  e.currentTarget.style.boxShadow = '0 6px 15px rgba(251, 191, 36, 0.3), 0 3px 8px rgba(0,0,0,0.3)'
+                }}
+              >
+                TRAILER
+              </button>
+
               {/* Tutorial Button */}
               <button
                 onClick={() => setShowTutorial(true)}
@@ -222,6 +251,90 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onStartGame }) => {
                 }}
               />
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* Trailer Modal */}
+      {showTrailer && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0, 0, 0, 0.9)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 4000,
+            backdropFilter: 'blur(8px)',
+          }}
+          onClick={() => setShowTrailer(false)}
+        >
+          <div
+            style={{
+              background: 'linear-gradient(135deg, #1a1a2e 0%, #0f0f1e 100%)',
+              borderRadius: '20px',
+              padding: '40px',
+              width: '80vw',
+              maxWidth: '1400px',
+              maxHeight: '85vh',
+              boxShadow: '0 25px 60px rgba(0, 0, 0, 0.7)',
+              border: '1px solid rgba(120, 80, 190, 0.3)',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              position: 'relative',
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setShowTrailer(false)}
+              style={{
+                position: 'absolute',
+                top: '20px',
+                right: '20px',
+                background: 'transparent',
+                border: 'none',
+                color: COLORS.textMuted,
+                fontSize: '32px',
+                cursor: 'pointer',
+                borderRadius: '50%',
+                width: '48px',
+                height: '48px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                transition: 'all 0.2s',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = 'rgba(255,255,255,0.1)';
+                e.currentTarget.style.color = COLORS.white;
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = 'transparent';
+                e.currentTarget.style.color = COLORS.textMuted;
+              }}
+              aria-label="Close trailer"
+            >
+              ✕
+            </button>
+            <h2 style={{ color: COLORS.warningLight, marginBottom: '20px', fontSize: FONT_SIZES.title }}>
+              Game Trailer
+            </h2>
+            <div style={{ width: '100%', height: '70vh', maxHeight: '700px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+              <iframe
+                src="https://drive.google.com/file/d/1RRwSLSAWT7Po_9u9_G0jtKMFX4iilDaa/preview"
+                width="100%"
+                height="100%"
+                allow="autoplay; encrypted-media"
+                allowFullScreen
+                style={{ border: 'none', borderRadius: '12px', width: '100%', height: '100%' }}
+                title="Dream Builders Trailer"
+              ></iframe>
+            </div>
           </div>
         </div>
       )}
