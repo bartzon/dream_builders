@@ -1,5 +1,11 @@
 # Dream Builders - Entrepreneurship Card Game
 
+🚀 **Play the game online now:** [Dream Builders Online Demo](https://bartzon.github.io/dream_builders/)
+
+_No installation required—just open the link and start playing in your browser!_
+
+---
+
 A strategic digital card game where players take on the roles of entrepreneurs, building their startup to achieve a revenue goal.
 
 Two rules for this project:
@@ -10,13 +16,21 @@ Two rules for this project:
 
 Dream Builders is a card game for 1 player (currently) where you choose a hero with a unique playstyle and deck, then attempt to build your business to reach **$500,000 in revenue**.
 
-### Core Features
-- **5 Unique Heroes**: Each with distinct abilities and a 10-card starter deck that forms the basis of a 45-card drafted play deck.
-  - Drafted deck composition: 10 hero starter cards + 10 additional hero cards + 7 inventory support cards + 18 product cards
-- **Product-Based Economy**: Play Product cards, manage their inventory, and generate revenue through automatic sales and card effects.
-- **Dynamic Card Effects**: Utilize Actions, deploy Tools for ongoing benefits, and hire Employees with unique skills.
-- **Cost and Discount System**: Manage your Capital to play cards, and leverage effects that provide temporary or ongoing cost reductions.
-- **Turn-Based Strategy**: Each turn presents new opportunities to draw cards, play your hand, and activate your hero power.
+---
+
+## 🖼️ Screenshots
+
+<p align="center">
+  <img src="public/assets/splash_screen.png" alt="Splash Screen" width="600" style="border-radius:12px; box-shadow:0 4px 24px rgba(0,0,0,0.2); margin-bottom:16px;" />
+</p>
+<p align="center">
+  <img src="public/assets/hero_selection.png" alt="Hero Selection" width="600" style="border-radius:12px; box-shadow:0 4px 24px rgba(0,0,0,0.2); margin-bottom:16px;" />
+</p>
+<p align="center">
+  <img src="public/assets/board_state.png" alt="Board State" width="600" style="border-radius:12px; box-shadow:0 4px 24px rgba(0,0,0,0.2); margin-bottom:16px;" />
+</p>
+
+---
 
 ## 🚀 Getting Started
 
@@ -160,3 +174,11 @@ Note: The base URL is configured as `/dream_builders/` in `vite.config.ts`. If d
 ## 📄 License
 
 MIT License.
+
+---
+
+## 🔗 Links
+
+- [Play Online Demo](https://bartzon.github.io/dream_builders/)
+- [GitHub Repository](https://github.com/bartzon/dream_builders)
+- [Game Trailer](https://drive.google.com/file/d/1RRwSLSAWT7Po_9u9_G0jtKMFX4iilDaa/view)
