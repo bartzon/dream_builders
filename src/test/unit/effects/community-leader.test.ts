@@ -30,6 +30,26 @@ describe('Community Leader Card Effects', () => {
         // Complex implementation with product copying
       })
     })
+
+    it('should add a product to the deck with full inventory, not the current board inventory', () => {
+      // Use a product from sharedProductPool with a known id and inventory
+      const productId = 'enamel_pin_collection';
+      const defaultInventory = 6; // from sharedProductPool
+      const boardInventory = 2; // simulate a depleted product
+      G = new GameStateBuilder()
+        .withHero('community_leader')
+        .withProducts(
+          new CardBuilder().withId(productId).withInventory(boardInventory).asProduct()
+        )
+        .withEffectContext({ cardsPlayedThisTurn: 2 }) // Enable Go Viral
+        .build();
+      // const deckBefore = G.players[playerID].deck.length;
+      heroAbilityEffects.community_leader_viral(G, playerID);
+      const deckAfter = G.players[playerID].deck;
+      // Find the newly added product in the deck
+      const added = deckAfter.find(card => card.id === productId && card.inventory === defaultInventory);
+      expect(added).toBeDefined();
+    });
   })
 
   describe('town_hall', () => {

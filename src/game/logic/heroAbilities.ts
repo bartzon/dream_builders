@@ -2,6 +2,7 @@ import type { GameState } from '../state';
 import { drawCard } from './utils/deck-helpers';
 import { initEffectContext } from './effectContext';
 import { addPendingChoice } from './utils/choice-helpers';
+import { sharedProductPool } from '../data/shared-products';
 
 // Hero Ability Effects Registry
 export const heroAbilityEffects: Record<string, (G: GameState, playerID: string) => void> = {
@@ -94,9 +95,12 @@ export const heroAbilityEffects: Record<string, (G: GameState, playerID: string)
         // Select a random Product to copy
         const randomIndex = Math.floor(Math.random() * products.length);
         const productToCopy = products[randomIndex];
-        
-        // Create a copy of the Product card and add it to the player's deck
+        // Find the default inventory for this product from sharedProductPool
+        const defaultProduct = sharedProductPool.find(p => p.id === productToCopy.id);
         const productCopy = { ...productToCopy };
+        if (defaultProduct && typeof defaultProduct.inventory === 'number') {
+          productCopy.inventory = defaultProduct.inventory;
+        }
         player.deck.push(productCopy);
         
         if (G.gameLog) {
